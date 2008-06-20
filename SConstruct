@@ -8,14 +8,21 @@ SUFFIX = ".so.2"
 SONAME = NAME + SUFFIX
 
 env["CCFLAGS"] = '-O2'
-env["SHLIBSUFFIX"] = [SUFFIX + '.0.0']
-env["LINKFLAGS"] = ['-Wl,-soname,' + SONAME]
 
-so = env.SharedLibrary(NAME, ['nss_role.cpp', 'role.cpp'])
+libenv = env.Clone()
+libenv["SHLIBSUFFIX"] = [SUFFIX + '.0.0']
+libenv["LINKFLAGS"] = ['-Wl,-soname,' + SONAME]
+so = libenv.SharedLibrary(NAME, ['nss_role.cpp', 'roleParser.cpp'])
 
-i = env.Install('$DESTDIR/lib', so)
+roleadd = env.Program('roleadd', ['roleadd.cpp', 'roleParser.cpp', 'roleStorage.cpp'])
+env["LIBS"] = ['-lboost_program_options']
+
+i = env.Install('$DESTDIR/usr/bin', roleadd)
 env.Alias('install', i)
 
+i = libenv.Install('$DESTDIR/lib', so)
+libenv.Alias('install', i)
+
 if 'install' in COMMAND_LINE_TARGETS:
-        i = env.Command(NAME + '.so', so[0], 'ln -sf %s $DESTDIR/lib/%s' % ( SONAME+'.0.0', SONAME))
-        env.Alias('install', i)
+        i = libenv.Command(NAME + '.so', so[0], 'ln -sf %s $DESTDIR/lib/%s' % ( SONAME+'.0.0', SONAME))
+        libenv.Alias('install', i)

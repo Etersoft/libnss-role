@@ -10,7 +10,7 @@
 //#include <iostream>
 
 #include "lock.h"
-#include "role.h"
+#include "roleParser.h"
 
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
