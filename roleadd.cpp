@@ -4,8 +4,7 @@
 #include <iterator>
 #include <vector>
 
-#include "roleParser.h"
-#include "roleStorage.h"
+#include "roleManager.h"
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
@@ -14,7 +13,6 @@ using std::cerr;
 using std::string;
 using std::vector;
 using std::exception;
-//using namespace std;
 
 static po::variables_map vm;
 
@@ -74,8 +72,6 @@ static int getOptions(int ac, char* av[])
 	return 0;
 }
 
-class Role
-
 int main (int argc, char *argv[])
 {
 	static const char *default_config = "/etc/role";
@@ -89,17 +85,7 @@ int main (int argc, char *argv[])
 	if (vm.count("config"))
 		config = vm["config"].as<string>().c_str();
 
-	Roles roles;
-
-	if (!RoleParser(config).Update(roles)) {
-		std::cerr << "read error\n";
-		return 1;
-	}
-
-	if (!RoleStorage(config).Store(roles)) {
-		std::cerr << "write error\n";
-		return 2;
-	}
+	RoleManager manager(config);
 
 	return 0;
 }
