@@ -10,7 +10,7 @@
 //#include <iostream>
 
 #include "lock.h"
-#include "roleParser.h"
+#include "roleParserSimple.h"
 
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -63,7 +63,7 @@ enum nss_status _nss_role_initgroups_dyn (char *user, gid_t main_group, long int
 		Roles roles;
 		Groups add_groups;
 		long int last_start = *start;
-		if (!RoleParser().Update(roles))
+		if (!RoleParserSimple().Update(roles))
 			return ret;
 
 		add_groups_insert(main_group, roles, add_groups);

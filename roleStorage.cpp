@@ -1,12 +1,14 @@
+#include <fstream>
 #include "roleStorage.h"
 
-bool RoleStorage::Store(const Roles &roles)
-{
-	out.open(filename.c_str());
-	if (!out)
-		return false;
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/stream.hpp>
 
-	for (Roles::const_iterator i = roles.begin(); i != roles.end(); ++i)
+namespace io = boost::iostreams;
+
+bool RoleStorage::StoreCycle(const Roles &roles, std::ostream &out)
+{
+	for (Roles::const_iterator i = roles.begin(); out && i != roles.end(); ++i)
 	{
 		gid_t id = i->first;
 		const Privs &privs = i->second;
@@ -20,5 +22,24 @@ bool RoleStorage::Store(const Roles &roles)
 		out << std::endl;
 	}
 
-	return true;
+	return out;
+}
+
+bool RoleStorage::Store(const Roles &roles, int fd)
+{
+	if (fd < 0) {
+		std::ofstream out(filename.c_str());
+		if (out)
+			return StoreCycle(roles, out);
+
+		return false;
+	}
+
+	io::file_descriptor_source fd_source(fd);
+	io::stream_buffer<io::file_descriptor_source> buf(fd_source);
+	std::ostream out(&buf);
+	if (!out)
+		return false;
+
+	return StoreCycle(roles, out);
 }

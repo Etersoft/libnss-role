@@ -74,6 +74,8 @@ static int getOptions(int ac, char* av[])
 	return 0;
 }
 
+class Role
+
 int main (int argc, char *argv[])
 {
 	static const char *default_config = "/etc/role";

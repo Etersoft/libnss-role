@@ -1,45 +1,20 @@
 #include "roleParser.h"
 
-#include <boost/spirit/core.hpp>
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/stream.hpp>
 
-using boost::spirit::parse;
-using boost::spirit::uint_p;
-using boost::spirit::space_p;
-using boost::spirit::assign;
-using boost::spirit::push_back_a;
+namespace io = boost::iostreams;
 
-bool RoleParser::Parse(char const* str, gid_t &role_id, Privs &privs)
+bool RoleParser::Update(Roles &roles, int fd)
 {
-	return parse(str,
-	(
-	 uint_p[assign(role_id)] >>
-	 ':' >>
-	 uint_p[push_back_a(privs)] >>
-	 *(',' >> uint_p[push_back_a(privs)])),
-	 space_p).full;
-}
+	if (fd < 0)
+		return RoleParserSimple::Update(roles);
 
-bool RoleParser::Update(Roles &roles)
-{
-	in.open(filename.c_str());
+	io::file_descriptor_source fd_source(fd);
+	io::stream_buffer<io::file_descriptor_source> buf(fd_source);
+	std::istream in(&buf);
 	if (!in)
 		return false;
 
-	roles.clear();
-	while (in && !in.eof())
-	{
-		Privs privs;
-		gid_t role_id;
-		std::string rbuf;
-
-		getline (in, rbuf);
-		if (rbuf.length() == 0)
-			continue;
-		if (!Parse(rbuf.c_str(), role_id, privs))
-			continue;
-
-		roles.insert(Role(role_id, privs));
-	}
-
-	return true;
+	return ParseCycle(roles, in);
 }
