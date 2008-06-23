@@ -12,6 +12,10 @@ class LockFile
 public:
 	LockFile (const std::string &file);
 	~LockFile ();
+
+	bool isLocked() {
+		return locked;
+	}
 };
 
 #endif /*LIBNSS_ROLE_LOCKFILE_H_*/

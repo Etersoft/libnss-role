@@ -1,0 +1,55 @@
+#ifndef LIBNSS_GROUP_READER_H_
+#define LIBNSS_GROUP_READER_H_
+
+#include <string>
+#include <vector>
+#include <grp.h>
+#include <errno.h>
+
+#include <stdexcept>
+
+class errno_error: public std::runtime_error
+{
+	int code;
+public:
+	explicit errno_error(std::string what, int err):
+		std::runtime_error(what), code(err) {}
+	int get_errno() { return code; }
+};
+
+class no_such_error: public std::runtime_error
+{
+public:
+	explicit no_such_error(std::string what):
+		std::runtime_error(what) {}
+};
+
+class Group {
+	struct group grp;
+	std::vector<char> buf;
+	bool valid;
+
+	static const size_t grp_buf_default_size = 1024;
+	static const size_t grp_struct_size = sizeof (struct group); 
+
+	size_t max_grp_size();
+	void getgrgid (gid_t gid);
+	void getgrnam (const std::string&);
+public:
+	Group(const std::string &name);
+	Group(gid_t gid);
+	const char* name() {
+		return grp.gr_name;
+	}
+	const char* passwd() {
+		return grp.gr_passwd;
+	}
+	gid_t gid() {
+		return grp.gr_gid;
+	}
+	//const char** members() {
+	//	return grp.gr_mem;
+	//}
+};
+
+#endif /*LIBNSS_GROUP_READER_H_*/

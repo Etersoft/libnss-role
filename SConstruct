@@ -14,7 +14,7 @@ libenv["SHLIBSUFFIX"] = [SUFFIX + '.0.0']
 libenv["LINKFLAGS"] = ['-Wl,-soname,' + SONAME]
 so = libenv.SharedLibrary(NAME, ['nss_role.cpp', 'roleParserSimple.cpp'])
 
-roleadd = env.Program('roleadd', ['roleadd.cpp', 'lockFile.cpp', 'roleManager.cpp', 'roleParserSimple.cpp', 'roleParser.cpp', 'roleStorage.cpp'])
+roleadd = env.Program('roleadd', ['roleadd.cpp', 'lockFile.cpp', 'roleManager.cpp', 'groupReader.cpp', 'roleParserSimple.cpp', 'roleParser.cpp', 'roleStorage.cpp'])
 env["LIBS"] = ['-lboost_program_options', '-lboost_iostreams']
 
 i = env.Install('$DESTDIR/usr/bin', roleadd)
