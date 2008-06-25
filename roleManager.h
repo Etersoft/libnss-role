@@ -14,16 +14,29 @@ public:
 		std::runtime_error(what) {}
 };
 
+class GroupMap: std::map<std::string,gid_t>
+{
+public:
+	GroupMap() {}
+	gid_t operator[] (const std::string&);
+};
+
+class GroupMap;
 class RoleManager
 {
+public:
+	typedef std::vector<std::string> PrivNames;
+private:
 	int fd;
 	Roles roles;
 	std::string config;
 	LockFile locker;
 	bool initialized;
+	GroupMap groupmap;
+
+	void fillGroups(Groups &groups, const PrivNames &list);
+	Privs getPrivs(const Groups &groups);
 public:
-	typedef std::string Name;
-	typedef std::vector<std::string> PrivList;
 	RoleManager(const std::string &config);
 	~RoleManager();
 	bool isInitialized() {
@@ -31,10 +44,10 @@ public:
 	}
 	void Update();
 	void Store();
-	void Add(const Name &name, const PrivList &list);
-	void Set(const Name &name, const PrivList &list);
-	void Delete(const Name &name, const PrivList &list);
-	void Remove(const Name &name);
+	void Add(const std::string &name, const PrivNames &list);
+	void Set(const std::string &name, const PrivNames &list);
+	void Delete(const std::string &name, const PrivNames &list);
+	void Remove(const std::string &name);
 };
 
 #endif /*LIBNSS_ROLE_MANAGER_H_*/

@@ -10,7 +10,8 @@ public:
 		errno_error(what, errno) {}
 };
 
-Group::Group(gid_t gid): buf(grp_buf_default_size)
+Group::Group(gid_t gid):
+	buf(grp_buf_default_size)
 {
 	try {
 		getgrgid (gid);
@@ -20,7 +21,8 @@ Group::Group(gid_t gid): buf(grp_buf_default_size)
 	}
 }
 
-Group::Group(const std::string &name)
+Group::Group(const std::string &name):
+	buf(grp_buf_default_size)
 {
 	try {
 		getgrnam (name);
@@ -40,7 +42,7 @@ size_t Group::max_grp_size ()
 
 void Group::getgrgid (gid_t gid)
 {
-	size_t len = buf.size();
+	size_t len = buf.capacity();
 	char *buffer = &buf[0];
 	struct group* grp_ptr;
 	if (getgrgid_r(gid, &grp, buffer, len, &grp_ptr) == 0) {
@@ -56,7 +58,7 @@ void Group::getgrgid (gid_t gid)
 
 void Group::getgrnam (const std::string &name)
 {
-	size_t len = buf.size();
+	size_t len = buf.capacity();
 	char *buffer = &buf[0];
 	struct group* grp_ptr;
 	if (getgrnam_r(name.c_str(), &grp, buffer, len, &grp_ptr) == 0) {

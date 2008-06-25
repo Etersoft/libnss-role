@@ -16,12 +16,14 @@ using std::exception;
 
 static po::variables_map vm;
 
+typedef RoleManager::PrivNames PrivNames;
+
 static int getOptions(int ac, char* av[])
 {
 	try {
 		po::options_description desc("Usage: roleadd [-s] ROLE [GROUPS]...");
 		desc.add_options()
-			("help", "produce help message")
+			("help,h", "produce help message")
 			("set,s", "replace privileges for role");
 
 		po::positional_options_description p;
@@ -31,7 +33,7 @@ static int getOptions(int ac, char* av[])
 		hidden.add_options()
 			("config,c", po::value< string >(), "config name")
 			("role-name", po::value< string >(), "role name")
-			("priv-names", po::value< vector<string> >(), "privilegies names");
+			("priv-names", po::value< PrivNames >(), "privilegies names");
 
 		po::options_description cmdline_options;
 		cmdline_options.add(desc).add(hidden);
@@ -42,24 +44,9 @@ static int getOptions(int ac, char* av[])
 
 		if (vm.count("help")) {
 			cout << desc << "\n";
-			return 1;
+			return 0;
 		}
 
-		if (vm.count("set")) {
-			cout << "Set done.\n";
-		} else {
-			cout << "Set was not set.\n";
-		}
-		if (vm.count("role-name")) {
-			cout << "Role: " << vm["role-name"].as<string>() << ".\n";
-		} else {
-			cout << "Role was not set.\n";
-		}
-		if (vm.count("config")) {
-			cout << "Config: " << vm["config"].as<string>() << ".\n";
-		} else {
-			cout << "Config was not set.\n";
-		}
 	}
 	catch(exception& e) {
 		cerr << "error: " << e.what() << "\n";
@@ -70,6 +57,16 @@ static int getOptions(int ac, char* av[])
 	}
 
 	return 0;
+}
+
+PrivNames getPrivs()
+{
+	PrivNames privs;
+
+	if (vm.count("priv-names"))
+		privs = vm["priv-names"].as<PrivNames>();
+
+	return privs;
 }
 
 int main (int argc, char *argv[])
@@ -86,6 +83,21 @@ int main (int argc, char *argv[])
 		config = vm["config"].as<string>().c_str();
 
 	RoleManager manager(config);
+
+	manager.Update();
+
+	PrivNames privs;
+	string name = vm["role-name"].as<string>();
+
+	if (vm.count("priv-names"))
+		privs = vm["priv-names"].as<PrivNames>();
+
+	if (vm.count("set"))
+		manager.Set(name, privs);
+	else
+		manager.Add(name, privs);
+
+	manager.Store();
 
 	return 0;
 }

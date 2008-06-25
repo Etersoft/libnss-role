@@ -15,8 +15,8 @@ bool RoleParserSimple::Parse(char const* str, gid_t &role_id, Privs &privs)
 	(
 	 uint_p[assign(role_id)] >>
 	 ':' >>
-	 uint_p[push_back_a(privs)] >>
-	 *(',' >> uint_p[push_back_a(privs)])),
+	 !(uint_p[push_back_a(privs)] >>
+	  *(',' >> uint_p[push_back_a(privs)]))),
 	 space_p).full;
 }
 

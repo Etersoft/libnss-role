@@ -15,6 +15,7 @@ LockFile::LockFile(const std::string &file): lockfile(file), locked(false)
 	std::ostringstream temp;
 	temp << pid;
 	std::string uniq = temp.str();
+	lockfile += ".lock";
 
 	try {
 		DoLock(file, uniq);
@@ -50,7 +51,7 @@ void LockFile::DoLock(const std::string &file, const std::string &uniq)
 	if ((fd = open(tempfile.c_str(), O_CREAT|O_EXCL|O_WRONLY, 0600)) == -1)
 		throw("can't open tempfile");
 
-	int len = uniq.size() + 1;
+	int len = uniq.size();
 	if (write(fd, uniq.c_str(), len) != len) {
 		close(fd);
 		unlink(tempfile.c_str());
@@ -63,6 +64,7 @@ void LockFile::DoLock(const std::string &file, const std::string &uniq)
 		unlink(tempfile.c_str());
 		if (!ret)
 			throw("can't link lockfile");
+		return;
 	}
 
 	if ((fd = open(lockfile.c_str(), O_RDWR)) == -1) {
