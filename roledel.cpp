@@ -21,10 +21,10 @@ typedef RoleManager::PrivNames PrivNames;
 static int getOptions(int ac, char* av[])
 {
 	try {
-		po::options_description desc("Usage: roleadd [-s] ROLE [GROUPS]...");
+		po::options_description desc("Usage: roledel [-s] ROLE [GROUPS]...");
 		desc.add_options()
 			("help,h", "produce help message")
-			("set,s", "replace privileges for role");
+			("remove,r", "remove role instead delete privilegies from it");
 
 		po::positional_options_description p;
 		p.add("role-name", 1).add("priv-names", -1);
@@ -93,10 +93,10 @@ int main (int argc, char *argv[])
 	if (vm.count("priv-names"))
 		privs = vm["priv-names"].as<PrivNames>();
 
-	if (vm.count("set"))
-		manager.Set(name, privs);
+	if (vm.count("remove"))
+		manager.Remove(name);
 	else
-		manager.Add(name, privs);
+		manager.Delete(name, privs);
 
 	manager.Store();
 

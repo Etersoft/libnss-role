@@ -21,7 +21,6 @@ public:
 	gid_t operator[] (const std::string&);
 };
 
-class GroupMap;
 class RoleManager
 {
 public:

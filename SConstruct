@@ -41,20 +41,24 @@ commonfiles = ['lockFile.cpp', 'roleManager.cpp', parser, 'groupReader.cpp', 'ro
 common = commonenv.SharedLibrary(COMMON_NAME, commonfiles)
 commonlink = commonenv.Command(COMMON_SONAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_SONAME))
 commondevlink = commonenv.Command(COMMON_DEVNAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_DEVNAME))
+commonheaders = ['lockFile.h', 'roleManager.h', 'roleParserSimple.h', 'groupReader.h', 'roleParser.h', 'roleStorage.h']
 
 env = env.Clone()
 env["LIBS"] = ['role','boost_program_options']
 env["LIBPATH"] = '.'
 roleadd = env.Program('roleadd', 'roleadd.cpp')
+roledel = env.Program('roledel', 'roledel.cpp')
 
 i = commonenv.Install('$DESTDIR/usr/lib', common)
+commonenv.Alias('install', i)
+i = commonenv.Install('$DESTDIR/usr/include', commonheaders)
 commonenv.Alias('install', i)
 i = commonenv.Command('$DESTDIR/usr/lib/' + COMMON_SONAME, commonlink[0], 'cp -P %s $DESTDIR/usr/lib/%s' % (COMMON_SONAME, COMMON_SONAME))
 commonenv.Alias('install', i)
 i = commonenv.Command('$DESTDIR/usr/lib/' + COMMON_DEVNAME, commondevlink[0], 'cp -P %s $DESTDIR/usr/lib/%s' % (COMMON_DEVNAME, COMMON_DEVNAME))
 commonenv.Alias('install', i)
 
-i = env.Install('$DESTDIR/usr/bin', roleadd)
+i = env.Install('$DESTDIR/usr/bin', [roleadd, roledel])
 env.Alias('install', i)
 
 i = libenv.Install('$DESTDIR/lib', so)
