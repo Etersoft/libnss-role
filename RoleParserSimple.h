@@ -4,7 +4,7 @@
 #include <string>
 #include <istream>
 
-#include "roleCommon.h"
+#include <Role/RoleCommon.h>
 
 class RoleParserSimple
 {

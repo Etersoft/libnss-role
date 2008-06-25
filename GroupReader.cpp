@@ -1,7 +1,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "groupReader.h"
+#include <Role/GroupReader.h>
 
 class buf_size_error: public errno_error
 {

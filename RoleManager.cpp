@@ -2,10 +2,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "roleManager.h"
-#include "roleStorage.h"
-#include "roleParser.h"
-#include "groupReader.h"
+#include <Role/RoleManager.h>
+#include <Role/RoleStorage.h>
+#include <Role/RoleParser.h>
+#include <Role/GroupReader.h>
 
 gid_t GroupMap::operator[] (const std::string& name)
 {

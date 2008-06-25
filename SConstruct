@@ -24,12 +24,12 @@ COMMON_SONAME = COMMON_NAME + COMMON_LIBBASESUFFIX
 COMMON_FULLNAME = COMMON_NAME + COMMON_LIBFULLSUFFIX
 COMMON_DEVNAME = COMMON_NAME + LIBDEVSUFFIX
 
-env["CCFLAGS"] = '-O2'
+env["CCFLAGS"] = '-O2 -I.'
 
 libenv = env.Clone()
 libenv["SHLIBSUFFIX"] = [NSS_LIBFULLSUFFIX]
 libenv["LINKFLAGS"] = ['-Wl,-soname,' + NSS_SONAME]
-parser = libenv.SharedObject('roleParserSimple', 'roleParserSimple.cpp')
+parser = libenv.SharedObject('RoleParserSimple', 'RoleParserSimple.cpp')
 so = libenv.SharedLibrary(NSS_NAME, ['nss_role.cpp', parser])
 solink = libenv.Command(NSS_SONAME, so[0], 'ln -sf %s %s' % (NSS_FULLNAME, NSS_SONAME))
 
@@ -37,11 +37,11 @@ commonenv = libenv.Clone()
 commonenv["SHLIBSUFFIX"] = [COMMON_LIBFULLSUFFIX]
 commonenv["LINKFLAGS"] = ['-Wl,-soname,' + COMMON_SONAME]
 commonenv["LIBS"] = ['boost_iostreams']
-commonfiles = ['lockFile.cpp', 'roleManager.cpp', parser, 'groupReader.cpp', 'roleParser.cpp', 'roleStorage.cpp']
+commonfiles = ['LockFile.cpp', 'RoleManager.cpp', parser, 'GroupReader.cpp', 'RoleParser.cpp', 'RoleStorage.cpp']
 common = commonenv.SharedLibrary(COMMON_NAME, commonfiles)
 commonlink = commonenv.Command(COMMON_SONAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_SONAME))
 commondevlink = commonenv.Command(COMMON_DEVNAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_DEVNAME))
-commonheaders = ['lockFile.h', 'roleManager.h', 'roleParserSimple.h', 'groupReader.h', 'roleParser.h', 'roleStorage.h']
+commonheaders = ['LockFile.h', 'RoleManager.h', 'RoleParserSimple.h', 'GroupReader.h', 'RoleParser.h', 'RoleStorage.h']
 
 env = env.Clone()
 env["LIBS"] = ['role','boost_program_options']

@@ -4,7 +4,7 @@
 #include <string>
 #include <ostream>
 
-#include "roleCommon.h"
+#include <Role/RoleCommon.h>
 
 class RoleStorage
 {

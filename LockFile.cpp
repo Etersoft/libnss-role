@@ -7,7 +7,7 @@
 #include <sstream>
 #include <cstdlib>
 
-#include "lockFile.h"
+#include <Role/LockFile.h>
 
 LockFile::LockFile(const std::string &file): lockfile(file), locked(false)
 {

@@ -1,4 +1,4 @@
-#include "roleParserSimple.h"
+#include <Role/RoleParserSimple.h>
 
 #include <boost/spirit/core.hpp>
 #include <fstream>

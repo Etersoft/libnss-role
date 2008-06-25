@@ -4,8 +4,8 @@
 #include <string>
 #include <stdexcept>
 
-#include "roleCommon.h"
-#include "lockFile.h"
+#include <Role/RoleCommon.h>
+#include <Role/LockFile.h>
 
 class system_error: public std::runtime_error
 {
