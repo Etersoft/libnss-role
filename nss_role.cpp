@@ -40,12 +40,20 @@ static bool realloc_groups (long int **size, gid_t ***groups, long int limit)
 	return true;
 }
 
-static void add_groups_insert (gid_t gid, const Roles &roles, Groups &groups)
+static void add_groups_insert (gid_t gid, const Roles &roles, Groups &groups, Groups &rolesAsGroups)
 {
 	Roles::const_iterator iter = roles.find(gid);
 	if (iter != roles.end()) {
 		const Privs &privs = iter->second;
-		groups.insert(privs.begin(), privs.end());
+		gid_t rid = iter->first;
+
+		rolesAsGroups.insert(rid);
+
+		for (Privs::const_iterator i = privs.begin(); i != privs.end(); i++) {
+			groups.insert(privs.begin(), privs.end());
+			if (roles.find(rid) != roles.end() && rolesAsGroups.find(rid) == rolesAsGroups.end())
+				add_groups_insert(rid, roles, groups, rolesAsGroups);
+		}
 	}
 }
 
@@ -61,14 +69,16 @@ enum nss_status _nss_role_initgroups_dyn (char *user, gid_t main_group, long int
 
 	try {
 		Roles roles;
-		Groups add_groups;
+		Groups add_groups, role_groups;
 		long int last_start = *start;
 		if (!RoleParserSimple().Update(roles))
 			return ret;
 
-		add_groups_insert(main_group, roles, add_groups);
-		for (long int i = 0; i < last_start; i++)
-			add_groups_insert((*groups)[i], roles, add_groups);
+		add_groups_insert(main_group, roles, add_groups, role_groups);
+		for (long int i = 0; i < last_start; i++) {
+			role_groups.clear();
+			add_groups_insert((*groups)[i], roles, add_groups, role_groups);
+		}
 
 		add_groups.erase(main_group);
 		for (long int i = 0; i < last_start; i++)
