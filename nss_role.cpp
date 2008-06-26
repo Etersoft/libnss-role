@@ -45,13 +45,12 @@ static void add_groups_insert (gid_t gid, const Roles &roles, Groups &groups, Gr
 	Roles::const_iterator iter = roles.find(gid);
 	if (iter != roles.end()) {
 		const Privs &privs = iter->second;
-		gid_t rid = iter->first;
 
-		rolesAsGroups.insert(rid);
+		rolesAsGroups.insert(gid);
 
 		for (Privs::const_iterator i = privs.begin(); i != privs.end(); i++) {
-			groups.insert(privs.begin(), privs.end());
-			if (roles.find(rid) != roles.end() && rolesAsGroups.find(rid) == rolesAsGroups.end())
+			groups.insert(*i);
+			if (roles.find(*i) != roles.end() && rolesAsGroups.find(*i) == rolesAsGroups.end())
 				add_groups_insert(rid, roles, groups, rolesAsGroups);
 		}
 	}
