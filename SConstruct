@@ -51,7 +51,7 @@ roledel = env.Program('roledel', 'roledel.cpp')
 
 i = commonenv.Install('$DESTDIR/usr/lib', common)
 commonenv.Alias('install', i)
-i = commonenv.Install('$DESTDIR/usr/include', commonheaders)
+i = commonenv.Install('$DESTDIR/usr/include/Role', commonheaders)
 commonenv.Alias('install', i)
 i = commonenv.Command('$DESTDIR/usr/lib/' + COMMON_SONAME, commonlink[0], 'cp -P %s $DESTDIR/usr/lib/%s' % (COMMON_SONAME, COMMON_SONAME))
 commonenv.Alias('install', i)
