@@ -80,6 +80,9 @@ int main (int argc, char *argv[])
 	if (ret != 0)
 		return ret;
 
+	if (vm.count("help"))
+		return 0;
+
 	if (vm.count("config"))
 		config = vm["config"].as<string>().c_str();
 

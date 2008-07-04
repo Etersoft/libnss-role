@@ -5,19 +5,11 @@
 #include <Role/RoleManager.h>
 #include <Role/RoleStorage.h>
 #include <Role/RoleParser.h>
-#include <Role/GroupReader.h>
+//#include <Role/GroupReader.h>
 
-gid_t GroupMap::operator[] (const std::string& name)
+std::ostream& operator <<(std::ostream &os, const RoleManager &manager)
 {
-	iterator i = this->find(name);
-
-	if (i != this->end())
-		return i->second;
-
-	gid_t gid = Group(name).gid();
-	this->insert(value_type(name, gid));
-
-	return gid;
+	return os << manager.roles;
 }
 
 RoleManager::RoleManager(const std::string &filename): config(filename), fd(-1), initialized(false), locker(config)
@@ -111,9 +103,10 @@ void RoleManager::Delete(const std::string &name, const PrivNames &list)
 	Roles::iterator curr = roles.find(gid);
 	if (curr != roles.end()) {
 		const Privs &privs = curr->second;
+		Groups newgroups(privs.begin(), privs.end());
 		for (Groups::iterator i = groups.begin(); i != groups.end(); i++)
-			groups.erase(*i);
-		roles[gid] = getPrivs(groups);
+			newgroups.erase(*i);
+		roles[gid] = getPrivs(newgroups);
 	}
 }
 

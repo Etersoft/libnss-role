@@ -4,7 +4,7 @@
 #include <iterator>
 #include <vector>
 
-#include <RoleManager.h>
+#include <RoleParser.h>
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
@@ -16,24 +16,23 @@ using std::exception;
 
 static po::variables_map vm;
 
-typedef RoleManager::PrivNames PrivNames;
+typedef vector<string> RoleNames;
 
 static int getOptions(int ac, char* av[])
 {
 	try {
-		po::options_description desc("Usage: roledel [-s] ROLE [GROUPS]...");
+		po::options_description desc("Usage: rolelst [-i] [ROLES]...");
 		desc.add_options()
-			("help,h", "produce help message")
-			("remove,r", "remove role instead delete privilegies from it");
+			("help,h", "produce help message");
+//			("ids,i", "print ids too");
 
 		po::positional_options_description p;
-		p.add("role-name", 1).add("priv-names", -1);
+		p.add("role-names", -1);
 
 		po::options_description hidden("Hidden options");
 		hidden.add_options()
 			("config,c", po::value<string>(), "config name")
-			("role-name", po::value<string>(), "role name")
-			("priv-names", po::value<PrivNames>(), "privilegies names");
+			("role-names", po::value<RoleNames>(), "role names");
 
 		po::options_description cmdline_options;
 		cmdline_options.add(desc).add(hidden);
@@ -60,16 +59,6 @@ static int getOptions(int ac, char* av[])
 	return 0;
 }
 
-PrivNames getPrivs()
-{
-	PrivNames privs;
-
-	if (vm.count("priv-names"))
-		privs = vm["priv-names"].as<PrivNames>();
-
-	return privs;
-}
-
 int main (int argc, char *argv[])
 {
 	static const char *default_config = "/etc/role";
@@ -86,22 +75,26 @@ int main (int argc, char *argv[])
 	if (vm.count("config"))
 		config = vm["config"].as<string>().c_str();
 
-	RoleManager manager(config);
+	Roles roles;
 
-	manager.Update();
+	RoleParser(config).Update(roles);
 
-	PrivNames privs;
-	string name = vm["role-name"].as<string>();
-
-	if (vm.count("priv-names"))
-		privs = vm["priv-names"].as<PrivNames>();
-
-	if (vm.count("remove"))
-		manager.Remove(name);
-	else
-		manager.Delete(name, privs);
-
-	manager.Store();
+	if (vm.count("role-names")) {
+		GroupMap groupmap;
+		RoleNames rn = vm["role-names"].as<RoleNames>();
+		for (RoleNames::iterator i = rn.begin(); i != rn.end(); i++) {
+			gid_t gid;
+			try {
+				gid = groupmap[*i];
+			} catch (...) {
+				continue;
+			}
+			Roles::iterator r = roles.find(gid);
+			if (r != roles.end())
+				output_role(cout, *r, groupmap);
+		}
+	} else
+		cout << roles;
 
 	return 0;
 }

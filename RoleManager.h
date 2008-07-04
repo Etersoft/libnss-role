@@ -14,12 +14,8 @@ public:
 		std::runtime_error(what) {}
 };
 
-class GroupMap: std::map<std::string,gid_t>
-{
-public:
-	GroupMap() {}
-	gid_t operator[] (const std::string&);
-};
+class RoleManager;
+std::ostream& operator <<(std::ostream &os, const RoleManager &manager);
 
 class RoleManager
 {
@@ -47,6 +43,8 @@ public:
 	void Set(const std::string &name, const PrivNames &list);
 	void Delete(const std::string &name, const PrivNames &list);
 	void Remove(const std::string &name);
+
+	friend std::ostream& operator <<(std::ostream &os, const RoleManager &manager);
 };
 
 #endif /*LIBNSS_ROLE_MANAGER_H_*/

@@ -37,7 +37,7 @@ commonenv = libenv.Clone()
 commonenv["SHLIBSUFFIX"] = [COMMON_LIBFULLSUFFIX]
 commonenv["LINKFLAGS"] = ['-Wl,-soname,' + COMMON_SONAME]
 commonenv["LIBS"] = ['boost_iostreams']
-commonfiles = ['LockFile.cpp', 'RoleManager.cpp', parser, 'GroupReader.cpp', 'RoleParser.cpp', 'RoleStorage.cpp']
+commonfiles = ['LockFile.cpp', 'RoleCommon.cpp', 'RoleManager.cpp', parser, 'GroupReader.cpp', 'RoleParser.cpp', 'RoleStorage.cpp']
 common = commonenv.SharedLibrary(COMMON_NAME, commonfiles)
 commonlink = commonenv.Command(COMMON_SONAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_SONAME))
 commondevlink = commonenv.Command(COMMON_DEVNAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_DEVNAME))
@@ -48,6 +48,7 @@ env["LIBS"] = ['role','boost_program_options']
 env["LIBPATH"] = '.'
 roleadd = env.Program('roleadd', 'roleadd.cpp')
 roledel = env.Program('roledel', 'roledel.cpp')
+rolelst = env.Program('rolelst', 'rolelst.cpp')
 
 i = commonenv.Install('$DESTDIR/usr/lib', common)
 commonenv.Alias('install', i)
