@@ -5,21 +5,16 @@
 #include <Role/RoleManager.h>
 #include <Role/RoleStorage.h>
 #include <Role/RoleParser.h>
-//#include <Role/GroupReader.h>
 
 std::ostream& operator <<(std::ostream &os, const RoleManager &manager)
 {
 	return os << manager.roles;
 }
 
-RoleManager::RoleManager(const std::string &filename): config(filename), fd(-1), initialized(false), locker(config)
+RoleManager::RoleManager(const std::string &filename): config(filename), fd(-1), locker(config)
 {
-	if (!locker.isLocked())
-		return;
-
 //	fd = open(filename.c_str(), O_RDWR|O_EXCL);
 //	if (fd >= 0)
-		initialized = true;
 }
 
 RoleManager::~RoleManager()
@@ -27,25 +22,19 @@ RoleManager::~RoleManager()
 	if (fd < 0)
 		return;
 
-	close(fd);
+    	close(fd);
 }
 
 void RoleManager::Update()
 {
-	if (!initialized)
-		throw system_error("RoleManager not initialized");
-
-	if (!RoleParser(config).Update(roles), fd)
-		system_error("RoleManager Parser error");
+	if (!RoleParser(config).Update(roles, fd))
+		throw system_error("RoleManager Parser error");
 }
 
 void RoleManager::Store()
 {
-	if (!initialized)
-		throw system_error("RoleManager not initialized");
-
-	if (!RoleStorage(config).Store(roles), fd)
-		system_error("RoleManager Store error");
+	if (!RoleStorage(config).Store(roles, fd))
+		throw system_error("RoleManager Store error");
 }
 
 Privs RoleManager::getPrivs(const Groups &groups)

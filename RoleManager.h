@@ -2,17 +2,9 @@
 #define LIBNSS_ROLE_MANAGER_H_
 
 #include <string>
-#include <stdexcept>
 
 #include <Role/RoleCommon.h>
 #include <Role/LockFile.h>
-
-class system_error: public std::runtime_error
-{
-public:
-	explicit system_error(std::string what):
-		std::runtime_error(what) {}
-};
 
 class RoleManager;
 std::ostream& operator <<(std::ostream &os, const RoleManager &manager);
@@ -26,7 +18,6 @@ private:
 	Roles roles;
 	std::string config;
 	LockFile locker;
-	bool initialized;
 	GroupMap groupmap;
 
 	void fillGroups(Groups &groups, const PrivNames &list);
@@ -34,11 +25,10 @@ private:
 public:
 	RoleManager(const std::string &config);
 	~RoleManager();
-	bool isInitialized() {
-		return initialized;
-	}
+
 	void Update();
 	void Store();
+
 	void Add(const std::string &name, const PrivNames &list);
 	void Set(const std::string &name, const PrivNames &list);
 	void Delete(const std::string &name, const PrivNames &list);

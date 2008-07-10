@@ -9,7 +9,7 @@
 
 #include <Role/LockFile.h>
 
-LockFile::LockFile(const std::string &file): lockfile(file), locked(false)
+LockFile::LockFile(const std::string &file): lockfile(file)
 {
 	pid_t pid = getpid();
 	std::ostringstream temp;
@@ -17,12 +17,7 @@ LockFile::LockFile(const std::string &file): lockfile(file), locked(false)
 	std::string uniq = temp.str();
 	lockfile += ".lock";
 
-	try {
-		DoLock(file, uniq);
-		locked = true;
-	} catch (...) {
-		locked = false;
-	}
+	DoLock(file, uniq);
 }
 
 LockFile::~LockFile()
@@ -49,13 +44,13 @@ void LockFile::DoLock(const std::string &file, const std::string &uniq)
 	std::string tempfile = file + '.' + uniq;
 
 	if ((fd = open(tempfile.c_str(), O_CREAT|O_EXCL|O_WRONLY, 0600)) == -1)
-		throw("can't open tempfile");
+		throw system_error("can't open tempfile");
 
 	int len = uniq.size();
 	if (write(fd, uniq.c_str(), len) != len) {
 		close(fd);
 		unlink(tempfile.c_str());
-		throw("can't write tempfile");
+		throw system_error("can't write tempfile");
 	}
 	close(fd);
 
@@ -63,34 +58,34 @@ void LockFile::DoLock(const std::string &file, const std::string &uniq)
 		bool ret = CheckLinkCount(tempfile);
 		unlink(tempfile.c_str());
 		if (!ret)
-			throw("can't link lockfile");
+			throw system_error("can't link lockfile");
 		return;
 	}
 
 	if ((fd = open(lockfile.c_str(), O_RDWR)) == -1) {
 		unlink(tempfile.c_str());
-		throw("can't open lockfile");
+		throw system_error("can't open lockfile");
 	}
 	char buf[32];
 	len = read(fd, buf, sizeof(buf) - 1);
 	close(fd);
 	if (len <= 0) {
 		unlink(tempfile.c_str());
-		throw("can't read lockfile");
+		throw system_error("can't read lockfile");
 	}
 	buf[len] = '\0';
 	pid_t pid;
 	if ((pid = std::strtol(buf, (char **) 0, 10)) == 0) {
 		unlink(tempfile.c_str());
-		throw("can't get process id from lockfile");
+		throw system_error("can't get process id from lockfile");
 	}
 	if (kill(pid, 0) == 0)  {
 		unlink(tempfile.c_str());
-		throw("process exists for lockfile");
+		throw system_error("process exists for lockfile");
 	}
 	if (unlink(lockfile.c_str()) != 0) {
 		unlink(tempfile.c_str());
-		throw("can't delete old lockfile");
+		throw system_error("can't delete old lockfile");
 	}
 
 	bool done = false;
@@ -100,5 +95,5 @@ void LockFile::DoLock(const std::string &file, const std::string &uniq)
 	unlink(tempfile.c_str());
 
 	if (!done)
-		throw("can't link lock file after delete");
+		throw system_error("can't link lock file after delete");
 }

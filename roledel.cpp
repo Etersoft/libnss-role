@@ -86,22 +86,32 @@ int main (int argc, char *argv[])
 	if (vm.count("config"))
 		config = vm["config"].as<string>().c_str();
 
-	RoleManager manager(config);
+	try {
+		RoleManager manager(config);
 
-	manager.Update();
+		manager.Update();
 
-	PrivNames privs;
-	string name = vm["role-name"].as<string>();
+		PrivNames privs;
+		string name = vm["role-name"].as<string>();
 
-	if (vm.count("priv-names"))
-		privs = vm["priv-names"].as<PrivNames>();
+		if (vm.count("priv-names"))
+			privs = vm["priv-names"].as<PrivNames>();
 
-	if (vm.count("remove"))
-		manager.Remove(name);
-	else
-		manager.Delete(name, privs);
+		if (vm.count("remove"))
+			manager.Remove(name);
+		else
+			manager.Delete(name, privs);
 
-	manager.Store();
+		manager.Store();
+	}
+	catch(exception& e) {
+		cerr << "error: " << e.what() << "\n";
+		return 1;
+	}
+	catch(...) {
+		cerr << "Exception of unknown type!\n";
+		return 2;
+	}
 
 	return 0;
 }

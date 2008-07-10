@@ -75,26 +75,36 @@ int main (int argc, char *argv[])
 	if (vm.count("config"))
 		config = vm["config"].as<string>().c_str();
 
-	Roles roles;
+	try {
+		Roles roles;
 
-	RoleParser(config).Update(roles);
+		RoleParser(config).Update(roles);
 
-	if (vm.count("role-names")) {
-		GroupMap groupmap;
-		RoleNames rn = vm["role-names"].as<RoleNames>();
-		for (RoleNames::iterator i = rn.begin(); i != rn.end(); i++) {
-			gid_t gid;
-			try {
-				gid = groupmap[*i];
-			} catch (...) {
-				continue;
+		if (vm.count("role-names")) {
+			GroupMap groupmap;
+			RoleNames rn = vm["role-names"].as<RoleNames>();
+			for (RoleNames::iterator i = rn.begin(); i != rn.end(); i++) {
+				gid_t gid;
+				try {
+					gid = groupmap[*i];
+				} catch (...) {
+					continue;
+				}
+				Roles::iterator r = roles.find(gid);
+				if (r != roles.end())
+					output_role(cout, *r, groupmap);
 			}
-			Roles::iterator r = roles.find(gid);
-			if (r != roles.end())
-				output_role(cout, *r, groupmap);
-		}
-	} else
-		cout << roles;
+		} else
+			cout << roles;
+	}
+	catch(exception& e) {
+		cerr << "error: " << e.what() << "\n";
+		return 1;
+	}
+	catch(...) {
+		cerr << "Exception of unknown type!\n";
+		return 2;
+	}
 
 	return 0;
 }

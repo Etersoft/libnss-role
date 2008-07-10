@@ -41,7 +41,7 @@ commonfiles = ['LockFile.cpp', 'RoleCommon.cpp', 'RoleManager.cpp', parser, 'Gro
 common = commonenv.SharedLibrary(COMMON_NAME, commonfiles)
 commonlink = commonenv.Command(COMMON_SONAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_SONAME))
 commondevlink = commonenv.Command(COMMON_DEVNAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_DEVNAME))
-commonheaders = ['LockFile.h', 'RoleManager.h', 'RoleParserSimple.h', 'GroupReader.h', 'RoleParser.h', 'RoleStorage.h']
+commonheaders = ['LockFile.h', 'RoleManager.h', 'RoleParserSimple.h', 'GroupReader.h', 'RoleParser.h', 'RoleStorage.h', 'RoleError.h']
 
 env = env.Clone()
 env["LIBS"] = ['role','boost_program_options']
@@ -54,15 +54,15 @@ i = commonenv.Install('$DESTDIR/usr/lib', common)
 commonenv.Alias('install', i)
 i = commonenv.Install('$DESTDIR/usr/include/Role', commonheaders)
 commonenv.Alias('install', i)
-i = commonenv.Command('$DESTDIR/usr/lib/' + COMMON_SONAME, commonlink[0], 'cp -P %s $DESTDIR/usr/lib/%s' % (COMMON_SONAME, COMMON_SONAME))
+i = commonenv.Command('$DESTDIR/usr/lib/' + COMMON_SONAME, commonlink[0], 'cp -P %s /$DESTDIR/usr/lib/%s' % (COMMON_SONAME, COMMON_SONAME))
 commonenv.Alias('install', i)
-i = commonenv.Command('$DESTDIR/usr/lib/' + COMMON_DEVNAME, commondevlink[0], 'cp -P %s $DESTDIR/usr/lib/%s' % (COMMON_DEVNAME, COMMON_DEVNAME))
+i = commonenv.Command('$DESTDIR/usr/lib/' + COMMON_DEVNAME, commondevlink[0], 'cp -P %s /$DESTDIR/usr/lib/%s' % (COMMON_DEVNAME, COMMON_DEVNAME))
 commonenv.Alias('install', i)
 
-i = env.Install('$DESTDIR/usr/bin', [roleadd, roledel])
+i = env.Install('$DESTDIR/usr/bin', [roleadd, roledel, rolelst])
 env.Alias('install', i)
 
 i = libenv.Install('$DESTDIR/lib', so)
 libenv.Alias('install', i)
-i = libenv.Command('$DESTDIR/lib/' + NSS_SONAME, solink[0], 'cp -P %s $DESTDIR/lib/%s' % (NSS_SONAME, NSS_SONAME))
+i = libenv.Command('$DESTDIR/lib/' + NSS_SONAME, solink[0], 'cp -P %s /$DESTDIR/lib/%s' % (NSS_SONAME, NSS_SONAME))
 libenv.Alias('install', i)

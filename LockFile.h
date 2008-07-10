@@ -3,19 +3,16 @@
 
 #include <string>
 
+#include <Role/RoleError.h>
+
 class LockFile
 {
-	bool locked;
 	std::string lockfile;
 	void DoLock (const std::string &file, const std::string &uniq);
 	bool CheckLinkCount(const std::string &file);
 public:
 	LockFile (const std::string &file);
 	~LockFile ();
-
-	bool isLocked() {
-		return locked;
-	}
 };
 
 #endif /*LIBNSS_ROLE_LOCKFILE_H_*/

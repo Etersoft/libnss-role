@@ -5,6 +5,7 @@
 #include <set>
 #include <vector>
 #include <ostream>
+#include <stdexcept>
 
 typedef std::set<gid_t> Groups;
 typedef std::vector<gid_t> Privs;

@@ -2,9 +2,9 @@ Name: libnss-role
 Version: 0.1.1
 Release: alt1
 
-Summary: NSS API library
+Summary: NSS API library and admin tools for role and privilegies
 
-License: GPL
+License: GPLv3
 URL: http://tartarus.ru/wiki/RolesAndPrivilegies
 Group: System/Libraries
 Packager: Evgeny Sinelnikov <sin@altlinux.ru>
@@ -18,7 +18,7 @@ BuildRequires: gcc-c++ glibc-devel scons
 BuildRequires: boost-devel boost-iostreams-devel boost-program-options-devel
 
 %description
-NSS API library for privilegies and roles.
+NSS API library and admin tools for privilegies and roles.
 
 %package devel
 Summary: Header for developing applications managing Roles

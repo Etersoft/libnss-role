@@ -6,23 +6,7 @@
 #include <grp.h>
 #include <errno.h>
 
-#include <stdexcept>
-
-class errno_error: public std::runtime_error
-{
-	int code;
-public:
-	explicit errno_error(std::string what, int err):
-		std::runtime_error(what), code(err) {}
-	int get_errno() { return code; }
-};
-
-class no_such_error: public std::runtime_error
-{
-public:
-	explicit no_such_error(std::string what):
-		std::runtime_error(what) {}
-};
+#include <Role/RoleError.h>
 
 class Group {
 	struct group grp;
