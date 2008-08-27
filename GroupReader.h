@@ -11,7 +11,6 @@
 class Group {
 	struct group grp;
 	std::vector<char> buf;
-	bool valid;
 
 	static const size_t grp_buf_default_size = 1024;
 	static const size_t grp_struct_size = sizeof (struct group); 

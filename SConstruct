@@ -1,5 +1,7 @@
 opts = Options()
-opts.Add('DESTDIR', 'Directory to install', '')
+opts.Add('DESTDIR', 'Directory to install', '/')
+opts.Add('DEBUG', 'Set DEBUG=yes for building with enabled debuging', 'no')
+opts.Add('NLS_SUPPORT', 'Set NLS_SUPPORT=no for building with disable gettext i18n', 'yes')
 env = Environment(options=opts)
 Help(opts.GenerateHelpText(env))
 
@@ -24,7 +26,11 @@ COMMON_SONAME = COMMON_NAME + COMMON_LIBBASESUFFIX
 COMMON_FULLNAME = COMMON_NAME + COMMON_LIBFULLSUFFIX
 COMMON_DEVNAME = COMMON_NAME + LIBDEVSUFFIX
 
-env["CCFLAGS"] = '-O2 -I.'
+env['CCFLAGS'] = ['-O2', '-I.', '-DPACKAGE=\\"nss_role\\"']
+if 'DEBUG' in ARGUMENTS and ARGUMENTS['DEBUG'] == 'yes':
+    env['CCFLAGS'] += ['-DDEBUG']
+if 'NLS_SUPPORT' not in ARGUMENTS or ARGUMENTS['NLS_SUPPORT'] != 'no':
+    env['CCFLAGS'] += ['-DENABLE_NLS', '-DLOCALEDIR=\\"/usr/share/locale\\"']
 
 libenv = env.Clone()
 libenv["SHLIBSUFFIX"] = [NSS_LIBFULLSUFFIX]
@@ -36,19 +42,20 @@ solink = libenv.Command(NSS_SONAME, so[0], 'ln -sf %s %s' % (NSS_FULLNAME, NSS_S
 commonenv = libenv.Clone()
 commonenv["SHLIBSUFFIX"] = [COMMON_LIBFULLSUFFIX]
 commonenv["LINKFLAGS"] = ['-Wl,-soname,' + COMMON_SONAME]
-commonenv["LIBS"] = ['boost_iostreams']
-commonfiles = ['LockFile.cpp', 'RoleCommon.cpp', 'RoleManager.cpp', parser, 'GroupReader.cpp', 'RoleParser.cpp', 'RoleStorage.cpp']
+commonenv["LIBS"] = ['boost_iostreams', 'pam', 'pam_misc']
+commonfiles = ['PamCheck.cpp', 'GetText.cpp', 'LockFile.cpp', 'RoleCommon.cpp', 'RoleManager.cpp', parser, 'UserReader.cpp', 'GroupReader.cpp', 'RoleParser.cpp', 'RoleStorage.cpp']
 common = commonenv.SharedLibrary(COMMON_NAME, commonfiles)
 commonlink = commonenv.Command(COMMON_SONAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_SONAME))
 commondevlink = commonenv.Command(COMMON_DEVNAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_DEVNAME))
-commonheaders = ['LockFile.h', 'RoleManager.h', 'RoleParserSimple.h', 'GroupReader.h', 'RoleParser.h', 'RoleStorage.h', 'RoleError.h']
+commonheaders = ['PamCheck.cpp', 'GetText.h', 'LockFile.h', 'RoleManager.h', 'RoleParserSimple.h', 'UserReader.h', 'GroupReader.h', 'RoleParser.h', 'RoleStorage.h', 'RoleError.h']
 
-env = env.Clone()
-env["LIBS"] = ['role','boost_program_options']
-env["LIBPATH"] = '.'
-roleadd = env.Program('roleadd', 'roleadd.cpp')
-roledel = env.Program('roledel', 'roledel.cpp')
-rolelst = env.Program('rolelst', 'rolelst.cpp')
+utilenv = env.Clone()
+utilenv["LIBS"] = ['role','boost_program_options']
+utilenv["LIBPATH"] = '.'
+
+roleadd = utilenv.Program('roleadd', 'roleadd.cpp')
+roledel = utilenv.Program('roledel', 'roledel.cpp')
+rolelst = utilenv.Program('rolelst', 'rolelst.cpp')
 
 i = commonenv.Install('$DESTDIR/usr/lib', common)
 commonenv.Alias('install', i)
@@ -59,8 +66,12 @@ commonenv.Alias('install', i)
 i = commonenv.Command('$DESTDIR/usr/lib/' + COMMON_DEVNAME, commondevlink[0], 'cp -P %s /$DESTDIR/usr/lib/%s' % (COMMON_DEVNAME, COMMON_DEVNAME))
 commonenv.Alias('install', i)
 
-i = env.Install('$DESTDIR/usr/bin', [roleadd, roledel, rolelst])
-env.Alias('install', i)
+i = utilenv.Install('$DESTDIR/usr/bin', [roleadd, roledel, rolelst])
+utilenv.Alias('install', i)
+i = utilenv.InstallAs('$DESTDIR/etc/pam.d/roleadd', 'role.pamd')
+utilenv.Alias('install', i)
+i = utilenv.InstallAs('$DESTDIR/etc/pam.d/roledel', 'role.pamd')
+utilenv.Alias('install', i)
 
 i = libenv.Install('$DESTDIR/lib', so)
 libenv.Alias('install', i)

@@ -11,7 +11,7 @@ std::ostream& operator <<(std::ostream &os, const RoleManager &manager)
 	return os << manager.roles;
 }
 
-RoleManager::RoleManager(const std::string &filename): config(filename), fd(-1), locker(config)
+RoleManager::RoleManager(const std::string &filename, const std::string &progname): config(filename), fd(-1), pamcheck(progname), locker(config)
 {
 //	fd = open(filename.c_str(), O_RDWR|O_EXCL);
 //	if (fd >= 0)

@@ -5,6 +5,7 @@
 
 #include <Role/RoleCommon.h>
 #include <Role/LockFile.h>
+#include <Role/PamCheck.h>
 
 class RoleManager;
 std::ostream& operator <<(std::ostream &os, const RoleManager &manager);
@@ -17,13 +18,14 @@ private:
 	int fd;
 	Roles roles;
 	std::string config;
+	PamCheck pamcheck;
 	LockFile locker;
 	GroupMap groupmap;
 
 	void fillGroups(Groups &groups, const PrivNames &list);
 	Privs getPrivs(const Groups &groups);
 public:
-	RoleManager(const std::string &config);
+	RoleManager(const std::string &config, const std::string &progname);
 	~RoleManager();
 
 	void Update();

@@ -3,13 +3,6 @@
 
 #include <Role/GroupReader.h>
 
-class buf_size_error: public errno_error
-{
-public:
-	explicit buf_size_error(std::string what, int err):
-		errno_error(what, errno) {}
-};
-
 Group::Group(gid_t gid):
 	buf(grp_buf_default_size)
 {
@@ -63,11 +56,11 @@ void Group::getgrnam (const std::string &name)
 	struct group* grp_ptr;
 	if (getgrnam_r(name.c_str(), &grp, buffer, len, &grp_ptr) == 0) {
 		if (errno == ERANGE)
-			throw buf_size_error("getgrgid_r: not enough space in buffer", errno);
+			throw buf_size_error("getgrnam_r: not enough space in buffer", errno);
 		else if (errno != 0)
-			throw errno_error ("getgrgid_r: error", errno);
+			throw errno_error ("getgrnam_r: error", errno);
 	}
 
 	if (!grp_ptr)
-		throw no_such_error ("getgrgid_r: no such group");
+		throw no_such_error ("getgrnam_r: no such group");
 }

@@ -1,5 +1,5 @@
 Name: libnss-role
-Version: 0.1.2
+Version: 0.1.3
 Release: alt1
 
 Summary: NSS API library and admin tools for role and privilegies
@@ -15,7 +15,7 @@ Requires(pre): chrooted >= 0.3.5-alt1 chrooted-resolv sed
 Requires(postun): chrooted >= 0.3.5-alt1 sed
 
 BuildRequires: gcc-c++ glibc-devel scons
-BuildRequires: boost-devel boost-iostreams-devel boost-program-options-devel
+BuildRequires: boost-devel boost-iostreams-devel boost-program-options-devel libpam-devel
 
 %description
 NSS API library and admin tools for privilegies and roles.
@@ -53,6 +53,7 @@ update_chrooted all
 
 %files
 %config(noreplace) %_sysconfdir/role
+%_sysconfdir/pam.d/role*
 /%_lib/libnss_*.so.*
 %_bindir/*
 %_libdir/*.so*
@@ -61,6 +62,11 @@ update_chrooted all
 %_includedir/Role
 
 %changelog
+* Wed Aug 27 2008 Evgeny Sinelnikov <sin@altlinux.ru> 0.1.3-alt1
+- Added pam support
+- Started utils i18n support
+- Added class UserReader
+
 * Fri Jul 11 2008 Evgeny Sinelnikov <sin@altlinux.ru> 0.1.2-alt1
 - Improved error handling
 

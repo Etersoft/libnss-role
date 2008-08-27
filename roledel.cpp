@@ -87,7 +87,7 @@ int main (int argc, char *argv[])
 		config = vm["config"].as<string>().c_str();
 
 	try {
-		RoleManager manager(config);
+		RoleManager manager(config, argv[0]);
 
 		manager.Update();
 
