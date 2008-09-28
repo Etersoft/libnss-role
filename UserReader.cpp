@@ -2,6 +2,7 @@
 #include <unistd.h>
 
 #include <Role/UserReader.h>
+#include <Role/GetText.h>
 
 User::User(uid_t uid):
 	buf(pwd_buf_default_size)
@@ -40,13 +41,13 @@ void User::getpwuid (uid_t uid)
 	struct passwd* pwd_ptr;
 	if (getpwuid_r(uid, &pwd, buffer, len, &pwd_ptr) == 0) {
 		if (errno == ERANGE)
-			throw buf_size_error("getpwuid_r: not enough space in buffer", errno);
+			throw buf_size_error(_("getpwuid_r: not enough space in buffer"), errno);
 		else if (errno != 0)
-			throw errno_error ("getpwuid_r: error", errno);
+			throw errno_error (_("getpwuid_r: error"), errno);
 	}
 
 	if (!pwd_ptr)
-		throw no_such_error ("getpwuid_r: no such group");
+		throw no_such_error (_("getpwuid_r: no such group"));
 }
 
 void User::getpwnam (const std::string &name)
@@ -56,11 +57,11 @@ void User::getpwnam (const std::string &name)
 	struct passwd* pwd_ptr;
 	if (getpwnam_r(name.c_str(), &pwd, buffer, len, &pwd_ptr) == 0) {
 		if (errno == ERANGE)
-			throw buf_size_error("getpwnam_r: not enough space in buffer", errno);
+			throw buf_size_error(_("getpwnam_r: not enough space in buffer"), errno);
 		else if (errno != 0)
-			throw errno_error ("getpwnam_r: error", errno);
+			throw errno_error (_("getpwnam_r: error"), errno);
 	}
 
 	if (!pwd_ptr)
-		throw no_such_error ("getpwnam_r: no such group");
+		throw no_such_error (_("getpwnam_r: no such group"));
 }

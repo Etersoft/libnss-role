@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <Role/RoleManager.h>
+#include <Role/GetText.h>
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
@@ -21,19 +22,19 @@ typedef RoleManager::PrivNames PrivNames;
 static int getOptions(int ac, char* av[])
 {
 	try {
-		po::options_description desc("Usage: roleadd [-s] ROLE [GROUPS]...");
+		po::options_description desc(_("Usage: roleadd [-s] ROLE [GROUPS]..."));
 		desc.add_options()
-			("help,h", "produce help message")
-			("set,s", "replace privileges for role");
+			("help,h", _("produce help message"))
+			("set,s", _("replace privileges for role"));
 
 		po::positional_options_description p;
 		p.add("role-name", 1).add("priv-names", -1);
 
-		po::options_description hidden("Hidden options");
+		po::options_description hidden(_("Hidden options"));
 		hidden.add_options()
-			("config,c", po::value<string>(), "config name")
-			("role-name", po::value<string>(), "role name")
-			("priv-names", po::value<PrivNames>(), "privilegies names");
+			("config,c", po::value<string>(), _("config name"))
+			("role-name", po::value<string>(), _("role name"))
+			("priv-names", po::value<PrivNames>(), _("privilegies names"));
 
 		po::options_description cmdline_options;
 		cmdline_options.add(desc).add(hidden);
@@ -49,11 +50,11 @@ static int getOptions(int ac, char* av[])
 
 	}
 	catch(exception& e) {
-		cerr << "error: " << e.what() << "\n";
+		cerr << _("option error: ") << e.what() << "\n";
 		return 1;
 	}
 	catch(...) {
-		cerr << "Exception of unknown type!\n";
+		cerr << _("Exception of unknown type!\n");
 		return 2;
 	}
 
@@ -74,6 +75,8 @@ int main (int argc, char *argv[])
 {
 	static const char *default_config = "/etc/role";
 	const char *config = default_config;
+
+	InitGetText();
 
 	int ret = getOptions(argc, argv);
 
@@ -105,11 +108,11 @@ int main (int argc, char *argv[])
 		manager.Store();
 	}
 	catch(exception& e) {
-		cerr << "error: " << e.what() << "\n";
+		cerr << _("error: ") << e.what() << "\n";
 		return 1;
 	}
 	catch(...) {
-		cerr << "Exception of unknown type!\n";
+		cerr << _("Exception of unknown type!\n");
 		return 2;
 	}
 

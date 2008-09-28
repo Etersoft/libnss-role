@@ -5,6 +5,7 @@
 #include <Role/RoleManager.h>
 #include <Role/RoleStorage.h>
 #include <Role/RoleParser.h>
+#include <Role/GetText.h>
 
 std::ostream& operator <<(std::ostream &os, const RoleManager &manager)
 {
@@ -28,13 +29,13 @@ RoleManager::~RoleManager()
 void RoleManager::Update()
 {
 	if (!RoleParser(config).Update(roles, fd))
-		throw system_error("RoleManager Parser error");
+		throw system_error(_("RoleManager Parser error"));
 }
 
 void RoleManager::Store()
 {
 	if (!RoleStorage(config).Store(roles, fd))
-		throw system_error("RoleManager Store error");
+		throw system_error(_("RoleManager Store error"));
 }
 
 Privs RoleManager::getPrivs(const Groups &groups)

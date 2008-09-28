@@ -2,6 +2,7 @@
 #include <unistd.h>
 
 #include <Role/GroupReader.h>
+#include <Role/GetText.h>
 
 Group::Group(gid_t gid):
 	buf(grp_buf_default_size)
@@ -40,13 +41,13 @@ void Group::getgrgid (gid_t gid)
 	struct group* grp_ptr;
 	if (getgrgid_r(gid, &grp, buffer, len, &grp_ptr) == 0) {
 		if (errno == ERANGE)
-			throw buf_size_error("getgrgid_r: not enough space in buffer", errno);
+			throw buf_size_error(_("getgrgid_r: not enough space in buffer"), errno);
 		else if (errno != 0)
-			throw errno_error ("getgrgid_r: error", errno);
+			throw errno_error (_("getgrgid_r: error"), errno);
 	}
 
 	if (!grp_ptr)
-		throw no_such_error ("getgrgid_r: no such group");
+		throw no_such_error (_("getgrgid_r: no such group"));
 }
 
 void Group::getgrnam (const std::string &name)
@@ -56,11 +57,11 @@ void Group::getgrnam (const std::string &name)
 	struct group* grp_ptr;
 	if (getgrnam_r(name.c_str(), &grp, buffer, len, &grp_ptr) == 0) {
 		if (errno == ERANGE)
-			throw buf_size_error("getgrnam_r: not enough space in buffer", errno);
+			throw buf_size_error(_("getgrnam_r: not enough space in buffer"), errno);
 		else if (errno != 0)
-			throw errno_error ("getgrnam_r: error", errno);
+			throw errno_error (_("getgrnam_r: error"), errno);
 	}
 
 	if (!grp_ptr)
-		throw no_such_error ("getgrnam_r: no such group");
+		throw no_such_error (_("getgrnam_r: no such group"));
 }

@@ -1,6 +1,6 @@
 Name: libnss-role
 Version: 0.1.3
-Release: alt1
+Release: alt2
 
 Summary: NSS API library and admin tools for role and privilegies
 
@@ -42,13 +42,17 @@ touch %buildroot%_sysconfdir/role
 
 %post
 %post_ldconfig
-grep -q '^group:[[:blank:]].\+role' /etc/nsswitch.conf || \
-sed -i.rpmorig 's/^\(group:[[:blank:]].\+\)$/\1 role/' /etc/nsswitch.conf
+if [ "$1" = "1" ]; then
+    grep -q '^group:[[:blank:]].\+role' /etc/nsswitch.conf || \
+    sed -i.rpmorig 's/^\(group:[[:blank:]].\+\)$/\1 role/' /etc/nsswitch.conf
+fi
 update_chrooted all
 
 %postun
 %postun_ldconfig
-sed -i -e 's/ role//' /etc/nsswitch.conf
+if [ "$1" = "0" ]; then
+    sed -i -e 's/ role//' /etc/nsswitch.conf
+fi
 update_chrooted all
 
 %files
@@ -62,6 +66,10 @@ update_chrooted all
 %_includedir/Role
 
 %changelog
+* Sun Sep 28 2008 Evgeny Sinelnikov <sin@altlinux.ru> 0.1.3-alt2
+- Fixed nsswitch.conf update scripts
+- Prepared for i18n
+
 * Wed Aug 27 2008 Evgeny Sinelnikov <sin@altlinux.ru> 0.1.3-alt1
 - Added pam support
 - Started utils i18n support

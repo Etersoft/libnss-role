@@ -47,7 +47,7 @@ PamCheck::~PamCheck()
 	retval = pam_chauthtok (pamh, 0);
 	if (retval != PAM_SUCCESS) {
 		pam_end (pamh, retval);
-		throw auth_error ("PAM chauthtok failed");
+		throw auth_error (_("PAM chauthtok failed"));
 		//fprintf (stderr, _("%s: PAM chauthtok failed\n"), Prog);
 	}
 
