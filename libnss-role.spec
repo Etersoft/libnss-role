@@ -15,7 +15,7 @@ Requires(pre): chrooted >= 0.3.5-alt1 chrooted-resolv sed
 Requires(postun): chrooted >= 0.3.5-alt1 sed
 
 BuildRequires: gcc-c++ glibc-devel scons
-BuildRequires: boost-devel boost-iostreams-devel boost-program-options-devel libpam-devel
+BuildRequires: boost-devel boost-iostreams-devel boost-program_options-devel libpam-devel
 
 %description
 NSS API library and admin tools for privilegies and roles.
