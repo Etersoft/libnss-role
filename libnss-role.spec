@@ -1,6 +1,6 @@
 Name: libnss-role
 Version: 0.1.3
-Release: alt3
+Release: alt4
 
 Summary: NSS API library and admin tools for role and privilegies
 
@@ -39,7 +39,7 @@ NSS API library for privilegies and roles.
 scons
 
 %install
-scons install DESTDIR=%buildroot
+scons install DESTDIR=%buildroot LIBDIR=%_libdir LIBSYSDIR=/%_lib
 mkdir -p %buildroot%_sysconfdir
 touch %buildroot%_sysconfdir/role
 
@@ -69,6 +69,9 @@ update_chrooted all
 %_includedir/Role
 
 %changelog
+* Wed Oct 29 2008 Evgeny Sinelnikov <sin@altlinux.ru> 0.1.3-alt4
+- Fixed libdir installation path for x86_64
+
 * Wed Oct 29 2008 Evgeny Sinelnikov <sin@altlinux.ru> 0.1.3-alt3
 - Fixed build with gcc4.3
 
