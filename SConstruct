@@ -74,8 +74,11 @@ i = utilenv.InstallAs('$DESTDIR/etc/pam.d/roleadd', 'role.pamd')
 utilenv.Alias('install', i)
 i = utilenv.InstallAs('$DESTDIR/etc/pam.d/roledel', 'role.pamd')
 utilenv.Alias('install', i)
+i = utilenv.Install('$DESTDIR/usr/share/man/man8', ['roleadd.8', 'roledel.8', 'rolelst.8'])
+utilenv.Alias('install', i)
 
 i = libenv.Install('$DESTDIR/$LIBSYSDIR', so)
 libenv.Alias('install', i)
 i = libenv.Command('$DESTDIR/$LIBSYSDIR/' + NSS_SONAME, solink[0], 'cp -P %s /$DESTDIR/$LIBSYSDIR/%s' % (NSS_SONAME, NSS_SONAME))
 libenv.Alias('install', i)
+
