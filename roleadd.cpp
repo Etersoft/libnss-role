@@ -23,7 +23,7 @@ typedef RoleManager::PrivNames PrivNames;
 static int getOptions(int ac, char* av[])
 {
 	try {
-		po::options_description desc(_("Usage: roleadd [-s] ROLE [GROUPS]..."));
+		po::options_description desc(_("Usage: roleadd [-s] ROLE [GROUP*]"));
 		desc.add_options()
 			("help,h", _("produce help message"))
 			("set,s", _("replace privileges for role"))

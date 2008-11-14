@@ -23,7 +23,7 @@ typedef vector<string> RoleNames;
 static int getOptions(int ac, char* av[])
 {
 	try {
-		po::options_description desc(_("Usage: rolelst [-i] [ROLES]..."));
+		po::options_description desc(_("Usage: rolelst [ROLE*]"));
 		desc.add_options()
 			("help,h", _("produce help message"));
 //			("ids,i", "print ids too");

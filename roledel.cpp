@@ -23,7 +23,8 @@ typedef RoleManager::PrivNames PrivNames;
 static int getOptions(int ac, char* av[])
 {
 	try {
-		po::options_description desc(_("Usage: roledel [-s] ROLE [GROUPS]..."));
+		po::options_description desc(_("Usage: roledel ROLE [GROUP*]\n"
+						"       roledel [-r] ROLE"));
 		desc.add_options()
 			("help,h", _("produce help message"))
 			("remove,r", _("remove role instead delete privilegies from it"))
