@@ -4,7 +4,7 @@
 #include <iterator>
 #include <vector>
 
-#include <RoleManager.h>
+#include <Role/RoleManager.h>
 #include <Role/GetText.h>
 #include <Role/Version.h>
 

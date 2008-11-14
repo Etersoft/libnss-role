@@ -4,7 +4,7 @@
 #include <iterator>
 #include <vector>
 
-#include <RoleParser.h>
+#include <Role/RoleParser.h>
 #include <Role/GetText.h>
 #include <Role/Version.h>
 

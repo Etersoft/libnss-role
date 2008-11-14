@@ -28,7 +28,7 @@ COMMON_SONAME = COMMON_NAME + COMMON_LIBBASESUFFIX
 COMMON_FULLNAME = COMMON_NAME + COMMON_LIBFULLSUFFIX
 COMMON_DEVNAME = COMMON_NAME + LIBDEVSUFFIX
 
-env['CCFLAGS'] = ['-O2', '-I.', '-DPACKAGE=\\"nss_role\\"']
+env['CCFLAGS'] = ['-O2', '-Iinclude', '-DPACKAGE=\\"nss_role\\"']
 if 'DEBUG' in ARGUMENTS and ARGUMENTS['DEBUG'] == 'yes':
     env['CCFLAGS'] += ['-DDEBUG']
 if 'NLS_SUPPORT' not in ARGUMENTS or ARGUMENTS['NLS_SUPPORT'] != 'no':
@@ -49,7 +49,7 @@ commonfiles = ['PamCheck.cpp', 'GetText.cpp', 'LockFile.cpp', 'RoleCommon.cpp', 
 common = commonenv.SharedLibrary(COMMON_NAME, commonfiles)
 commonlink = commonenv.Command(COMMON_SONAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_SONAME))
 commondevlink = commonenv.Command(COMMON_DEVNAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_DEVNAME))
-commonheaders = ['PamCheck.cpp', 'GetText.h', 'LockFile.h', 'RoleManager.h', 'RoleParserSimple.h', 'UserReader.h', 'GroupReader.h', 'RoleParser.h', 'RoleStorage.h', 'RoleError.h']
+commonheaders = Glob('include/Role/*.h')
 
 utilenv = env.Clone()
 utilenv["LIBS"] = ['role','boost_program_options']
@@ -59,26 +59,20 @@ roleadd = utilenv.Program('roleadd', 'roleadd.cpp')
 roledel = utilenv.Program('roledel', 'roledel.cpp')
 rolelst = utilenv.Program('rolelst', 'rolelst.cpp')
 
-i = commonenv.Install('$DESTDIR/$LIBDIR/', common)
-commonenv.Alias('install', i)
-i = commonenv.Install('$DESTDIR/usr/include/Role', commonheaders)
-commonenv.Alias('install', i)
+commonenv.Install('$DESTDIR/$LIBDIR/', common)
+commonenv.Install('$DESTDIR/usr/include/Role', commonheaders)
 i = commonenv.Command('$DESTDIR/$LIBDIR/' + COMMON_SONAME, commonlink[0], 'cp -P %s /$DESTDIR/$LIBDIR/%s' % (COMMON_SONAME, COMMON_SONAME))
 commonenv.Alias('install', i)
 i = commonenv.Command('$DESTDIR/$LIBDIR/' + COMMON_DEVNAME, commondevlink[0], 'cp -P %s /$DESTDIR/$LIBDIR/%s' % (COMMON_DEVNAME, COMMON_DEVNAME))
 commonenv.Alias('install', i)
 
-i = utilenv.Install('$DESTDIR/usr/bin', [roleadd, roledel, rolelst])
-utilenv.Alias('install', i)
-i = utilenv.InstallAs('$DESTDIR/etc/pam.d/roleadd', 'role.pamd')
-utilenv.Alias('install', i)
-i = utilenv.InstallAs('$DESTDIR/etc/pam.d/roledel', 'role.pamd')
-utilenv.Alias('install', i)
-i = utilenv.Install('$DESTDIR/usr/share/man/man8', ['roleadd.8', 'roledel.8', 'rolelst.8'])
-utilenv.Alias('install', i)
+utilenv.Install('$DESTDIR/usr/bin', [roleadd, roledel, rolelst])
+utilenv.InstallAs('$DESTDIR/etc/pam.d/roleadd', 'role.pamd')
+utilenv.InstallAs('$DESTDIR/etc/pam.d/roledel', 'role.pamd')
+utilenv.Install('$DESTDIR/usr/share/man/man8', ['roleadd.8', 'roledel.8', 'rolelst.8'])
 
-i = libenv.Install('$DESTDIR/$LIBSYSDIR', so)
-libenv.Alias('install', i)
+libenv.Install('$DESTDIR/$LIBSYSDIR', so)
 i = libenv.Command('$DESTDIR/$LIBSYSDIR/' + NSS_SONAME, solink[0], 'cp -P %s /$DESTDIR/$LIBSYSDIR/%s' % (NSS_SONAME, NSS_SONAME))
 libenv.Alias('install', i)
 
+Alias('install', FindInstalledFiles())
