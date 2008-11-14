@@ -1,0 +1,31 @@
+.TH ROLEADD "8" "November 2008" "libnss_role" "Tartarus User's Manual"
+.SH NAME
+roleadd \- Add new roles and add privileges for role
+.SH SYNOPSIS
+.B roleadd
+[\fI-s\fR] \fIROLE \fR[\fIGROUP*\fR]\fR
+.SH DESCRIPTION
+roleadd is utility allows to add privilege groups to role groups.
+This mean that all users at role group includes to all
+privileges groups which added to modified role.
+.SH OPTIONS
+.TP
+\fB\-h\fR [ \fB\-\-help\fR ]
+produce help message
+.TP
+\fB\-s\fR [ \fB\-\-set\fR ]
+replace privileges for role
+.TP
+\fB\-v\fR [ \fB\-\-version\fR ]
+print the version of roleadd being used
+.SH "SEE ALSO"
+The full documentation for
+.B roleadd
+is maintained as part of documentation of
+.B Tartarus
+project available at
+.br
+.BR http://www.tartarus.ru/Projects/libnss_role
+.PP
+.BR roledel (8),
+.BR rolelst (8),
