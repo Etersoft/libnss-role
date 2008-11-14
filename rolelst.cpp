@@ -6,6 +6,7 @@
 
 #include <RoleParser.h>
 #include <Role/GetText.h>
+#include <Role/Version.h>
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
@@ -33,7 +34,8 @@ static int getOptions(int ac, char* av[])
 		po::options_description hidden(_("Hidden options"));
 		hidden.add_options()
 			("config,c", po::value<string>(), _("config name"))
-			("role-names", po::value<RoleNames>(), _("role names"));
+			("role-names", po::value<RoleNames>(), _("role names"))
+			("version,v", _("print the version of rolelst being used"));
 
 		po::options_description cmdline_options;
 		cmdline_options.add(desc).add(hidden);
@@ -44,6 +46,11 @@ static int getOptions(int ac, char* av[])
 
 		if (vm.count("help")) {
 			cout << desc << "\n";
+			return 0;
+		}
+
+		if (vm.count("version")) {
+			cout << "rolelst is utility for libnss_role version " << VERSION << "\n";
 			return 0;
 		}
 
@@ -72,7 +79,7 @@ int main (int argc, char *argv[])
 	if (ret != 0)
 		return ret;
 
-	if (vm.count("help"))
+	if (vm.count("help") || vm.count("version"))
 		return 0;
 
 	if (vm.count("config"))

@@ -6,6 +6,7 @@
 
 #include <RoleManager.h>
 #include <Role/GetText.h>
+#include <Role/Version.h>
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
@@ -25,7 +26,8 @@ static int getOptions(int ac, char* av[])
 		po::options_description desc(_("Usage: roledel [-s] ROLE [GROUPS]..."));
 		desc.add_options()
 			("help,h", _("produce help message"))
-			("remove,r", _("remove role instead delete privilegies from it"));
+			("remove,r", _("remove role instead delete privilegies from it"))
+			("version,v", _("print the version of roledel being used"));
 
 		po::positional_options_description p;
 		p.add("role-name", 1).add("priv-names", -1);
@@ -45,6 +47,11 @@ static int getOptions(int ac, char* av[])
 
 		if (vm.count("help")) {
 			cout << desc << "\n";
+			return 0;
+		}
+
+		if (vm.count("version")) {
+			cout << "roledel is utility for libnss_role version " << VERSION << "\n";
 			return 0;
 		}
 
@@ -83,7 +90,7 @@ int main (int argc, char *argv[])
 	if (ret != 0)
 		return ret;
 
-	if (vm.count("help"))
+	if (vm.count("help") || vm.count("version"))
 		return 0;
 
 	if (vm.count("config"))

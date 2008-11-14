@@ -1,0 +1,6 @@
+#ifndef LIBNSS_ROLE_VERSION_H_
+#define LIBNSS_ROLE_VERSION_H_
+
+#define VERSION "0.1.3"
+
+#endif /*LIBNSS_ROLE_VERSION_H_*/
