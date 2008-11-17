@@ -22,7 +22,7 @@ private:
 	LockFile locker;
 	GroupMap groupmap;
 
-	void fillGroups(Groups &groups, const PrivNames &list);
+	void fillGroups(Groups &groups, const PrivNames &list, bool skip = false);
 	Privs getPrivs(const Groups &groups);
 public:
 	RoleManager(const std::string &config, const std::string &progname);
@@ -31,9 +31,9 @@ public:
 	void Update();
 	void Store();
 
-	void Add(const std::string &name, const PrivNames &list);
-	void Set(const std::string &name, const PrivNames &list);
-	void Delete(const std::string &name, const PrivNames &list);
+	void Add(const std::string &name, const PrivNames &list, bool skip = false);
+	void Set(const std::string &name, const PrivNames &list, bool skip = false);
+	void Delete(const std::string &name, const PrivNames &list, bool skip = false);
 	void Remove(const std::string &name);
 
 	friend std::ostream& operator <<(std::ostream &os, const RoleManager &manager);

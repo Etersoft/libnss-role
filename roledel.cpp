@@ -28,6 +28,7 @@ static int getOptions(int ac, char* av[])
 		desc.add_options()
 			("help,h", _("produce help message"))
 			("remove,r", _("remove role instead delete privilegies from it"))
+			("skip-missed,m", _("skipping for missed privilegies instead error"))
 			("version,v", _("print the version of roledel being used"));
 
 		po::positional_options_description p;
@@ -83,6 +84,7 @@ int main (int argc, char *argv[])
 {
 	static const char *default_config = "/etc/role";
 	const char *config = default_config;
+	bool skip = false;
 
 	InitGetText();
 
@@ -97,12 +99,19 @@ int main (int argc, char *argv[])
 	if (vm.count("config"))
 		config = vm["config"].as<string>().c_str();
 
+	if (vm.count("skip-missed"))
+		skip = true;
+
 	try {
 		RoleManager manager(config, argv[0]);
 
 		manager.Update();
 
 		PrivNames privs;
+
+		if (!vm.count("role-name"))
+			throw (system_error(_("Role not defined")));
+
 		string name = vm["role-name"].as<string>();
 
 		if (vm.count("priv-names"))
@@ -111,12 +120,12 @@ int main (int argc, char *argv[])
 		if (vm.count("remove"))
 			manager.Remove(name);
 		else
-			manager.Delete(name, privs);
+			manager.Delete(name, privs, skip);
 
 		manager.Store();
 	}
 	catch(exception& e) {
-		cerr << _("error: ") << e.what() << "\n";
+		cerr << _("roledel: ") << e.what() << std::endl;
 		return 1;
 	}
 	catch(...) {

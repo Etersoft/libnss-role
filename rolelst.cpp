@@ -108,7 +108,7 @@ int main (int argc, char *argv[])
 			cout << roles;
 	}
 	catch(exception& e) {
-		cerr << _("error: ") << e.what() << "\n";
+		cerr << _("rolelst: ") << e.what() << std::endl;
 		return 1;
 	}
 	catch(...) {

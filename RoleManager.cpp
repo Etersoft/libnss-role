@@ -7,6 +7,8 @@
 #include <Role/RoleParser.h>
 #include <Role/GetText.h>
 
+#include <sstream>
+
 std::ostream& operator <<(std::ostream &os, const RoleManager &manager)
 {
 	return os << manager.roles;
@@ -43,7 +45,7 @@ Privs RoleManager::getPrivs(const Groups &groups)
 	return Privs(groups.begin(), groups.end());
 }
 
-void RoleManager::fillGroups(Groups &groups, const PrivNames &list)
+void RoleManager::fillGroups(Groups &groups, const PrivNames &list, bool skip)
 {
 	for (PrivNames::const_iterator i = list.begin(); i != list.end(); i++)
 	{
@@ -51,18 +53,23 @@ void RoleManager::fillGroups(Groups &groups, const PrivNames &list)
 		try {
 			id = groupmap[*i];
 		} catch(...) {
+			if (!skip) {
+				std::ostringstream buf;
+				buf << _("group ") << *i << _(" does not exist");
+				throw system_error(buf.str());
+			}
 			continue;
 		}
 		groups.insert(id);
 	}
 }
 
-void RoleManager::Add(const std::string &name, const PrivNames &list)
+void RoleManager::Add(const std::string &name, const PrivNames &list, bool skip)
 {
 	Groups groups;
 	gid_t gid = groupmap[name];
 
-	fillGroups(groups, list);
+	fillGroups(groups, list, skip);
 
 	Roles::iterator curr = roles.find(gid);
 	if (curr != roles.end()) {
@@ -74,21 +81,21 @@ void RoleManager::Add(const std::string &name, const PrivNames &list)
 	roles[gid] = getPrivs(groups);
 }
 
-void RoleManager::Set(const std::string &name, const PrivNames &list)
+void RoleManager::Set(const std::string &name, const PrivNames &list, bool skip)
 {
 	Groups groups;
 	gid_t gid = groupmap[name];
 
-	fillGroups(groups, list);
+	fillGroups(groups, list, skip);
 	roles[gid] = getPrivs(groups);
 }
 
-void RoleManager::Delete(const std::string &name, const PrivNames &list)
+void RoleManager::Delete(const std::string &name, const PrivNames &list, bool skip)
 {
 	Groups groups;
 	gid_t gid = groupmap[name];
 
-	fillGroups(groups, list);
+	fillGroups(groups, list, skip);
 
 	Roles::iterator curr = roles.find(gid);
 	if (curr != roles.end()) {
