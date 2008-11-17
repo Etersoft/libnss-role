@@ -3,7 +3,7 @@
 roledel \- Delete roles and remove priviledges from role
 .SH SYNOPSIS
 .B roledel
-\fIROLE \fR[\fIGROUP*\fR]\fR
+[\fI-m\fR] \fIROLE \fR[\fIGROUP*\fR]\fR
 
 .B roledel
 [\fI-r\fR] \fIROLE\fR
@@ -19,6 +19,9 @@ produce help message
 \fB\-r\fR [ \fB\-\-remove\fR ]
 remove role instead delete privilegies from it
 .TP
+\fB\-m\fR [ \fB\-\-skip\-missed\fR ]
+skipping for missed privilegies instead error
+.TP
 \fB\-v\fR [ \fB\-\-version\fR ]
 print the version of roledel being used
 .SH "SEE ALSO"
@@ -28,7 +31,7 @@ is maintained as part of documentation of
 .B Tartarus
 project available at:
 .br
-.BR http://www.tartarus.ru/Projects/libnss_role
+.BR http://www.tartarus.ru/wiki/Projects/libnss_role
 .PP
 .BR roleadd (8),
 .BR rolelst (8),
