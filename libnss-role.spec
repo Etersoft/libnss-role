@@ -62,6 +62,7 @@ update_chrooted all
 %config(noreplace) %_sysconfdir/role
 %_sysconfdir/pam.d/role*
 /%_lib/libnss_*.so.*
+%_sbindir/*
 %_bindir/*
 %_libdir/*.so*
 %_man8dir/*
