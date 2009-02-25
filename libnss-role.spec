@@ -44,16 +44,29 @@ mkdir -p %buildroot%_sysconfdir
 touch %buildroot%_sysconfdir/role
 
 %post
-%post_ldconfig
 if [ "$1" = "1" ]; then
-    grep -q '^group:[[:blank:]].\+role' /etc/nsswitch.conf || \
+    DETECTED=0
+    POOL=`grep '^group:[[:blank:]].' /etc/nsswitch.conf`
+    for i in $POOL
+    do
+        [ "$i" == "role" ] && DETECTED=1
+    done
+
+    [ "$DETECTED" == 1 ] || \
     sed -i.rpmorig 's/^\(group:[[:blank:]].\+\)$/\1 role/' /etc/nsswitch.conf
 fi
 update_chrooted all
 
 %postun
-%postun_ldconfig
 if [ "$1" = "0" ]; then
+    DETECTED=0
+    POOL=`grep '^group:[[:blank:]].' /etc/nsswitch.conf`
+    for i in $POOL
+    do
+        [ "$i" == "role" ] && DETECTED=1
+    done
+
+    [ "$DETECTED" == 1 ] && \
     sed -i -e 's/ role//' /etc/nsswitch.conf
 fi
 update_chrooted all
