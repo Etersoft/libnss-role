@@ -1,11 +1,11 @@
 Name: libnss-role
 Version: 0.1.6
-Release: alt1
+Release: alt2
 
 Summary: NSS API library and admin tools for role and privilegies
 
 License: GPLv3
-URL: http://tartarus.ru/wiki/Projects/libnss_role
+URL: http://tartarus.ru/projects/show/libnss-role
 Group: System/Libraries
 Packager: Evgeny Sinelnikov <sin@altlinux.ru>
 
@@ -45,29 +45,18 @@ touch %buildroot%_sysconfdir/role
 
 %post
 if [ "$1" = "1" ]; then
-    DETECTED=0
-    POOL=`grep '^group:[[:blank:]].' /etc/nsswitch.conf`
-    for i in $POOL
-    do
-        [ "$i" == "role" ] && DETECTED=1
-    done
-
-    [ "$DETECTED" == 1 ] || \
-    sed -i.rpmorig 's/^\(group:[[:blank:]].\+\)$/\1 role/' /etc/nsswitch.conf
+    grep -q '^group:[[:blank:]]*\(.\+[[:blank:]]\+\)*role\($\|[[:blank:]]\)' \
+        /etc/nsswitch.conf || \
+    sed -i.rpmorig -e 's/^\(group:.\+\)$/\1 role/g' \
+        /etc/nsswitch.conf
 fi
 update_chrooted all
 
 %postun
 if [ "$1" = "0" ]; then
-    DETECTED=0
-    POOL=`grep '^group:[[:blank:]].' /etc/nsswitch.conf`
-    for i in $POOL
-    do
-        [ "$i" == "role" ] && DETECTED=1
-    done
-
-    [ "$DETECTED" == 1 ] && \
-    sed -i -e 's/ role//' /etc/nsswitch.conf
+    sed -i -e 's/^group:role/group:/g' \
+           -e 's/^\(group:\)\(.\+[[:blank:]]*\)*[[:blank:]]\+role\($\|[[:blank:]].*\)$/\1\2\3/g' \
+        /etc/nsswitch.conf
 fi
 update_chrooted all
 
@@ -84,6 +73,11 @@ update_chrooted all
 %_includedir/Role
 
 %changelog
+* Thu Feb 26 2009 Evgeny Sinelnikov <sin@altlinux.ru> 0.1.6-alt2
+- Remove post_ldconfig and postun_ldconfig
+- Fixed potential problem in sections post and postun (#18984)
+- Adjusted project URL
+
 * Thu Dec 11 2008 Evgeny Sinelnikov <sin@altlinux.ru> 0.1.6-alt1
 - Fixed install directory for system tools
 - Fixed manuals
