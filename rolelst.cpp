@@ -3,7 +3,9 @@
 #include <fstream>
 #include <iterator>
 #include <vector>
+#include <cstring>
 
+#include <Role/RoleError.h>
 #include <Role/RoleParser.h>
 #include <Role/GetText.h>
 #include <Role/Version.h>
@@ -106,6 +108,10 @@ int main (int argc, char *argv[])
 			}
 		} else
 			cout << roles;
+	}
+	catch(errno_error& e) {
+		cerr << _("roleadd: ") << e.what() << ": " << std::strerror(e.get_errno()) << std::endl;
+		return 1;
 	}
 	catch(exception& e) {
 		cerr << _("rolelst: ") << e.what() << std::endl;

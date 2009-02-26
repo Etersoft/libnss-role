@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iterator>
 #include <vector>
+#include <cstring>
 
 #include <Role/RoleManager.h>
 #include <Role/GetText.h>
@@ -123,6 +124,10 @@ int main (int argc, char *argv[])
 			manager.Delete(name, privs, skip);
 
 		manager.Store();
+	}
+	catch(errno_error& e) {
+		cerr << _("roleadd: ") << e.what() << ": " << std::strerror(e.get_errno()) << std::endl;
+		return 1;
 	}
 	catch(exception& e) {
 		cerr << _("roledel: ") << e.what() << std::endl;

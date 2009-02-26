@@ -39,7 +39,7 @@ void User::getpwuid (uid_t uid)
 	size_t len = buf.capacity();
 	char *buffer = &buf[0];
 	struct passwd* pwd_ptr;
-	if (getpwuid_r(uid, &pwd, buffer, len, &pwd_ptr) == 0) {
+	if (getpwuid_r(uid, &pwd, buffer, len, &pwd_ptr) != 0) {
 		if (errno == ERANGE)
 			throw buf_size_error(_("getpwuid_r: not enough space in buffer"), errno);
 		else if (errno != 0)
@@ -55,7 +55,7 @@ void User::getpwnam (const std::string &name)
 	size_t len = buf.capacity();
 	char *buffer = &buf[0];
 	struct passwd* pwd_ptr;
-	if (getpwnam_r(name.c_str(), &pwd, buffer, len, &pwd_ptr) == 0) {
+	if (getpwnam_r(name.c_str(), &pwd, buffer, len, &pwd_ptr) != 0) {
 		if (errno == ERANGE)
 			throw buf_size_error(_("getpwnam_r: not enough space in buffer"), errno);
 		else if (errno != 0)

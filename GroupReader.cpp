@@ -39,7 +39,7 @@ void Group::getgrgid (gid_t gid)
 	size_t len = buf.capacity();
 	char *buffer = &buf[0];
 	struct group* grp_ptr;
-	if (getgrgid_r(gid, &grp, buffer, len, &grp_ptr) == 0) {
+	if (getgrgid_r(gid, &grp, buffer, len, &grp_ptr) != 0) {
 		if (errno == ERANGE)
 			throw buf_size_error(_("getgrgid_r: not enough space in buffer"), errno);
 		else if (errno != 0)
@@ -55,7 +55,7 @@ void Group::getgrnam (const std::string &name)
 	size_t len = buf.capacity();
 	char *buffer = &buf[0];
 	struct group* grp_ptr;
-	if (getgrnam_r(name.c_str(), &grp, buffer, len, &grp_ptr) == 0) {
+	if (getgrnam_r(name.c_str(), &grp, buffer, len, &grp_ptr) != 0) {
 		if (errno == ERANGE)
 			throw buf_size_error(_("getgrnam_r: not enough space in buffer"), errno);
 		else if (errno != 0)
