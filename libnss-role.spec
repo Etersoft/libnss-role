@@ -1,6 +1,6 @@
 Name: libnss-role
 Version: 0.1.6
-Release: alt2
+Release: alt3
 
 Summary: NSS API library and admin tools for role and privilegies
 
@@ -15,9 +15,9 @@ Requires(pre): chrooted >= 0.3.5-alt1 chrooted-resolv sed
 Requires(postun): chrooted >= 0.3.5-alt1 sed
 
 BuildRequires: gcc-c++ glibc-devel scons
-BuildRequires: boost-devel >= 1:1.36.0
-BuildRequires: boost-iostreams-devel >= 1:1.36.0
-BuildRequires: boost-program-options-devel >= 1:1.36.0
+BuildRequires: boost-devel >= 1:1.39.0
+BuildRequires: boost-iostreams-devel >= 1:1.39.0
+BuildRequires: boost-program-options-devel >= 1:1.39.0
 BuildRequires: libpam-devel
 
 %description
@@ -73,6 +73,11 @@ update_chrooted all
 %_includedir/Role
 
 %changelog
+* Sat Jun 27 2009 Evgeny Sinelnikov <sin@altlinux.ru> 0.1.6-alt3
+- Build with boost-1.39.0
+- Fixed bug with local user and group reading
+- Improve error handling
+
 * Thu Feb 26 2009 Evgeny Sinelnikov <sin@altlinux.ru> 0.1.6-alt2
 - Remove post_ldconfig and postun_ldconfig
 - Fixed potential problem in sections post and postun (#18984)
