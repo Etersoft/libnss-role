@@ -38,7 +38,7 @@ libenv = env.Clone()
 libenv["SHLIBSUFFIX"] = [NSS_LIBFULLSUFFIX]
 libenv["LINKFLAGS"] = ['-Wl,-soname,' + NSS_SONAME]
 parser = libenv.SharedObject('RoleParserSimple', 'RoleParserSimple.cpp')
-so = libenv.SharedLibrary(NSS_NAME, ['nss_role.cpp', parser])
+so = libenv.SharedLibrary(NSS_NAME, ['nss_role.c', parser])
 solink = libenv.Command(NSS_SONAME, so[0], 'ln -sf %s %s' % (NSS_FULLNAME, NSS_SONAME))
 
 commonenv = libenv.Clone()
@@ -66,8 +66,7 @@ commonenv.Alias('install', i)
 i = commonenv.Command('$DESTDIR/$LIBDIR/' + COMMON_DEVNAME, commondevlink[0], 'cp -P %s /$DESTDIR/$LIBDIR/%s' % (COMMON_DEVNAME, COMMON_DEVNAME))
 commonenv.Alias('install', i)
 
-utilenv.Install('$DESTDIR/usr/sbin', [roleadd, roledel])
-utilenv.Install('$DESTDIR/usr/bin', [rolelst])
+utilenv.Install('$DESTDIR/usr/bin', [roleadd, roledel, rolelst])
 utilenv.InstallAs('$DESTDIR/etc/pam.d/roleadd', 'role.pamd')
 utilenv.InstallAs('$DESTDIR/etc/pam.d/roledel', 'role.pamd')
 utilenv.Install('$DESTDIR/usr/share/man/man8', ['roleadd.8', 'roledel.8', 'rolelst.8'])
