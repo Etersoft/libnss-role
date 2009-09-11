@@ -214,7 +214,6 @@ static int dfs(struct graph *G, gid_t v, group_collector *col)
 		return result;
 	}
 
-	//printf("after find %llu\n", v);
 	if (G->used[i])
 		return OK;
 	result = ver_add(col, v);
@@ -223,9 +222,7 @@ static int dfs(struct graph *G, gid_t v, group_collector *col)
 	G->used[i] = 1;
 
 	for(j = 0; j < G->gr[i].size; j++) {
-	//	printf("    dfs: %d %llu \n", j, v);
 		result = dfs(G, G->gr[i].list[j], col);
-	//	printf("    result: %d %llu\n", result, v);
 		if (result != OK && result != NO_SUCH_GROUP)
 			return result;
 	}
@@ -360,32 +357,3 @@ libnss_role_out:
 	pthread_mutex_unlock(&mutex);
 	return ret;
 }
-
-
-/*int main(void)
-{
-	struct graph G = {0, 0, 0, 10};
-	group_collector col = {0, 0, 0, 10};
-	col.list = (gid_t *) malloc(sizeof(gid_t) * col.capacity);
-	int i;
-	G.gr = malloc(sizeof(struct ver) * G.capacity);
-	reading("/etc/role", &G);
-	G.used = (int *) malloc(sizeof(int) * G.capacity);
-	memset(G.used, 0, sizeof(int) * G.capacity);
-
-	for(i = 0; i < G.size; i++) {
-		int j;
-		printf("%llu: ", G.gr[i].gid);
-		for(j = 0; j < G.gr[i].size; j++)
-			printf("%llu, ", G.gr[i].list[j]);
-		printf("\n");
-	}
-	dfs(&G, 514, &col);
-	for(i = 0; i < col.size; i++)
-		printf("%llu ", col.list[i]);
-	printf("\n");
-	free(col.list);
-	free_all(&G);
-
-	return 0;
-}*/
