@@ -258,20 +258,103 @@ enum nss_status _nss_role_initgroups_dyn (char *user, gid_t main_group, long int
 	pthread_mutex_lock(&mutex);
 
 	struct graph G = {0, 0, 0, 10};
-	int i;
-	group_collector col = {0, 0, 0, 10};
-	col.list = (int *) malloc(sizeof(int) * col.capacity);
+	int i, result;
+	group_collector col = {0, 0, 0, 10}, ans = {0, 0, 0, 10};
+
+	col.list = (gid_t *) malloc(sizeof(gid_t) * col.capacity);
+	if (!col.list) {
+		*errnop = ENOMEM;
+		ret =  NSS_STATUS_NOTFOUND;
+		goto libnss_role_out;
+	}
 
 	G.gr = (struct ver *) malloc(sizeof(struct ver) * G.capacity);
-	reading("/etc/role", &G);
+	if (!G.gr) {
+		*errnop = ENOMEM;
+		ret = NSS_STATUS_NOTFOUND;
+		goto libnss_role_out;
+	}
+
+	result = reading("/etc/role", &G);
+	if (result != OK) {
+		if (result == MEMORY_ERROR) {
+			*errnop = ENOMEM;
+			ret =  NSS_STATUS_NOTFOUND;
+		} else
+			ret = NSS_STATUS_UNAVAIL;
+		goto libnss_role_out;
+	}
+
 	G.used = (int *) malloc(sizeof(int) * G.capacity);
+	if (!G.used) {
+		*errnop = ENOMEM;
+		ret = NSS_STATUS_NOTFOUND;
+		goto libnss_role_out;
+	}
 	memset(G.used, 0, sizeof(int) * G.capacity);
 
-	dfs(&G, main_group, &col);
-	for(i = 0; i < *start; i++)
-		dfs(&G, (*groups)[i], &col);
+	result = dfs(&G, main_group, &col);
+	if (result == MEMORY_ERROR) {
+		*errnop = ENOMEM;
+		ret = NSS_STATUS_NOTFOUND;
+		goto libnss_role_out;
+	}
 
-out:
+	for(i = 0; i < *start; i++) {
+		result = dfs(&G, (*groups)[i], &col);
+		if (result == MEMORY_ERROR) {
+			*errnop = ENOMEM;
+			ret = NSS_STATUS_NOTFOUND;
+			goto libnss_role_out;
+		}
+	}
+
+	ans.list = (gid_t *) malloc(sizeof(gid_t) * ans.capacity);
+	if (!ans.list) {
+		*errnop = ENOMEM;
+		ret = NSS_STATUS_NOTFOUND;
+		goto libnss_role_out;
+	}
+
+	for(i = 0; i < col.size; i++) {
+		int exist = 0, j;
+		for(j = 0; j < *start; j++) {
+			if ((*groups)[j] == col.list[i]) {
+				exist = 1;
+				break;
+			}
+		}
+		if (main_group == col.list[i])
+			exist = 1;
+		for(j = 0; j < ans.size; j++) {
+			if (ans.list[j] == col.list[i]) {
+				exist = 1;
+				break;
+			}
+		}
+
+		if (exist)
+			continue;
+
+		result = ver_add(&ans, col.list[i]);
+		if (result != OK) {
+			*errnop = ENOMEM;
+			ret = NSS_STATUS_NOTFOUND;
+			goto libnss_role_out;
+		}
+	}
+
+	if (*start + col.size > *size) {
+		if (!realloc_groups(&size, &groups, limit)) {
+			*errnop = ENOMEM;
+			goto libnss_role_out;
+		}
+	}
+
+	for(i = 0; i < ans.size; i++)
+		(*groups)[(*start)++] = ans.list[i];
+
+libnss_role_out:
 	free(col.list);
 	free_all(&G);
 	pthread_mutex_unlock(&mutex);
@@ -279,11 +362,11 @@ out:
 }
 
 
-int main(void)
+/*int main(void)
 {
 	struct graph G = {0, 0, 0, 10};
 	group_collector col = {0, 0, 0, 10};
-	col.list = (int *) malloc(sizeof(int) * col.capacity);
+	col.list = (gid_t *) malloc(sizeof(gid_t) * col.capacity);
 	int i;
 	G.gr = malloc(sizeof(struct ver) * G.capacity);
 	reading("/etc/role", &G);
@@ -305,4 +388,4 @@ int main(void)
 	free_all(&G);
 
 	return 0;
-}
+}*/
