@@ -1,5 +1,5 @@
 Name: libnss-role
-Version: 0.1.6
+Version: 0.2.0
 Release: alt1
 
 Summary: NSS API library and admin tools for role and privilegies
@@ -7,7 +7,7 @@ Summary: NSS API library and admin tools for role and privilegies
 License: GPLv3
 URL: http://tartarus.ru/wiki/Projects/libnss_role
 Group: System/Libraries
-Packager: Evgeny Sinelnikov <sin@altlinux.ru>
+Packager: Pavel Shilovsky <piastry@altlinux.ru>
 
 Source: %name-%version.tar
 
@@ -71,6 +71,10 @@ update_chrooted all
 %_includedir/Role
 
 %changelog
+* Fri Sep 11 2009 Pavel Shilovsky <piastry@altlinux.org> 0.2.0-alt1
+- Implemented module on C language
+- Added work with gids
+
 * Thu Dec 11 2008 Evgeny Sinelnikov <sin@altlinux.ru> 0.1.6-alt1
 - Fixed install directory for system tools
 - Fixed manuals
