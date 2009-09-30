@@ -35,29 +35,52 @@ struct graph {
 	int capacity;
 };
 
-static gid_t get_gid(char *, gid_t *);
+static int get_gid(char *, gid_t *);
 
 static int graph_add(struct graph *G, struct ver v)
 {
-	G->gr[G->size++] = v;
 	if (G->size == G->capacity) {
-		G->capacity *= 2;
+		G->capacity <<= 1;
 		G->gr = (struct ver *) realloc(G->gr, sizeof(struct ver) * G->capacity);
 		if (!G->gr)
 			return MEMORY_ERROR;
 	}
+	G->gr[G->size++] = v;
 	return OK;
 }
 
 static int ver_add(struct ver *v, gid_t g)
 {
-	v->list[v->size++] = g;
 	if (v->size == v->capacity) {
-		v->capacity *= 2;
+		v->capacity <<= 1;
 		v->list = (gid_t *) realloc(v->list, sizeof(gid_t) * v->capacity);
 		if (!v->list)
 			return MEMORY_ERROR;
 	}
+	v->list[v->size++] = g;
+	return OK;
+}
+
+static int graph_init(struct graph *G)
+{
+	G->gr = (struct ver *) malloc(sizeof(struct ver) * G->capacity);
+	if (!G->gr)
+		return MEMORY_ERROR;
+
+	G->used = (int *) malloc(sizeof(int) * G->capacity);
+	if (!G->used)
+		return MEMORY_ERROR;
+
+	memset(G->used, 0, sizeof(int) * G->capacity);
+	return OK;
+}
+
+static int ver_init(struct ver *v)
+{
+	v->list = (gid_t *) malloc(sizeof(gid_t) * v->capacity);
+	if (!v->list)
+		return MEMORY_ERROR;
+
 	return OK;
 }
 
@@ -88,23 +111,14 @@ static void free_all(struct graph *G)
 	free(G->used);
 }
 
-static int realloc_groups(long int **size, gid_t ***groups, long int limit)
+static int realloc_groups(long int **size, gid_t ***groups, long int new_size)
 {
-	long int new_size;
 	gid_t *new_groups;
-
-	new_size = 2 * (**size);
-	if (limit > 0) {
-		if (**size == limit)
-			return 0;
-
-		if (new_size > limit)
-			new_size = limit;
-	}
 
 	new_groups = (gid_t *)
 		realloc((**groups),
 			new_size * sizeof(***groups));
+
 	if (!new_groups)
 		return MEMORY_ERROR;
 
@@ -121,10 +135,10 @@ static int parse_line(char *s, struct graph *G)
 	int i;
 	struct group_name role_name = {{0}, 0};
 	struct ver role = {0, 0, 0, 10};
-	role.list = (gid_t *) malloc(sizeof(gid_t) * role.capacity);
 
-	if (!role.list)
-		return MEMORY_ERROR;
+	result = ver_init(&role);
+	if (result != OK)
+		return result;
 
 	for(i = 0; i < len; i++) {
 		if (s[i] == ':') {
@@ -136,7 +150,7 @@ static int parse_line(char *s, struct graph *G)
 
 	result = get_gid(role_name.name, &role.gid);
 	if (result != OK)
-		return result;
+		goto libnss_role_parse_line_error;
 
 	while(1) {
 		struct group_name gr_name = {{0}, 0};
@@ -153,27 +167,41 @@ static int parse_line(char *s, struct graph *G)
 
 		result = get_gid(gr_name.name, &gr);
 		if (result != OK && result != NO_SUCH_GROUP)
-			return result;
+			goto libnss_role_parse_line_error;
 		else if (result == NO_SUCH_GROUP)
 			continue;
 
 		result = ver_add(&role, gr);
 		if (result != OK)
-			return result;
+			goto libnss_role_parse_line_error;
 	}
 
 	result = graph_add(G, role);
+	if (result != OK)
+		goto libnss_role_parse_line_error;
+	return result;
+
+libnss_role_parse_line_error:
+	free(role.list);
 	return result;
 }
 
 static int reading(char *s, struct graph *G)
 {
 	int result;
-	FILE *f = fopen(s, "r");
+	FILE *f = NULL;
 	unsigned long len = STR_min_size;
-	char *str = malloc(len * sizeof(char));
+	char *str = NULL;
 	unsigned long id = 0;
 	char c;
+
+	f = fopen(s, "r");
+	if (!f)
+		goto libnss_role_reading_out;
+
+	str = malloc(len * sizeof(char));
+	if (!str)
+		goto libnss_role_reading_close;
 
 	while(1) {
 		c = fgetc(f);
@@ -183,25 +211,32 @@ static int reading(char *s, struct graph *G)
 			str[id] = '\0';
 			result = parse_line(str, G);
 			if (result != OK)
-				return result;
+				goto libnss_role_reading_close;
 			id = 0;
 			continue;
 		}
 		str[id++] = c;
 		if (id == len) {
-			len *= 2;
+			len <<= 1;
 			str = realloc(str, len * sizeof(char));
-			if (!str)
-				return MEMORY_ERROR;
+			if (!str) {
+				result = MEMORY_ERROR;
+				goto libnss_role_reading_close;
+			}
 		}
 	}
 	if (id) {
 		str[id] = '\0';
 		result = parse_line(str, G);
 		if (result != OK)
-			return result;
+			goto libnss_role_reading_close;
 	}
-	return OK;
+	
+libnss_role_reading_close:
+	fclose(f);
+libnss_role_reading_out:
+	free(str);
+	return result;
 }
 
 static int dfs(struct graph *G, gid_t v, group_collector *col)
@@ -229,9 +264,9 @@ static int dfs(struct graph *G, gid_t v, group_collector *col)
 	return OK;
 }
 
-static gid_t get_gid(char *gr_name, gid_t *ans)
+static int get_gid(char *gr_name, gid_t *ans)
 {
-	if (isalpha(gr_name[0])) {
+	if (!isdigit(gr_name[0])) {
 		struct group grp, *grp_ptr;
 		char buffer[1000];
 		if (getgrnam_r(gr_name, &grp, buffer, 1000, &grp_ptr) == 0) {
@@ -245,11 +280,16 @@ static gid_t get_gid(char *gr_name, gid_t *ans)
 		*ans = grp.gr_gid;
 		return OK;
 	}
-	*ans = (gid_t) atoi(gr_name);
+
+	if (sscanf(gr_name, "%u", ans) < 1)
+		return UNKNOWN_ERROR;
+
 	return OK;
 }
 
-enum nss_status _nss_role_initgroups_dyn (char *user, gid_t main_group, long int *start, long int *size, gid_t **groups, long int limit, int *errnop)
+enum nss_status _nss_role_initgroups_dyn(char *user, gid_t main_group,
+		long int *start, long int *size, gid_t **groups,
+		long int limit, int *errnop)
 {
 	enum nss_status ret = NSS_STATUS_SUCCESS;
 	pthread_mutex_lock(&mutex);
@@ -258,15 +298,8 @@ enum nss_status _nss_role_initgroups_dyn (char *user, gid_t main_group, long int
 	int i, result;
 	group_collector col = {0, 0, 0, 10}, ans = {0, 0, 0, 10};
 
-	col.list = (gid_t *) malloc(sizeof(gid_t) * col.capacity);
-	if (!col.list) {
-		*errnop = ENOMEM;
-		ret =  NSS_STATUS_NOTFOUND;
-		goto libnss_role_out;
-	}
-
-	G.gr = (struct ver *) malloc(sizeof(struct ver) * G.capacity);
-	if (!G.gr) {
+	result = graph_init(&G);
+	if (result != OK) {
 		*errnop = ENOMEM;
 		ret = NSS_STATUS_NOTFOUND;
 		goto libnss_role_out;
@@ -282,13 +315,12 @@ enum nss_status _nss_role_initgroups_dyn (char *user, gid_t main_group, long int
 		goto libnss_role_out;
 	}
 
-	G.used = (int *) malloc(sizeof(int) * G.capacity);
-	if (!G.used) {
+	result = ver_init(&col);
+	if (result != OK) {
 		*errnop = ENOMEM;
 		ret = NSS_STATUS_NOTFOUND;
 		goto libnss_role_out;
 	}
-	memset(G.used, 0, sizeof(int) * G.capacity);
 
 	result = dfs(&G, main_group, &col);
 	if (result == MEMORY_ERROR) {
@@ -306,8 +338,8 @@ enum nss_status _nss_role_initgroups_dyn (char *user, gid_t main_group, long int
 		}
 	}
 
-	ans.list = (gid_t *) malloc(sizeof(gid_t) * ans.capacity);
-	if (!ans.list) {
+	result = ver_init(&ans);
+	if (result != OK) {
 		*errnop = ENOMEM;
 		ret = NSS_STATUS_NOTFOUND;
 		goto libnss_role_out;
@@ -341,9 +373,12 @@ enum nss_status _nss_role_initgroups_dyn (char *user, gid_t main_group, long int
 		}
 	}
 
-	if (*start + col.size > *size) {
-		if (!realloc_groups(&size, &groups, limit)) {
+	if (*start + ans.size > *size) {
+		if ((limit >= 0 && *start + ans.size > limit) ||
+			realloc_groups(&size, &groups,
+				*start + ans.size) != OK) {
 			*errnop = ENOMEM;
+			ret = NSS_STATUS_NOTFOUND;
 			goto libnss_role_out;
 		}
 	}
@@ -352,6 +387,7 @@ enum nss_status _nss_role_initgroups_dyn (char *user, gid_t main_group, long int
 		(*groups)[(*start)++] = ans.list[i];
 
 libnss_role_out:
+	free(ans.list);
 	free(col.list);
 	free_all(&G);
 	pthread_mutex_unlock(&mutex);
