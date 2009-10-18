@@ -38,7 +38,8 @@ libenv = env.Clone()
 libenv["SHLIBSUFFIX"] = [NSS_LIBFULLSUFFIX]
 libenv["LINKFLAGS"] = ['-Wl,-soname,' + NSS_SONAME]
 parser = libenv.SharedObject('RoleParserSimple', 'RoleParserSimple.cpp')
-so = libenv.SharedLibrary(NSS_NAME, ['nss_role.c'])
+parser1 = libenv.SharedObject('parser', 'parser.c')
+so = libenv.SharedLibrary(NSS_NAME, ['nss_role.c', parser1])
 solink = libenv.Command(NSS_SONAME, so[0], 'ln -sf %s %s' % (NSS_FULLNAME, NSS_SONAME))
 
 commonenv = libenv.Clone()
