@@ -44,6 +44,8 @@ void free_all(struct graph *);
 
 int realloc_groups(long int **, gid_t ***, long int);
 
-int reading(char *, struct graph *);
+int reading(const char *, struct graph *);
+
+int writing(const char *, struct graph *);
 
 int dfs(struct graph *, gid_t, group_collector *);

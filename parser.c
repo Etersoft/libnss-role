@@ -4,8 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 
-struct ver a;
-
 int graph_add(struct graph *G, struct ver v)
 {
 	if (G->size == G->capacity) {
@@ -150,9 +148,9 @@ libnss_role_parse_line_error:
 	return result;
 }
 
-int reading(char *s, struct graph *G)
+int reading(const char *s, struct graph *G)
 {
-	int result;
+	int result = OK;
 	FILE *f = NULL;
 	unsigned long len = STR_min_size;
 	char *str = NULL;
@@ -160,8 +158,10 @@ int reading(char *s, struct graph *G)
 	char c;
 
 	f = fopen(s, "r");
-	if (!f)
+	if (!f) {
+		result = UNKNOWN_ERROR;
 		goto libnss_role_reading_out;
+	}
 
 	str = malloc(len * sizeof(char));
 	if (!str)
@@ -251,3 +251,33 @@ int get_gid(char *gr_name, gid_t *ans)
 	return OK;
 }
 
+int writing(const char *file, struct graph *G)
+{
+	int i, j, result = UNKNOWN_ERROR;
+	FILE *f = fopen(file, "w");
+	if (!f)
+		return result;
+
+	for(i = 0; i < G->size; i++) {
+		if (!G->gr[i].size)
+			continue;
+		if (fprintf(f, "%u:", G->gr[i].gid) < 0)
+			goto libnss_role_writing_exit;
+
+		for(j = 0; j < G->gr[i].size; j++) {
+			if (j)
+				if (fprintf(f, ",") < 0)
+					goto libnss_role_writing_exit;
+			if (fprintf(f, "%u", G->gr[i].list[j]) < 0)
+				goto libnss_role_writing_exit;
+		}
+		if (fprintf(f, "\n") < 0)
+			goto libnss_role_writing_exit;
+	}
+
+	result = OK;
+
+libnss_role_writing_exit:
+	fclose(f);
+	return result;
+}
