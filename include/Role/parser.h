@@ -26,7 +26,7 @@ struct graph {
 };
 
 struct group_name {
-	char name[32];
+	char name[33];
 	int id;
 };
 
