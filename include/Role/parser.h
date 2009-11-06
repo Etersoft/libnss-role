@@ -49,3 +49,5 @@ int reading(const char *, struct graph *);
 int writing(const char *, struct graph *);
 
 int dfs(struct graph *, gid_t, group_collector *);
+
+int find_id(struct graph *, gid_t, int *);

@@ -51,7 +51,7 @@ int ver_init(struct ver *v)
 	return OK;
 }
 
-static int find_id(struct graph *G, gid_t g, int *id)
+int find_id(struct graph *G, gid_t g, int *id)
 {
 	int i;
 	for(i = 0; i < G->size; i++)
