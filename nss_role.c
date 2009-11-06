@@ -47,6 +47,7 @@ enum nss_status _nss_role_initgroups_dyn(char *user, gid_t main_group,
 		goto libnss_role_out;
 	}
 
+	memset(G.used, 0, sizeof(int) * G.capacity);
 	result = dfs(&G, main_group, &col);
 	if (result == MEMORY_ERROR) {
 		*errnop = ENOMEM;

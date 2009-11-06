@@ -11,6 +11,9 @@ int graph_add(struct graph *G, struct ver v)
 		G->gr = (struct ver *) realloc(G->gr, sizeof(struct ver) * G->capacity);
 		if (!G->gr)
 			return MEMORY_ERROR;
+		G->used = (int *) malloc(sizeof(int) * G->capacity);
+		if (!G->used)
+			return MEMORY_ERROR;
 	}
 	G->gr[G->size++] = v;
 	return OK;
@@ -38,7 +41,6 @@ int graph_init(struct graph *G)
 	if (!G->used)
 		return MEMORY_ERROR;
 
-	memset(G->used, 0, sizeof(int) * G->capacity);
 	return OK;
 }
 
