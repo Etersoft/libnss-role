@@ -26,15 +26,15 @@ static int parse_options(int argc, char **argv)
 }
 
 int main(int argc, char **argv) {
-	struct graph G = {0,0,0,10};
+	struct librole_graph G = {0,0,0,10};
 	int result, i;
 	if (!parse_options(argc, argv))
 		goto exit;
-	result = graph_init(&G);
-	if (result != OK)
+	result = librole_graph_init(&G);
+	if (result != LIBROLE_OK)
 		goto exit;
-	result = reading("/etc/role", &G);
-	if (result != OK)
+	result = librole_reading("/etc/role", &G);
+	if (result != LIBROLE_OK)
 		goto exit;
 	for(i = 0; i < G.size; i++) {
 		int j;
@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
 	}
 
 exit:
-	free_all(&G);
+	librole_free_all(&G);
 	return 0;
 }
 

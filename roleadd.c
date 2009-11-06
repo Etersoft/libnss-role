@@ -49,39 +49,39 @@ static int parse_options(int argc, char **argv, int *set_flag, int *skip_flag)
 }
 
 int main(int argc, char **argv) {
-	struct graph G = {0, 0, 0, 10};
+	struct librole_graph G = {0, 0, 0, 10};
 	int result, i, set_flag, skip_flag;
-	struct ver new_role = {0, 0, 0, 10};
+	struct librole_ver new_role = {0, 0, 0, 10};
 
 	if (!parse_options(argc, argv, &set_flag, &skip_flag))
 		goto exit;
 
-	result = graph_init(&G);
-	if (result != OK)
+	result = librole_graph_init(&G);
+	if (result != LIBROLE_OK)
 		goto exit;
 
-	result = reading("/etc/role", &G);
-	if (result != OK)
+	result = librole_reading("/etc/role", &G);
+	if (result != LIBROLE_OK)
 		goto exit;
 
-	result = ver_init(&new_role);
-	if (result != OK)
+	result = librole_ver_init(&new_role);
+	if (result != LIBROLE_OK)
 		goto exit;
 
 	if (optind < argc) {
-		result = get_gid(argv[optind++], &new_role.gid);
-		if (result != OK)
+		result = librole_get_gid(argv[optind++], &new_role.gid);
+		if (result != LIBROLE_OK)
 			goto exit;
 		while(optind < argc) {
 			gid_t tmp_gr;
-			result = get_gid(argv[optind++], &tmp_gr);
-			if (result != OK && !skip_flag) {
+			result = librole_get_gid(argv[optind++], &tmp_gr);
+			if (result != LIBROLE_OK && !skip_flag) {
 				free(new_role.list);
 				goto exit;
-			} else if (result != OK)
+			} else if (result != LIBROLE_OK)
 				continue;
-			result = ver_add(&new_role, tmp_gr);
-			if (result != OK) {
+			result = librole_ver_add(&new_role, tmp_gr);
+			if (result != LIBROLE_OK) {
 				free(new_role.list);
 				goto exit;
 			}
@@ -92,8 +92,8 @@ int main(int argc, char **argv) {
 		goto exit;
 	}
 
-	result = find_id(&G, new_role.gid, &i);
-	if (result == OK) {
+	result = librole_find_id(&G, new_role.gid, &i);
+	if (result == LIBROLE_OK) {
 		if (!set_flag) {
 			int j;
 			for(j = 0; j < new_role.size; j++) {
@@ -105,8 +105,8 @@ int main(int argc, char **argv) {
 					}
 				if (exist_in_role)
 					continue;
-				result = ver_add(&G.gr[i], new_role.list[j]);
-				if (result != OK) {
+				result = librole_ver_add(&G.gr[i], new_role.list[j]);
+				if (result != LIBROLE_OK) {
 					free(new_role.list);
 					goto exit;
 				}
@@ -117,21 +117,21 @@ int main(int argc, char **argv) {
 			G.gr[i] = new_role;
 		}
 	} else {
-		result = graph_add(&G, new_role);
-		if (result != OK) {
+		result = librole_graph_add(&G, new_role);
+		if (result != LIBROLE_OK) {
 			free(new_role.list);
 			goto exit;
 		}
 	}
 
 	result = librole_lock("/etc/role");
-	if (result != OK)
+	if (result != LIBROLE_OK)
 		goto exit;
-	result = writing("/etc/role", &G);
+	result = librole_writing("/etc/role", &G);
 	librole_unlock("/etc/role");
 
 exit:
-	free_all(&G);
+	librole_free_all(&G);
 	return 0;
 }
 

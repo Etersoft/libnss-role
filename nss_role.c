@@ -19,20 +19,20 @@ enum nss_status _nss_role_initgroups_dyn(char *user, gid_t main_group,
 	enum nss_status ret = NSS_STATUS_SUCCESS;
 	pthread_mutex_lock(&mutex);
 
-	struct graph G = {0, 0, 0, 10};
+	struct librole_graph G = {0, 0, 0, 10};
 	int i, result;
-	group_collector col = {0, 0, 0, 10}, ans = {0, 0, 0, 10};
+	librole_group_collector col = {0, 0, 0, 10}, ans = {0, 0, 0, 10};
 
-	result = graph_init(&G);
-	if (result != OK) {
+	result = librole_graph_init(&G);
+	if (result != LIBROLE_OK) {
 		*errnop = ENOMEM;
 		ret = NSS_STATUS_NOTFOUND;
 		goto libnss_role_out;
 	}
 
-	result = reading("/etc/role", &G);
-	if (result != OK) {
-		if (result == MEMORY_ERROR) {
+	result = librole_reading("/etc/role", &G);
+	if (result != LIBROLE_OK) {
+		if (result == LIBROLE_MEMORY_ERROR) {
 			*errnop = ENOMEM;
 			ret =  NSS_STATUS_NOTFOUND;
 		} else
@@ -40,32 +40,32 @@ enum nss_status _nss_role_initgroups_dyn(char *user, gid_t main_group,
 		goto libnss_role_out;
 	}
 
-	result = ver_init(&col);
-	if (result != OK) {
+	result = librole_ver_init(&col);
+	if (result != LIBROLE_OK) {
 		*errnop = ENOMEM;
 		ret = NSS_STATUS_NOTFOUND;
 		goto libnss_role_out;
 	}
 
 	memset(G.used, 0, sizeof(int) * G.capacity);
-	result = dfs(&G, main_group, &col);
-	if (result == MEMORY_ERROR) {
+	result = librole_dfs(&G, main_group, &col);
+	if (result == LIBROLE_MEMORY_ERROR) {
 		*errnop = ENOMEM;
 		ret = NSS_STATUS_NOTFOUND;
 		goto libnss_role_out;
 	}
 
 	for(i = 0; i < *start; i++) {
-		result = dfs(&G, (*groups)[i], &col);
-		if (result == MEMORY_ERROR) {
+		result = librole_dfs(&G, (*groups)[i], &col);
+		if (result == LIBROLE_MEMORY_ERROR) {
 			*errnop = ENOMEM;
 			ret = NSS_STATUS_NOTFOUND;
 			goto libnss_role_out;
 		}
 	}
 
-	result = ver_init(&ans);
-	if (result != OK) {
+	result = librole_ver_init(&ans);
+	if (result != LIBROLE_OK) {
 		*errnop = ENOMEM;
 		ret = NSS_STATUS_NOTFOUND;
 		goto libnss_role_out;
@@ -91,8 +91,8 @@ enum nss_status _nss_role_initgroups_dyn(char *user, gid_t main_group,
 		if (exist)
 			continue;
 
-		result = ver_add(&ans, col.list[i]);
-		if (result != OK) {
+		result = librole_ver_add(&ans, col.list[i]);
+		if (result != LIBROLE_OK) {
 			*errnop = ENOMEM;
 			ret = NSS_STATUS_NOTFOUND;
 			goto libnss_role_out;
@@ -101,8 +101,8 @@ enum nss_status _nss_role_initgroups_dyn(char *user, gid_t main_group,
 
 	if (*start + ans.size > *size) {
 		if ((limit >= 0 && *start + ans.size > limit) ||
-			realloc_groups(&size, &groups,
-				*start + ans.size) != OK) {
+			librole_realloc_groups(&size, &groups,
+				*start + ans.size) != LIBROLE_OK) {
 			*errnop = ENOMEM;
 			ret = NSS_STATUS_NOTFOUND;
 			goto libnss_role_out;
@@ -115,7 +115,7 @@ enum nss_status _nss_role_initgroups_dyn(char *user, gid_t main_group,
 libnss_role_out:
 	free(ans.list);
 	free(col.list);
-	free_all(&G);
+	librole_free_all(&G);
 	pthread_mutex_unlock(&mutex);
 	return ret;
 }
