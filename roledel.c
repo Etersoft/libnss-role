@@ -88,6 +88,7 @@ int main(int argc, char **argv) {
 		}
 	} else {
 		print_help();
+		free(del_role.list);
 		goto exit;
 	}
 
@@ -127,7 +128,11 @@ int main(int argc, char **argv) {
 	}
 	free(del_role.list);
 
+	result = librole_lock("/etc/role");
+	if (result != OK)
+		goto exit;
 	result = writing("/etc/role", &G);
+	librole_unlock("/etc/role");
 
 exit:
 	free_all(&G);

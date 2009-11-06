@@ -161,7 +161,7 @@ int reading(const char *s, struct graph *G)
 
 	f = fopen(s, "r");
 	if (!f) {
-		result = UNKNOWN_ERROR;
+		result = IO_ERROR;
 		goto libnss_role_reading_out;
 	}
 
@@ -248,14 +248,14 @@ int get_gid(char *gr_name, gid_t *ans)
 	}
 
 	if (sscanf(gr_name, "%u", ans) < 1)
-		return UNKNOWN_ERROR;
+		return IO_ERROR;
 
 	return OK;
 }
 
 int writing(const char *file, struct graph *G)
 {
-	int i, j, result = UNKNOWN_ERROR;
+	int i, j, result = IO_ERROR;
 	FILE *f = fopen(file, "w");
 	if (!f)
 		return result;

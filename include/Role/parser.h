@@ -6,7 +6,8 @@
 #define NO_SUCH_GROUP		-100
 #define OUT_OF_RANGE		-101
 #define MEMORY_ERROR		-102
-#define UNKNOWN_ERROR		-103
+#define IO_ERROR		-103
+#define UNKNOWN_ERROR		-104
 #define OK			0
 
 struct ver {
