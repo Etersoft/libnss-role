@@ -37,28 +37,27 @@ if 'NLS_SUPPORT' not in ARGUMENTS or ARGUMENTS['NLS_SUPPORT'] != 'no':
 libenv = env.Clone()
 libenv["SHLIBSUFFIX"] = [NSS_LIBFULLSUFFIX]
 libenv["LINKFLAGS"] = ['-Wl,-soname,' + NSS_SONAME]
-parser = libenv.SharedObject('RoleParserSimple', 'RoleParserSimple.cpp')
-parser1 = libenv.SharedObject('parser', 'parser.c')
-so = libenv.SharedLibrary(NSS_NAME, ['nss_role.c', parser1])
+parser = libenv.SharedObject('parser', 'parser.c')
+so = libenv.SharedLibrary(NSS_NAME, ['nss_role.c', parser])
 solink = libenv.Command(NSS_SONAME, so[0], 'ln -sf %s %s' % (NSS_FULLNAME, NSS_SONAME))
 
 commonenv = libenv.Clone()
 commonenv["SHLIBSUFFIX"] = [COMMON_LIBFULLSUFFIX]
-commonenv["LINKFLAGS"] = ['-Wl,-soname,' + COMMON_SONAME]
-commonenv["LIBS"] = ['boost_iostreams', 'pam', 'pam_misc']
-commonfiles = ['PamCheck.cpp', 'GetText.cpp', 'LockFile.cpp', 'RoleCommon.cpp', 'RoleManager.cpp', parser, 'UserReader.cpp', 'GroupReader.cpp', 'RoleParser.cpp', 'RoleStorage.cpp']
-common = commonenv.SharedLibrary(COMMON_NAME, commonfiles)
+commonenv["LIBS"] = ['pam', 'pam_misc']
+commonenv["LINKFLAGS"] = ['-Wl,-soname,' + 'librole.so.0']
+common = commonenv.SharedLibrary(COMMON_NAME, [parser, 'lock_file.c', 'pam_check.c'])
 commonlink = commonenv.Command(COMMON_SONAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_SONAME))
 commondevlink = commonenv.Command(COMMON_DEVNAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_DEVNAME))
 commonheaders = Glob('include/Role/*.h')
 
 utilenv = env.Clone()
-utilenv["LIBS"] = ['role','boost_program_options']
+utilenv["LIBS"] = ['role']
 utilenv["LIBPATH"] = '.'
 
-roleadd = utilenv.Program('roleadd', 'roleadd.cpp')
-roledel = utilenv.Program('roledel', 'roledel.cpp')
-rolelst = utilenv.Program('rolelst', 'rolelst.cpp')
+roleadd = utilenv.Program('roleadd', 'roleadd.c')
+roledel = utilenv.Program('roledel', 'roledel.c')
+rolelst = utilenv.Program('rolelst', 'rolelst.c')
+utilenv1 = env.Clone()
 
 commonenv.Install('$DESTDIR/$LIBDIR/', common)
 commonenv.Install('$DESTDIR/usr/include/Role', commonheaders)
