@@ -154,7 +154,7 @@ int librole_reading(const char *s, struct librole_graph *G)
 {
 	int result = LIBROLE_OK;
 	FILE *f = NULL;
-	unsigned long len = LIBROLE_STR_min_size;
+	unsigned long len = LIBROLE_STR_MIN_SIZE;
 	char *str = NULL;
 	unsigned long id = 0;
 	char c;

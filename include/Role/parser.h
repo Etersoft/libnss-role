@@ -1,14 +1,9 @@
+#ifndef LIBROLE_PARSER_H
+#define LIBROLE_PARSER_H
+
 #include <grp.h>
 #include <sys/types.h>
-
-#define LIBROLE_STR_min_size		100
-
-#define LIBROLE_NO_SUCH_GROUP		-100
-#define LIBROLE_OUT_OF_RANGE		-101
-#define LIBROLE_MEMORY_ERROR		-102
-#define LIBROLE_IO_ERROR		-103
-#define LIBROLE_UNKNOWN_ERROR		-104
-#define LIBROLE_OK			0
+#include <Role/glob.h>
 
 struct librole_ver {
 	gid_t gid;
@@ -52,3 +47,5 @@ int librole_writing(const char *, struct librole_graph *);
 int librole_dfs(struct librole_graph *, gid_t, librole_group_collector *);
 
 int librole_find_id(struct librole_graph *, gid_t, int *);
+
+#endif
