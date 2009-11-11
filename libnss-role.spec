@@ -1,6 +1,6 @@
 Name: libnss-role
 Version: 0.2.2
-Release: alt1
+Release: alt2
 
 Summary: NSS API library and admin tools for role and privilegies
 
@@ -14,10 +14,7 @@ Source: %name-%version.tar
 Requires(pre): chrooted >= 0.3.5-alt1 chrooted-resolv sed
 Requires(postun): chrooted >= 0.3.5-alt1 sed
 
-BuildRequires: gcc-c++ glibc-devel scons
-BuildRequires: boost-devel >= 1:1.36.0
-BuildRequires: boost-iostreams-devel >= 1:1.36.0
-BuildRequires: boost-program-options-devel >= 1:1.36.0
+BuildRequires: glibc-devel scons
 BuildRequires: libpam-devel
 
 %description
@@ -44,7 +41,6 @@ mkdir -p %buildroot%_sysconfdir
 touch %buildroot%_sysconfdir/role
 
 %post
-/sbin/ldconfig
 if [ "$1" = "1" ]; then
     grep -q '^group:[[:blank:]].\+role' /etc/nsswitch.conf || \
     sed -i.rpmorig 's/^\(group:[[:blank:]].\+\)$/\1 role/' /etc/nsswitch.conf
@@ -52,7 +48,6 @@ fi
 update_chrooted all
 
 %postun
-/sbin/ldconfig
 if [ "$1" = "0" ]; then
     sed -i -e 's/ role//' /etc/nsswitch.conf
 fi
@@ -71,6 +66,9 @@ update_chrooted all
 %_includedir/Role
 
 %changelog
+* Wed Nov 11 2009 Pavel Shilovsky <piastry@altlinux.org> 0.2.2-alt2
+- Fixed passing sisyphus-check
+
 * Wed Nov 11 2009 Pavel Shilovsky <piastry@altlinux.org> 0.2.2-alt1
 - Migrated to  c-language utilites
 - Bugs' fixing
