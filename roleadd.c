@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <unistd.h>
+#include <security/pam_appl.h>
 
 struct option rolelst_opt[] = {
 	{"help", no_argument, 0, 'h'},
@@ -50,8 +51,9 @@ static int parse_options(int argc, char **argv, int *set_flag, int *skip_flag)
 
 int main(int argc, char **argv) {
 	struct librole_graph G = {0, 0, 0, 10};
-	int result, i, set_flag, skip_flag;
+	int result, i, set_flag, skip_flag, pam_status;
 	struct librole_ver new_role = {0, 0, 0, 10};
+	pam_handle_t *pamh;
 
 	if (!parse_options(argc, argv, &set_flag, &skip_flag))
 		goto exit;
@@ -124,11 +126,18 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	result = librole_pam_check(pamh, "roleadd", &pam_status);
+	if (result != LIBROLE_OK)
+		goto exit;
+
 	result = librole_lock("/etc/role");
 	if (result != LIBROLE_OK)
 		goto exit;
+
 	result = librole_writing("/etc/role", &G);
+
 	librole_unlock("/etc/role");
+	librole_pam_release(pamh, pam_status);
 
 exit:
 	librole_free_all(&G);

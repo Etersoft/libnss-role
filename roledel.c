@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <unistd.h>
+#include <Role/pam_check.h>
 
 struct option rolelst_opt[] = {
 	{"help", no_argument, 0, 'h'},
@@ -50,8 +51,9 @@ static int parse_options(int argc, char **argv, int *remove_flag, int *skip_flag
 
 int main(int argc, char **argv) {
 	struct librole_graph G = {0,0,0,10};
-	int result, i, remove_flag, skip_flag;
+	int result, i, remove_flag, skip_flag, pam_status;
 	struct librole_ver del_role = {0,0,0,10};
+	pam_handle_t *pamh;
 
 	if (!parse_options(argc, argv, &remove_flag, &skip_flag))
 		goto exit;
@@ -128,11 +130,19 @@ int main(int argc, char **argv) {
 	}
 	free(del_role.list);
 
+	result = librole_pam_check(pamh, "roledel", &pam_status);
+	if (result != LIBROLE_OK)
+		goto exit;
+
 	result = librole_lock("/etc/role");
 	if (result != LIBROLE_OK)
 		goto exit;
+
 	result = librole_writing("/etc/role", &G);
+
 	librole_unlock("/etc/role");
+
+	librole_pam_release(pamh, pam_status);
 
 exit:
 	librole_free_all(&G);
