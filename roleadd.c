@@ -59,32 +59,47 @@ int main(int argc, char **argv) {
 		goto exit;
 
 	result = librole_graph_init(&G);
-	if (result != LIBROLE_OK)
+	if (result != LIBROLE_OK) {
+		fprintf(stderr,"Memory error!\n");
 		goto exit;
+	}
 
 	result = librole_reading("/etc/role", &G);
-	if (result != LIBROLE_OK)
+	if (result != LIBROLE_OK) {
+		if (result = LIBROLE_IO_ERROR)
+			fprintf(stderr,"IO error!\n");
+		else if (result == LIBROLE_MEMORY_ERROR ||
+				result == LIBROLE_OUT_OF_RANGE)
+			fprintf(stderr,"Memory error!\n");
 		goto exit;
+	}
 
 	result = librole_ver_init(&new_role);
-	if (result != LIBROLE_OK)
+	if (result != LIBROLE_OK) {
+		fprintf(stderr,"Memory error!\n");
 		goto exit;
+	}
 
 	if (optind < argc) {
 		result = librole_get_gid(argv[optind++], &new_role.gid);
-		if (result != LIBROLE_OK)
+		if (result != LIBROLE_OK) {
+			if (result != LIBROLE_NO_SUCH_GROUP)
+				fprintf(stderr,"Memory error!\n");
 			goto exit;
+		}
 		while(optind < argc) {
 			gid_t tmp_gr;
 			result = librole_get_gid(argv[optind++], &tmp_gr);
 			if (result != LIBROLE_OK && !skip_flag) {
 				free(new_role.list);
+				fprintf(stderr,"No such group: %s!\n", argv[optind-1]);
 				goto exit;
 			} else if (result != LIBROLE_OK)
 				continue;
 			result = librole_ver_add(&new_role, tmp_gr);
 			if (result != LIBROLE_OK) {
 				free(new_role.list);
+				fprintf(stderr,"Memory error!\n");
 				goto exit;
 			}
 		}
@@ -110,6 +125,7 @@ int main(int argc, char **argv) {
 				result = librole_ver_add(&G.gr[i], new_role.list[j]);
 				if (result != LIBROLE_OK) {
 					free(new_role.list);
+					fprintf(stderr,"Memory error!\n");
 					goto exit;
 				}
 			}
@@ -122,21 +138,26 @@ int main(int argc, char **argv) {
 		result = librole_graph_add(&G, new_role);
 		if (result != LIBROLE_OK) {
 			free(new_role.list);
+			fprintf(stderr,"Memory error!\n");
 			goto exit;
 		}
 	}
-
 	result = librole_pam_check(pamh, "roleadd", &pam_status);
-	if (result != LIBROLE_OK)
+	if (result != LIBROLE_OK) {
+		fprintf(stderr,"Only root can do it\n");
 		goto exit;
+	}
 
 	result = librole_lock("/etc/role");
-	if (result != LIBROLE_OK)
+	if (result != LIBROLE_OK) {
+		librole_pam_release(pamh, pam_status);
 		goto exit;
+	}
 
 	result = librole_writing("/etc/role", &G);
 
 	librole_unlock("/etc/role");
+
 	librole_pam_release(pamh, pam_status);
 
 exit:

@@ -31,11 +31,19 @@ int main(int argc, char **argv) {
 	if (!parse_options(argc, argv))
 		goto exit;
 	result = librole_graph_init(&G);
-	if (result != LIBROLE_OK)
+	if (result != LIBROLE_OK) {
+		fprintf(stderr, "Memory error\n");
 		goto exit;
+	}
 	result = librole_reading("/etc/role", &G);
-	if (result != LIBROLE_OK)
+	if (result != LIBROLE_OK) {
+		if (result == LIBROLE_IO_ERROR)
+			fprintf(stderr, "IO error\n");
+		else if (result == LIBROLE_MEMORY_ERROR ||
+			result == LIBROLE_OUT_OF_RANGE)
+			fprintf(stderr, "Memory error\n");
 		goto exit;
+	}
 	for(i = 0; i < G.size; i++) {
 		int j;
 		printf("%u:", G.gr[i].gid);
