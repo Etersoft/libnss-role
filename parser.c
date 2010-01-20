@@ -176,9 +176,11 @@ int librole_reading(const char *s, struct librole_graph *G)
 		if (c == '\n') {
 			str[id] = '\0';
 			result = parse_line(str, G);
-			if (result != LIBROLE_OK)
+			if (result != LIBROLE_OK &&
+					result != LIBROLE_NO_SUCH_GROUP)
 				goto libnss_role_reading_close;
 			id = 0;
+			result = LIBROLE_OK;
 			continue;
 		}
 		str[id++] = c;
