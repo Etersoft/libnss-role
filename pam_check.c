@@ -42,23 +42,21 @@ int librole_pam_check(pam_handle_t *pamh, const char *prog, int *status)
 		return result;
 
 	result = pam_start(prog, user_name, &conv, &pamh);
+	if (result != PAM_SUCCESS)
+		return LIBROLE_UNKNOWN_ERROR;
 
-	if (result == PAM_SUCCESS) {
-		result = pam_authenticate(pamh, 0);
-		if (result != PAM_SUCCESS)
-			result = pam_end(pamh, result);
+	result = pam_authenticate(pamh, 0);
+	if (result != PAM_SUCCESS) {
+		pam_end(pamh, result);
+		return LIBROLE_UNKNOWN_ERROR;
 	}
-
-	if (result == PAM_SUCCESS) {
-		result = pam_acct_mgmt(pamh, 0);
-		if (result != PAM_SUCCESS)
-			result = pam_end(pamh, result);
+	result = pam_acct_mgmt(pamh, 0);
+	if (result != PAM_SUCCESS) {
+		pam_end(pamh, result);
+		return LIBROLE_UNKNOWN_ERROR;
 	}
 
 	*status = result;
-
-	if (result != PAM_SUCCESS)
-		return LIBROLE_UNKNOWN_ERROR;
 
 	return LIBROLE_OK;
 }
