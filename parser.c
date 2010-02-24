@@ -160,10 +160,8 @@ int librole_reading(const char *s, struct librole_graph *G)
 	char c;
 
 	f = fopen(s, "r");
-	if (!f) {
-		result = LIBROLE_IO_ERROR;
-		goto libnss_role_reading_out;
-	}
+	if (!f)
+		return LIBROLE_IO_ERROR;
 
 	str = malloc(len * sizeof(char));
 	if (!str)
@@ -178,7 +176,7 @@ int librole_reading(const char *s, struct librole_graph *G)
 			result = parse_line(str, G);
 			if (result != LIBROLE_OK &&
 					result != LIBROLE_NO_SUCH_GROUP)
-				goto libnss_role_reading_close;
+				goto libnss_role_reading_out;
 			id = 0;
 			result = LIBROLE_OK;
 			continue;
@@ -189,7 +187,7 @@ int librole_reading(const char *s, struct librole_graph *G)
 			str = realloc(str, len * sizeof(char));
 			if (!str) {
 				result = LIBROLE_MEMORY_ERROR;
-				goto libnss_role_reading_close;
+				goto libnss_role_reading_out;
 			}
 		}
 	}
@@ -197,13 +195,13 @@ int librole_reading(const char *s, struct librole_graph *G)
 		str[id] = '\0';
 		result = parse_line(str, G);
 		if (result != LIBROLE_OK)
-			goto libnss_role_reading_close;
+			goto libnss_role_reading_out;
 	}
 	
-libnss_role_reading_close:
-	fclose(f);
 libnss_role_reading_out:
 	free(str);
+libnss_role_reading_close:
+	fclose(f);
 	return result;
 }
 
