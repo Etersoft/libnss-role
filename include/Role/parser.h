@@ -21,11 +21,6 @@ struct librole_graph {
 	int capacity;
 };
 
-struct librole_group_name {
-	char name[33];
-	int id;
-};
-
 int librole_get_gid(char *, gid_t *);
 
 int librole_graph_add(struct librole_graph *, struct librole_ver);

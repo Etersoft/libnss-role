@@ -97,7 +97,7 @@ static int parse_line(char *s, struct librole_graph *G)
 	int result;
 	unsigned long len = strlen(s);
 	int i;
-	struct librole_group_name role_name = {{0}, 0};
+	char *last = s;
 	struct librole_ver role = {0, 0, 0, 10};
 
 	result = librole_ver_init(&role);
@@ -106,30 +106,28 @@ static int parse_line(char *s, struct librole_graph *G)
 
 	for(i = 0; i < len; i++) {
 		if (s[i] == ':') {
-			i++;
+			s[i++] = '\0';
 			break;
 		}
-		role_name.name[role_name.id++] = s[i];
 	}
 
-	result = librole_get_gid(role_name.name, &role.gid);
+	result = librole_get_gid(last, &role.gid);
 	if (result != LIBROLE_OK)
 		goto libnss_role_parse_line_error;
 
 	while(1) {
-		struct librole_group_name gr_name = {{0}, 0};
 		if (i >= len)
 			break;
+		last = s + i;
 		gid_t gr;
 		for(; i < len; i++) {
 			if (s[i] == ',') {
-				i++;
+				s[i++] = '\0';
 				break;
 			}
-			gr_name.name[gr_name.id++] = s[i];
 		}
 
-		result = librole_get_gid(gr_name.name, &gr);
+		result = librole_get_gid(last, &gr);
 		if (result != LIBROLE_OK && result != LIBROLE_NO_SUCH_GROUP)
 			goto libnss_role_parse_line_error;
 		else if (result == LIBROLE_NO_SUCH_GROUP)
