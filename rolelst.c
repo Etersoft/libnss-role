@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <unistd.h>
+#include <errno.h>
+#include <string.h>
 
 struct option rolelst_opt[] = {
 	{"help", no_argument, 0, 'h'}
@@ -25,9 +27,27 @@ static int parse_options(int argc, char **argv)
 	return 1;
 }
 
+static int get_group_name(gid_t g, char *ans)
+{
+	struct group grp, *grp_ptr;
+	char buffer[1000];
+	if (getgrgid_r(g, &grp, buffer, 1000, &grp_ptr) == 0) {
+		if (errno == ERANGE)
+			return LIBROLE_OUT_OF_RANGE;
+		if (errno != 0)
+			return LIBROLE_UNKNOWN_ERROR;
+	}
+	if (!grp_ptr)
+		return LIBROLE_NO_SUCH_GROUP;
+	strncpy(ans, grp.gr_name, 999);
+	ans[999] = '\0';
+	return LIBROLE_OK;
+}
+
 int main(int argc, char **argv) {
 	struct librole_graph G = {0,0,0,10};
 	int result, i;
+	char gr_name[1000];
 	if (!parse_options(argc, argv))
 		goto exit;
 	result = librole_graph_init(&G);
@@ -46,9 +66,16 @@ int main(int argc, char **argv) {
 	}
 	for(i = 0; i < G.size; i++) {
 		int j;
-		printf("%u:", G.gr[i].gid);
+		if (get_group_name(G.gr[i].gid, gr_name) == LIBROLE_OK)
+			printf("%s:", gr_name);
+		else
+			goto exit;
 		for(j = 0; j < G.gr[i].size; j++)
-			printf(" %u", G.gr[i].list[j]);
+			if (get_group_name(G.gr[i].list[j], gr_name)
+							== LIBROLE_OK)
+				printf(" %s", gr_name);
+			else
+				goto exit;
 		printf("\n");
 	}
 
