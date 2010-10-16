@@ -99,12 +99,12 @@ int librole_realloc_groups(long int **size, gid_t ***groups, long int new_size)
 	return LIBROLE_OK;
 }
 
-static int parse_line(char *s, struct librole_graph *G)
+static int parse_line(char *line, struct librole_graph *G)
 {
 	int result;
-	unsigned long len = strlen(s);
-	int i;
-	char *last = s;
+	unsigned long len = strlen(line);
+	int i, j;
+	char *last = line;
 	struct librole_ver role = {0, 0, 0, 10};
 
 	result = librole_ver_init(&role);
@@ -112,8 +112,8 @@ static int parse_line(char *s, struct librole_graph *G)
 		return result;
 
 	for(i = 0; i < len; i++) {
-		if (s[i] == ':') {
-			s[i++] = '\0';
+		if (line[i] == ':') {
+			line[i++] = '\0';
 			break;
 		}
 	}
@@ -125,11 +125,11 @@ static int parse_line(char *s, struct librole_graph *G)
 	while(1) {
 		if (i >= len)
 			break;
-		last = s + i;
+		last = line + i;
 		gid_t gr;
 		for(; i < len; i++) {
-			if (s[i] == ',') {
-				s[i++] = '\0';
+			if (line[i] == ',') {
+				line[i++] = '\0';
 				break;
 			}
 		}
