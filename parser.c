@@ -99,11 +99,41 @@ int librole_realloc_groups(long int **size, gid_t ***groups, long int new_size)
 	return LIBROLE_OK;
 }
 
+static void select_line_part(char *line, unsigned long len, char **last,
+			     unsigned long *pos, const char symbol)
+{
+	unsigned long i = *pos;
+	int in_progress = 0;
+
+	for(; i < len; i++) {
+		if (line[i] == ' ' && !in_progress) {
+			(*last)++;
+			continue;
+		} else if (line[i] != ' ' && !in_progress)
+			in_progress = 1;
+
+		if (line[i] == symbol) {
+			line[i++] = '\0';
+			break;
+		}
+	}
+
+	if (i > 1) {
+		/* we have at least one symbol for a role name */
+		unsigned long j = i - 1;
+
+		while (j >= 1 && line[j - 1] == ' ')
+			line[--j] = '\0';
+	}
+
+	*pos = i;
+}
+
 static int parse_line(char *line, struct librole_graph *G)
 {
 	int result;
 	unsigned long len = strlen(line);
-	int i, j;
+	unsigned long i = 0;
 	char *last = line;
 	struct librole_ver role = {0, 0, 0, 10};
 
@@ -111,12 +141,7 @@ static int parse_line(char *line, struct librole_graph *G)
 	if (result != LIBROLE_OK)
 		return result;
 
-	for(i = 0; i < len; i++) {
-		if (line[i] == ':') {
-			line[i++] = '\0';
-			break;
-		}
-	}
+	select_line_part(line, len, &last, &i, ':');
 
 	result = librole_get_gid(last, &role.gid);
 	if (result != LIBROLE_OK)
@@ -127,12 +152,8 @@ static int parse_line(char *line, struct librole_graph *G)
 			break;
 		last = line + i;
 		gid_t gr;
-		for(; i < len; i++) {
-			if (line[i] == ',') {
-				line[i++] = '\0';
-				break;
-			}
-		}
+
+		select_line_part(line, len, &last, &i, ',');
 
 		result = librole_get_gid(last, &gr);
 		if (result != LIBROLE_OK && result != LIBROLE_NO_SUCH_GROUP)
