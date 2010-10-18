@@ -1,4 +1,5 @@
 #include <Role/parser.h>
+#include <Role/version.h>
 #include <grp.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +10,8 @@
 struct option rolelst_opt[] = {
 	{"help", no_argument, 0, 'h'},
 	{"remove", no_argument, 0, 'r'},
-	{"skip_errors", no_argument, 0, 'm'}
+	{"skip_errors", no_argument, 0, 'm'},
+	{"version", no_argument, 0, 'v'}
 };
 
 static void print_help(void)
@@ -20,7 +22,9 @@ static void print_help(void)
 	fprintf(stderr,
 		"\t-r [ --remove ]\t\tremove role with privilegies\n");
 	fprintf(stderr,
-		"\t-m [ --skip-errors ]\tignore errors\n");
+		"\t-m [ --skip-errors ]\tskip missed priviligies\n");
+	fprintf(stderr,
+		"\t-v [ --verson]\t\tprint roledel version being used\n");
 	fprintf(stderr, "\n");
 }
 
@@ -29,7 +33,7 @@ static int parse_options(int argc, char **argv, int *remove_flag, int *skip_flag
 	int c, opt_ind;
 	*remove_flag = 0;
 	*skip_flag = 0;
-	while((c = getopt_long(argc, argv, "rhm", rolelst_opt, &opt_ind)) != -1) {
+	while((c = getopt_long(argc, argv, "hmrv", rolelst_opt, &opt_ind)) != -1) {
 		switch(c) {
 			case 'h':
 				print_help();
@@ -40,6 +44,10 @@ static int parse_options(int argc, char **argv, int *remove_flag, int *skip_flag
 			case 'r':
 				*remove_flag = 1;
 				break;
+			case 'v':
+				printf("roledel is the utility for libnss_role version %s\n",
+				       LIBNSS_ROLE_VERSION);
+				return 0;
 			case '?':
 				return 0;
 			default:

@@ -1,4 +1,5 @@
 #include <Role/parser.h>
+#include <Role/version.h>
 #include <grp.h>
 #include <stdio.h>
 #include <getopt.h>
@@ -7,16 +8,21 @@
 #include <string.h>
 
 struct option rolelst_opt[] = {
-	{"help", no_argument, 0, 'h'}
+	{"help", no_argument, 0, 'h'},
+	{"version", no_argument, 0, 'v'}
 };
 
 static int parse_options(int argc, char **argv)
 {
 	int c, opt_ind;
-	while((c = getopt_long(argc, argv, "h", rolelst_opt, &opt_ind)) != -1) {
+	while((c = getopt_long(argc, argv, "hv", rolelst_opt, &opt_ind)) != -1) {
 		switch(c) {
 			case 'h':
 				fprintf(stderr, "Usage: rolelst\n  -h [ --help ]\t\t produce help message\n\n");
+				return 0;
+			case 'v':
+				printf("rolelst is the utility for libnss_role version %s\n",
+				       LIBNSS_ROLE_VERSION);
 				return 0;
 			case '?':
 				return 0;
