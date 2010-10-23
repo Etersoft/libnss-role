@@ -258,24 +258,38 @@ int librole_dfs(struct librole_graph *G, gid_t v, librole_group_collector *col)
 
 int librole_get_gid(char *gr_name, gid_t *ans)
 {
-	if (!isdigit(gr_name[0])) {
-		struct group grp, *grp_ptr;
-		char buffer[1000];
-		if (getgrnam_r(gr_name, &grp, buffer, 1000, &grp_ptr) == 0) {
-			if (errno == ERANGE)
-				return LIBROLE_OUT_OF_RANGE;
-			if (errno != 0)
-				return LIBROLE_UNKNOWN_ERROR;
-		}
-		if (!grp_ptr)
-			return LIBROLE_NO_SUCH_GROUP;
-		*ans = grp.gr_gid;
-		return LIBROLE_OK;
-	}
+	unsigned long namelen = strlen(gr_name);
+	struct group grp, *grp_ptr;
+	char buffer[1000];
 
-	if (sscanf(gr_name, "%u", ans) < 1)
+	if (!namelen)
 		return LIBROLE_IO_ERROR;
 
+	if ((gr_name[0] != '"' && gr_name[namelen-1] == '"') ||
+	    (gr_name[0] == '"' && gr_name[namelen-1] != '"'))
+		return LIBROLE_IO_ERROR;
+
+	if (gr_name[0] == '"' && gr_name[namelen-1] == '"') {
+		gr_name[namelen-1] = '\0';
+		gr_name++;
+	} else {
+		char *p;
+		*ans = (gid_t)strtoul(gr_name, &p, 10);
+		if (*p == '\0' && (*ans != 0 || gr_name[0] == '0'))
+			return LIBROLE_OK;
+	}
+
+	if (getgrnam_r(gr_name, &grp, buffer, 1000, &grp_ptr) == 0) {
+		if (errno == ERANGE)
+			return LIBROLE_OUT_OF_RANGE;
+		if (errno != 0)
+			return LIBROLE_UNKNOWN_ERROR;
+	}
+
+	if (!grp_ptr)
+		return LIBROLE_NO_SUCH_GROUP;
+
+	*ans = grp.gr_gid;
 	return LIBROLE_OK;
 }
 
