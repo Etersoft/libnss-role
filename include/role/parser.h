@@ -3,7 +3,7 @@
 
 #include <grp.h>
 #include <sys/types.h>
-#include <Role/glob.h>
+#include <role/glob.h>
 
 struct librole_ver {
 	gid_t gid;

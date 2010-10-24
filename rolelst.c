@@ -1,5 +1,5 @@
-#include <Role/parser.h>
-#include <Role/version.h>
+#include <role/parser.h>
+#include <role/version.h>
 #include <grp.h>
 #include <stdio.h>
 #include <getopt.h>

@@ -48,7 +48,7 @@ commonenv["LINKFLAGS"] = ['-Wl,-soname,' + 'librole.so.0']
 common = commonenv.SharedLibrary(COMMON_NAME, [parser, 'lock_file.c', 'pam_check.c'])
 commonlink = commonenv.Command(COMMON_SONAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_SONAME))
 commondevlink = commonenv.Command(COMMON_DEVNAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_DEVNAME))
-commonheaders = Glob('include/Role/*.h')
+commonheaders = Glob('include/role/*.h')
 
 utilenv = env.Clone()
 utilenv["LIBS"] = ['role']
@@ -60,7 +60,7 @@ rolelst = utilenv.Program('rolelst', 'rolelst.c')
 utilenv1 = env.Clone()
 
 commonenv.Install('$DESTDIR/$LIBDIR/', common)
-commonenv.Install('$DESTDIR/usr/include/Role', commonheaders)
+commonenv.Install('$DESTDIR/usr/include/role', commonheaders)
 i = commonenv.Command('$DESTDIR/$LIBDIR/' + COMMON_SONAME, commonlink[0], 'cp -P %s /$DESTDIR/$LIBDIR/%s' % (COMMON_SONAME, COMMON_SONAME))
 commonenv.Alias('install', i)
 i = commonenv.Command('$DESTDIR/$LIBDIR/' + COMMON_DEVNAME, commondevlink[0], 'cp -P %s /$DESTDIR/$LIBDIR/%s' % (COMMON_DEVNAME, COMMON_DEVNAME))
