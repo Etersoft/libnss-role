@@ -1,11 +1,11 @@
 Name: libnss-role
-Version: 0.2.4
+Version: 0.2.5
 Release: alt1
 
-Summary: NSS API library and admin tools for role and privilegies
+Summary: NSS API library and admin tools for roles and privilegies
 
 License: GPLv3
-URL: http://tartarus.ru/wiki/Projects/libnss_role
+URL: http://tartarus.ru/projects/libnss-role
 Group: System/Libraries
 Packager: Pavel Shilovsky <piastry@altlinux.ru>
 
@@ -18,7 +18,7 @@ BuildRequires: glibc-devel scons
 BuildRequires: libpam-devel
 
 %description
-NSS API library and admin tools for privilegies and roles.
+NSS API library and admin tools for roles and privilegies.
 
 %package devel
 Summary: Header for developing applications managing Roles
@@ -27,7 +27,7 @@ Requires: %name = %version-%release
 
 %description devel
 Headers for developing applications managing Roles throw
-NSS API library for privilegies and roles.
+NSS API library for roles and privilegies.
 
 %prep
 %setup -q
@@ -63,9 +63,15 @@ update_chrooted all
 %_man8dir/*
 
 %files devel
-%_includedir/Role
+%_includedir/role
 
 %changelog
+* Sat Oct 24 2010 Pavel Shilovsky <piastry@altlinux.org> 0.2.5-alt1
+- Add new parsing rules
+- Update mans
+- Code style and bug fixing
+- Delete cpp implementation
+
 * Mon Jul 19 2010 Pavel Shilovsky <piastry@altlinux.org> 0.2.4-alt1
 - Fixed librole_reading() error handling
 - Set unlimit group len at parse_line()
