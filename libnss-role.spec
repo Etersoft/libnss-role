@@ -1,27 +1,24 @@
 Name: libnss-role
-Version: 0.1.6
-Release: alt3
+Version: 0.2.5
+Release: alt1
 
-Summary: NSS API library and admin tools for role and privilegies
+Summary: NSS API library and admin tools for roles and privilegies
 
 License: GPLv3
-URL: http://tartarus.ru/projects/show/libnss-role
+URL: http://tartarus.ru/projects/libnss-role
 Group: System/Libraries
-Packager: Evgeny Sinelnikov <sin@altlinux.ru>
+Packager: Pavel Shilovsky <piastry@altlinux.ru>
 
 Source: %name-%version.tar
 
 Requires(pre): chrooted >= 0.3.5-alt1 chrooted-resolv sed
 Requires(postun): chrooted >= 0.3.5-alt1 sed
 
-BuildRequires: gcc-c++ glibc-devel scons
-BuildRequires: boost-devel >= 1:1.39.0
-BuildRequires: boost-iostreams-devel >= 1:1.39.0
-BuildRequires: boost-program-options-devel >= 1:1.39.0
+BuildRequires: glibc-devel scons
 BuildRequires: libpam-devel
 
 %description
-NSS API library and admin tools for privilegies and roles.
+NSS API library and admin tools for roles and privilegies.
 
 %package devel
 Summary: Header for developing applications managing Roles
@@ -30,7 +27,7 @@ Requires: %name = %version-%release
 
 %description devel
 Headers for developing applications managing Roles throw
-NSS API library for privilegies and roles.
+NSS API library for roles and privilegies.
 
 %prep
 %setup -q
@@ -70,9 +67,38 @@ update_chrooted all
 %_man8dir/*
 
 %files devel
-%_includedir/Role
+%_includedir/role
 
 %changelog
+* Sat Oct 24 2010 Pavel Shilovsky <piastry@altlinux.org> 0.2.5-alt1
+- Add new parsing rules
+- Update mans
+- Code style and bug fixing
+- Delete cpp implementation
+
+* Mon Jul 19 2010 Pavel Shilovsky <piastry@altlinux.org> 0.2.4-alt1
+- Fixed librole_reading() error handling
+- Set unlimit group len at parse_line()
+- rolelst prints group names instead of gids
+
+* Wed Jan 20 2010 Pavel Shilovsky <piastry@altlinux.org> 0.2.3-alt1
+- Fixed bugs in pam_check and parser
+- Add error messages
+
+* Wed Nov 11 2009 Pavel Shilovsky <piastry@altlinux.org> 0.2.2-alt2
+- Fixed passing sisyphus-check
+
+* Wed Nov 11 2009 Pavel Shilovsky <piastry@altlinux.org> 0.2.2-alt1
+- Migrated to  c-language utilites
+- Bugs' fixing
+
+* Wed Sep 30 2009 Pavel Shilovsky <piastry@altlinux.org> 0.2.1-alt1
+- Code refactoring and bug's fixing.
+
+* Fri Sep 11 2009 Pavel Shilovsky <piastry@altlinux.org> 0.2.0-alt1
+- Implemented module on C language
+- Added work with gids
+
 * Sat Jun 27 2009 Evgeny Sinelnikov <sin@altlinux.ru> 0.1.6-alt3
 - Build with boost-1.39.0
 - Fixed bug with local user and group reading
