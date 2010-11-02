@@ -260,6 +260,7 @@ int librole_get_gid(char *gr_name, gid_t *ans)
 {
 	unsigned long namelen = strlen(gr_name);
 	struct group grp, *grp_ptr;
+	gid_t gid;
 	char buffer[1000];
 
 	if (!namelen)
@@ -274,12 +275,25 @@ int librole_get_gid(char *gr_name, gid_t *ans)
 		gr_name++;
 	} else {
 		char *p;
-		*ans = (gid_t)strtoul(gr_name, &p, 10);
-		if (*p == '\0' && (*ans != 0 || gr_name[0] == '0'))
+		gid = (gid_t)strtoul(gr_name, &p, 10);
+		if (*p == '\0' && (gid != 0 || gr_name[0] == '0')) {
+			if (getgrgid_r(gid, &grp, buffer,
+				       1000, &grp_ptr) != 0) {
+				if (errno == ERANGE)
+					return LIBROLE_OUT_OF_RANGE;
+				if (errno != 0)
+					return LIBROLE_UNKNOWN_ERROR;
+			}
+
+			if (!grp_ptr)
+				return LIBROLE_NO_SUCH_GROUP;
+
+			*ans = gid;
 			return LIBROLE_OK;
+		}
 	}
 
-	if (getgrnam_r(gr_name, &grp, buffer, 1000, &grp_ptr) == 0) {
+	if (getgrnam_r(gr_name, &grp, buffer, 1000, &grp_ptr) != 0) {
 		if (errno == ERANGE)
 			return LIBROLE_OUT_OF_RANGE;
 		if (errno != 0)
