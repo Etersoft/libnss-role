@@ -99,11 +99,13 @@ int librole_realloc_groups(long int **size, gid_t ***groups, long int new_size)
 	return LIBROLE_OK;
 }
 
-static void select_line_part(char *line, unsigned long len, char **last,
+/* return 1 if finished on the start of the comment, otherwise - return 0 */
+static int select_line_part(char *line, unsigned long len, char **last,
 			     unsigned long *pos, const char symbol)
 {
 	unsigned long i = *pos;
 	int in_progress = 0;
+	int rc = 0;
 
 	for(; i < len; i++) {
 		if (line[i] == ' ' && !in_progress) {
@@ -111,6 +113,12 @@ static void select_line_part(char *line, unsigned long len, char **last,
 			continue;
 		} else if (line[i] != ' ' && !in_progress)
 			in_progress = 1;
+
+		if (line[i] == '#') {
+			line[i++] = '\0';
+			rc = 1;
+			break;
+		}
 
 		if (line[i] == symbol) {
 			line[i++] = '\0';
@@ -127,6 +135,7 @@ static void select_line_part(char *line, unsigned long len, char **last,
 	}
 
 	*pos = i;
+	return rc;
 }
 
 static int parse_line(char *line, struct librole_graph *G)
@@ -136,24 +145,28 @@ static int parse_line(char *line, struct librole_graph *G)
 	unsigned long i = 0;
 	char *last = line;
 	struct librole_ver role = {0, 0, 0, 10};
+	int comment = 0;
 
 	result = librole_ver_init(&role);
 	if (result != LIBROLE_OK)
 		return result;
 
-	select_line_part(line, len, &last, &i, ':');
+	comment = select_line_part(line, len, &last, &i, ':');
+
+	if (comment && *last == '\0')
+		return result;
 
 	result = librole_get_gid(last, &role.gid);
 	if (result != LIBROLE_OK)
 		goto libnss_role_parse_line_error;
 
-	while(1) {
+	while (!comment) {
 		if (i >= len)
 			break;
 		last = line + i;
 		gid_t gr;
 
-		select_line_part(line, len, &last, &i, ',');
+		comment = select_line_part(line, len, &last, &i, ',');
 
 		result = librole_get_gid(last, &gr);
 		if (result != LIBROLE_OK && result != LIBROLE_NO_SUCH_GROUP)
