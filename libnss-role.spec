@@ -1,6 +1,6 @@
 Name: libnss-role
-Version: 0.2.6
-Release: alt2
+Version: 0.2.7
+Release: alt1
 
 Summary: NSS API library and admin tools for roles and privilegies
 
@@ -70,6 +70,9 @@ update_chrooted all
 %_includedir/role
 
 %changelog
+* Mon Nov 29 2010 Pavel Shilovsky <piastry@altlinux.org> 0.2.7-alt1
+- Add comment support
+
 * Wed Nov 03 2010 Pavel Shilovsky <piastry@altlinux.org> 0.2.6-alt2
 - Fix version
 
