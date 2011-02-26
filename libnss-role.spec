@@ -1,6 +1,6 @@
 Name: libnss-role
 Version: 0.2.7
-Release: alt2
+Release: alt3
 
 Summary: NSS API library and admin tools for roles and privilegies
 
@@ -43,9 +43,9 @@ touch %buildroot%_sysconfdir/role
 %post
 if [ "$1" = "1" ]; then
     grep -q '^group:[[:blank:]]*\(.\+[[:blank:]]\+\)*role\($\|[[:blank:]]\)' \
-        /etc/nsswitch.conf || \
+        %_sysconfdir/nsswitch.conf || \
     sed -i.rpmorig -e 's/^\(group:.\+\)$/\1 role/g' \
-        /etc/nsswitch.conf
+        %_sysconfdir/nsswitch.conf
 fi
 update_chrooted all
 
@@ -53,7 +53,7 @@ update_chrooted all
 if [ "$1" = "0" ]; then
     sed -i -e 's/^group:role/group:/g' \
            -e 's/^\(group:\)\(.\+[[:blank:]]*\)*[[:blank:]]\+role\($\|[[:blank:]].*\)$/\1\2\3/g' \
-        /etc/nsswitch.conf
+        %_sysconfdir/nsswitch.conf
 fi
 update_chrooted all
 
@@ -70,6 +70,9 @@ update_chrooted all
 %_includedir/role
 
 %changelog
+* Sat Feb 26 2011 Pavel Shilovsky <piastry@altlinux.org> 0.2.7-alt3
+- Replace /etc/nsswitch.conf with %_sysconfigdir/nsswitch.conf
+
 * Sat Jan 15 2011 Pavel Shilovsky <piastry@altlinux.org> 0.2.7-alt2
 - Fix module version
 
