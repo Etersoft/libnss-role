@@ -38,7 +38,7 @@ scons
 %install
 scons install DESTDIR=%buildroot LIBDIR=%_libdir LIBSYSDIR=/%_lib
 mkdir -p %buildroot%_sysconfdir
-touch %buildroot%_sysconfdir/role
+install -m644 role.default %buildroot%_sysconfdir/role
 
 %post
 if [ "$1" = "1" ]; then
