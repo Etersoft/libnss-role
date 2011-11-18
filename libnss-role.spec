@@ -63,10 +63,11 @@ update_chrooted all
 /%_lib/libnss_*.so.*
 %_sbindir/*
 %_bindir/*
-%_libdir/*.so*
+%_libdir/*.so.*
 %_man8dir/*
 
 %files devel
+%_libdir/*.so
 %_includedir/role
 
 %changelog
