@@ -1,6 +1,6 @@
 Name: libnss-role
 Version: 0.2.7
-Release: alt3
+Release: alt4
 
 Summary: NSS API library and admin tools for roles and privilegies
 
@@ -71,6 +71,10 @@ update_chrooted all
 %_includedir/role
 
 %changelog
+* Sat Nov 19 2011 Evgeny Sinelnikov <sin@altlinux.ru> 0.2.7-alt4
+- Fix devel-file-in-non-devel-package rpmlint violation
+- Add comments to configuration due rpmlint violation
+
 * Sat Feb 26 2011 Pavel Shilovsky <piastry@altlinux.org> 0.2.7-alt3
 - Replace /etc/nsswitch.conf with %_sysconfigdir/nsswitch.conf
 
