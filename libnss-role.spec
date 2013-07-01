@@ -1,6 +1,6 @@
 Name: libnss-role
-Version: 0.2.7
-Release: alt3
+Version: 0.2.8
+Release: alt1
 
 Summary: NSS API library and admin tools for roles and privilegies
 
@@ -70,6 +70,9 @@ update_chrooted all
 %_includedir/role
 
 %changelog
+* Mon Jul 01 2013 Pavel Shilovsky <piastry@altlinux.org> 0.2.8-alt1
+- Skip blank lines in the config file
+
 * Sat Feb 26 2011 Pavel Shilovsky <piastry@altlinux.org> 0.2.7-alt3
 - Replace /etc/nsswitch.conf with %_sysconfigdir/nsswitch.conf
 
