@@ -147,6 +147,10 @@ static int parse_line(char *line, struct librole_graph *G)
 	struct librole_ver role = {0, 0, 0, 10};
 	int comment = 0;
 
+	/* skip blank line */
+	if (!len)
+		return LIBROLE_OK;
+
 	result = librole_ver_init(&role);
 	if (result != LIBROLE_OK)
 		return result;
