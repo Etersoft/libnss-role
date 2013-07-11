@@ -1,6 +1,6 @@
 Name: libnss-role
 Version: 0.2.8
-Release: alt1
+Release: alt2
 
 Summary: NSS API library and admin tools for roles and privilegies
 
@@ -38,7 +38,7 @@ scons
 %install
 scons install DESTDIR=%buildroot LIBDIR=%_libdir LIBSYSDIR=/%_lib
 mkdir -p %buildroot%_sysconfdir
-touch %buildroot%_sysconfdir/role
+install -m644 role.default %buildroot%_sysconfdir/role
 
 %post
 if [ "$1" = "1" ]; then
@@ -63,15 +63,23 @@ update_chrooted all
 /%_lib/libnss_*.so.*
 %_sbindir/*
 %_bindir/*
-%_libdir/*.so*
+%_libdir/*.so.*
 %_man8dir/*
 
 %files devel
+%_libdir/*.so
 %_includedir/role
 
 %changelog
+* Thu Jul 11 2013 Pavel Shilovsky <piastry@altlinux.org> 0.2.8-alt2
+- Merge git.alt branch
+
 * Mon Jul 01 2013 Pavel Shilovsky <piastry@altlinux.org> 0.2.8-alt1
 - Skip blank lines in the config file
+
+* Sat Nov 19 2011 Evgeny Sinelnikov <sin@altlinux.ru> 0.2.7-alt4
+- Fix devel-file-in-non-devel-package rpmlint violation
+- Add comments to configuration due rpmlint violation
 
 * Sat Feb 26 2011 Pavel Shilovsky <piastry@altlinux.org> 0.2.7-alt3
 - Replace /etc/nsswitch.conf with %_sysconfigdir/nsswitch.conf
