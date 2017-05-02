@@ -227,11 +227,12 @@ int librole_reading(const char *s, struct librole_graph *G)
 		str[id++] = c;
 		if (id == len) {
 			len <<= 1;
-			str = realloc(str, len * sizeof(char));
-			if (!str) {
+			char *nstr = realloc(str, len * sizeof(char));
+			if (!nstr) {
 				result = LIBROLE_MEMORY_ERROR;
 				goto libnss_role_reading_out;
 			}
+			str = nstr;
 		}
 	}
 	if (id) {
