@@ -200,7 +200,7 @@ int librole_reading(const char *s, struct librole_graph *G)
 	unsigned long len = LIBROLE_STR_MIN_SIZE;
 	char *str = NULL;
 	unsigned long id = 0;
-	char c;
+	int c;
 
 	f = fopen(s, "r");
 	if (!f)
