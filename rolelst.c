@@ -88,6 +88,6 @@ int main(int argc, char **argv) {
 
 exit:
 	librole_free_all(&G);
-	return 0;
+	return result;
 }
 

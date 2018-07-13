@@ -44,7 +44,7 @@ static int do_lock(const char *file, const char *lock)
 
 	fd = open(file, O_CREAT | O_EXCL | O_WRONLY, 0600);
 	if (-1 == fd) {
-		return 0;
+		return LIBROLE_OK;
 	}
 
 	pid = getpid();
@@ -53,7 +53,7 @@ static int do_lock(const char *file, const char *lock)
 	if (write(fd, buf, len) != len) {
 		close (fd);
 		unlink(file);
-		return ;
+		return LIBROLE_OK;
 	}
 	close (fd);
 
