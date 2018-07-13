@@ -1,1 +1,2 @@
 tar: .
+spec: .gear/libnss-role.spec
