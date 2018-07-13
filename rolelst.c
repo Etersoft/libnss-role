@@ -37,12 +37,16 @@ static int parse_options(int argc, char **argv)
 static int get_group_name(gid_t g, char *ans)
 {
 	struct group grp, *grp_ptr;
-	char buffer[1000];
-	if (getgrgid_r(g, &grp, buffer, 1000, &grp_ptr) == 0) {
+	char buffer[2000];
+	if (getgrgid_r(g, &grp, buffer, 2000, &grp_ptr) != 0) {
+		return LIBROLE_UNKNOWN_ERROR;
+		/*
+		If one wants to check errno after the call, it should be set to zero before the call.
 		if (errno == ERANGE)
 			return LIBROLE_OUT_OF_RANGE;
 		if (errno != 0)
 			return LIBROLE_UNKNOWN_ERROR;
+		*/
 	}
 	if (!grp_ptr)
 		return LIBROLE_NO_SUCH_GROUP;

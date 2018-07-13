@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "role/parser.h"
+
 int librole_graph_add(struct librole_graph *G, struct librole_ver v)
 {
 	if (G->size == G->capacity) {
@@ -279,7 +280,7 @@ int librole_get_gid(char *gr_name, gid_t *ans)
 	unsigned long namelen = strlen(gr_name);
 	struct group grp, *grp_ptr;
 	gid_t gid;
-	char buffer[1000];
+	char buffer[2000];
 
 	if (!namelen)
 		return LIBROLE_IO_ERROR;
@@ -294,13 +295,18 @@ int librole_get_gid(char *gr_name, gid_t *ans)
 	} else {
 		char *p;
 		gid = (gid_t)strtoul(gr_name, &p, 10);
+		/* if there is gid in gr_name */
+		/* FIXME: == '0' ?? */
 		if (*p == '\0' && (gid != 0 || gr_name[0] == '0')) {
 			if (getgrgid_r(gid, &grp, buffer,
-				       1000, &grp_ptr) != 0) {
+				       2000, &grp_ptr) != 0) {
+				return LIBROLE_UNKNOWN_ERROR;
+				/* If one wants to check errno after the call, it should be set to zero before the call.
 				if (errno == ERANGE)
 					return LIBROLE_OUT_OF_RANGE;
 				if (errno != 0)
 					return LIBROLE_UNKNOWN_ERROR;
+				*/
 			}
 
 			if (!grp_ptr)
@@ -310,12 +316,15 @@ int librole_get_gid(char *gr_name, gid_t *ans)
 			return LIBROLE_OK;
 		}
 	}
-
-	if (getgrnam_r(gr_name, &grp, buffer, 1000, &grp_ptr) != 0) {
+	/* see man about sysconf(_SC_GETGR_R_SIZE_MAX) */
+	if (getgrnam_r(gr_name, &grp, buffer, 2000, &grp_ptr) != 0) {
+		return LIBROLE_UNKNOWN_ERROR;
+		/* If one wants to check errno after the call, it should be set to zero before the call.
 		if (errno == ERANGE)
 			return LIBROLE_OUT_OF_RANGE;
 		if (errno != 0)
 			return LIBROLE_UNKNOWN_ERROR;
+		*/
 	}
 
 	if (!grp_ptr)
