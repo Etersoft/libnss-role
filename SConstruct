@@ -28,9 +28,11 @@ COMMON_SONAME = COMMON_NAME + COMMON_LIBBASESUFFIX
 COMMON_FULLNAME = COMMON_NAME + COMMON_LIBFULLSUFFIX
 COMMON_DEVNAME = COMMON_NAME + LIBDEVSUFFIX
 
-env['CCFLAGS'] = ['-O2', '-Iinclude', '-DPACKAGE=\\"nss_role\\"']
+env['CCFLAGS'] = ['-Iinclude', '-DPACKAGE=\\"nss_role\\"']
 if 'DEBUG' in ARGUMENTS and ARGUMENTS['DEBUG'] == 'yes':
-    env['CCFLAGS'] += ['-DDEBUG']
+    env['CCFLAGS'] += ['-DDEBUG', '-g', '-O0']
+else:
+    env['CCFLAGS'] += ['-O2']
 if 'NLS_SUPPORT' not in ARGUMENTS or ARGUMENTS['NLS_SUPPORT'] != 'no':
     env['CCFLAGS'] += ['-DENABLE_NLS', '-DLOCALEDIR=\\"/usr/share/locale\\"']
 
