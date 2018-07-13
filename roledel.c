@@ -1,11 +1,13 @@
-#include <role/parser.h>
-#include <role/version.h>
-#include <grp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
 #include <unistd.h>
-#include <role/pam_check.h>
+#include <grp.h>
+
+#include "role/parser.h"
+#include "role/version.h"
+#include "role/pam_check.h"
+#include "role/lock_file.h"
 
 struct option rolelst_opt[] = {
 	{"help", no_argument, 0, 'h'},

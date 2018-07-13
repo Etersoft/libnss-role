@@ -7,7 +7,8 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
-#include <role/glob.h>
+
+#include "role/glob.h"
 
 static int get_pid(char *buf, pid_t *pid)
 {
