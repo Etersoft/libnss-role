@@ -18,16 +18,16 @@ struct option rolelst_opt[] = {
 
 static void print_help(void)
 {
-	fprintf(stderr, "Usage: roledel [-hrmv] ROLE [*PRIVS]\n");
-	fprintf(stderr,
+	fprintf(stdout, "Usage: roledel [-hrmv] ROLE [*PRIVS]\n");
+	fprintf(stdout,
 		"\t-h [ --help ]\t\tproduce help message\n");
-	fprintf(stderr,
-		"\t-r [ --remove ]\t\tremove role with privilegies\n");
-	fprintf(stderr,
-		"\t-m [ --skip-errors ]\tskip missed priviligies\n");
-	fprintf(stderr,
-		"\t-v [ --verson]\t\tprint roledel version being used\n");
-	fprintf(stderr, "\n");
+	fprintf(stdout,
+		"\t-r [ --remove ]\t\tremove role with privileges\n");
+	fprintf(stdout,
+		"\t-m [ --skip-errors ]\tskip missed privileges\n");
+	fprintf(stdout,
+		"\t-v [ --version]\t\tprint roledel version being used\n");
+	fprintf(stdout, "\n");
 }
 
 static int parse_options(int argc, char **argv, int *remove_flag, int *skip_flag)
@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
 			if (result != LIBROLE_OK && !skip_flag) {
 				free(del_role.list);
 				librole_print_error(result);
-				fprintf(stderr,"No such group: %s!\n", argv[optind-1]);
+				fprintf(stdout,"No such group: %s!\n", argv[optind-1]);
 				goto exit;
 			} else if (result != LIBROLE_OK)
 				continue;
@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
 	result = librole_pam_check(pamh, "roledel", &pam_status);
 	if (result != LIBROLE_OK) {
 		librole_print_error(result);
-		fprintf(stderr,"Only root can do it\n");
+		fprintf(stdout,"Only root can do it\n");
 		goto exit;
 	}
 

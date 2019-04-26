@@ -10,7 +10,7 @@
 
 struct option rolelst_opt[] = {
 	{"help", no_argument, 0, 'h'},
-	{"number", no_argument, 0, 'n'},
+	{"numeric", no_argument, 0, 'n'},
 	{"version", no_argument, 0, 'v'}
 };
 
@@ -21,7 +21,14 @@ static int parse_options(int argc, char **argv, int *numeric_flag)
 	while((c = getopt_long(argc, argv, "hnv", rolelst_opt, &opt_ind)) != -1) {
 		switch(c) {
 			case 'h':
-				fprintf(stderr, "Usage: rolelst\n  -h [ --help ]\t\t produce help message\n\n");
+				fprintf(stdout, "Usage: rolelst [-hnv]\n");
+				fprintf(stdout,
+					"\t-h [ --help   ]\t\tproduce help message\n");
+				fprintf(stdout,
+					"\t-n [ --numeric]\t\tprint gid instead of group names\n");
+				fprintf(stdout,
+					"\t-v [ --version]\t\tprint roledel version being used\n");
+				fprintf(stdout, "\n");
 				return 0;
 			case 'n':
 				*numeric_flag = 1;
