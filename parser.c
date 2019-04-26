@@ -280,7 +280,7 @@ int librole_get_gid(char *gr_name, gid_t *ans)
 	unsigned long namelen = strlen(gr_name);
 	struct group grp, *grp_ptr;
 	gid_t gid;
-	char buffer[2000];
+	char buffer[32000];
 
 	if (!namelen)
 		return LIBROLE_IO_ERROR;
@@ -299,7 +299,7 @@ int librole_get_gid(char *gr_name, gid_t *ans)
 		/* FIXME: == '0' ?? */
 		if (*p == '\0' && (gid != 0 || gr_name[0] == '0')) {
 			if (getgrgid_r(gid, &grp, buffer,
-				       2000, &grp_ptr) != 0) {
+				       32000, &grp_ptr) != 0) {
 				return LIBROLE_UNKNOWN_ERROR;
 				/* If one wants to check errno after the call, it should be set to zero before the call.
 				if (errno == ERANGE)
@@ -317,7 +317,7 @@ int librole_get_gid(char *gr_name, gid_t *ans)
 		}
 	}
 	/* see man about sysconf(_SC_GETGR_R_SIZE_MAX) */
-	if (getgrnam_r(gr_name, &grp, buffer, 2000, &grp_ptr) != 0) {
+	if (getgrnam_r(gr_name, &grp, buffer, 32000, &grp_ptr) != 0) {
 		return LIBROLE_UNKNOWN_ERROR;
 		/* If one wants to check errno after the call, it should be set to zero before the call.
 		if (errno == ERANGE)
