@@ -20,11 +20,11 @@ struct option rolelst_opt[] = {
 
 static void print_help(void)
 {
-	fprintf(stdout, "Usage: roledel [-hsmv] ROLE [*PRIVS]\n");
+	fprintf(stdout, "Usage: roleadd [-hsmv] ROLE [*PRIVS]\n");
 	fprintf(stdout,
 		"\t-h [ --help ]\t\tproduce help message\n");
 	fprintf(stdout,
-		"\t-s [ --set ]\t\tset role with privileges\n");
+		"\t-s [ --set ]\t\tset role with that privileges only (override)\n");
 	fprintf(stdout,
 		"\t-m [ --skip-errors ]\tskip missed privileges\n");
 	fprintf(stdout,

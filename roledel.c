@@ -22,7 +22,7 @@ static void print_help(void)
 	fprintf(stdout,
 		"\t-h [ --help ]\t\tproduce help message\n");
 	fprintf(stdout,
-		"\t-r [ --remove ]\t\tremove role with privileges\n");
+		"\t-r [ --remove ]\t\tremove all privileges from role\n");
 	fprintf(stdout,
 		"\t-m [ --skip-errors ]\tskip missed privileges\n");
 	fprintf(stdout,
