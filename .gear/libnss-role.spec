@@ -1,6 +1,6 @@
 Name: libnss-role
-Version: 0.2.9
-Release: alt2
+Version: 0.3.0
+Release: alt1
 
 Summary: NSS API library and admin tools for roles and privilegies
 
@@ -30,9 +30,9 @@ Headers for developing applications managing Roles throw
 NSS API library for roles and privilegies.
 
 %prep
-%setup -q
+%setup
 
-%build
+%build 
 scons
 
 %install
@@ -68,9 +68,12 @@ update_chrooted all
 
 %files devel
 %_libdir/*.so
-%_includedir/role
+%_includedir/role/
 
 %changelog
+* Fri Apr 26 2019 Vitaly Lipatov <lav@altlinux.ru> 0.3.0-alt1
+- full refactoring
+
 * Fri Apr 26 2019 Vitaly Lipatov <lav@altlinux.ru> 0.2.9-alt2
 - fast hack: increase buffers up to 32000
 
