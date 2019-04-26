@@ -1,5 +1,4 @@
 #include <nss.h>
-#include <grp.h>
 #include <pthread.h>
 #include <sys/types.h>
 #include <stdlib.h>
@@ -71,23 +70,23 @@ enum nss_status _nss_role_initgroups_dyn(char *user, gid_t main_group,
 	}
 
 	for(i = 0; i < col.size; i++) {
-		int exist = 0, j;
+		int exists = 0, j;
 		for(j = 0; j < *start; j++) {
 			if ((*groups)[j] == col.list[i]) {
-				exist = 1;
+				exists = 1;
 				break;
 			}
 		}
 		if (main_group == col.list[i])
-			exist = 1;
+			exists = 1;
 		for(j = 0; j < ans.size; j++) {
 			if (ans.list[j] == col.list[i]) {
-				exist = 1;
+				exists = 1;
 				break;
 			}
 		}
 
-		if (exist)
+		if (exists)
 			continue;
 
 		result = librole_ver_add(&ans, col.list[i]);

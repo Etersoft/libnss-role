@@ -1,4 +1,4 @@
-#include <grp.h>
+
 #include <stdio.h>
 #include <getopt.h>
 #include <unistd.h>
@@ -34,59 +34,45 @@ static int parse_options(int argc, char **argv)
 	return 1;
 }
 
-static int get_group_name(gid_t g, char *ans)
-{
-	struct group grp, *grp_ptr;
-	char buffer[32000];
-	if (getgrgid_r(g, &grp, buffer, 32000, &grp_ptr) != 0) {
-		return LIBROLE_UNKNOWN_ERROR;
-		/*
-		If one wants to check errno after the call, it should be set to zero before the call.
-		if (errno == ERANGE)
-			return LIBROLE_OUT_OF_RANGE;
-		if (errno != 0)
-			return LIBROLE_UNKNOWN_ERROR;
-		*/
-	}
-	if (!grp_ptr)
-		return LIBROLE_NO_SUCH_GROUP;
-	strncpy(ans, grp.gr_name, 999);
-	ans[999] = '\0';
-	return LIBROLE_OK;
-}
+
 
 int main(int argc, char **argv) {
 	struct librole_graph G = {0,0,0,10};
-	int result, i;
-	char gr_name[1000];
+	int result = LIBROLE_OK;
+	int i;
+	
 	if (!parse_options(argc, argv))
 		goto exit;
+	
 	result = librole_graph_init(&G);
 	if (result != LIBROLE_OK) {
-		fprintf(stderr, "Memory error\n");
+		librole_print_error(result);
 		goto exit;
 	}
 	result = librole_reading("/etc/role", &G);
 	if (result != LIBROLE_OK) {
-		if (result == LIBROLE_IO_ERROR)
-			fprintf(stderr, "IO error\n");
-		else if (result == LIBROLE_MEMORY_ERROR ||
-			result == LIBROLE_OUT_OF_RANGE)
-			fprintf(stderr, "Memory error\n");
+		librole_print_error(result);
 		goto exit;
 	}
+	
 	for(i = 0; i < G.size; i++) {
 		int j;
-		if (get_group_name(G.gr[i].gid, gr_name) == LIBROLE_OK)
-			printf("%s:", gr_name);
-		else
+		char gr_name[LIBROLE_MAX_NAME];
+		result = librole_get_group_name(G.gr[i].gid, gr_name, LIBROLE_MAX_NAME);
+		if (result != LIBROLE_OK) {
+			librole_print_error(result);
 			goto exit;
-		for(j = 0; j < G.gr[i].size; j++)
-			if (get_group_name(G.gr[i].list[j], gr_name)
-							== LIBROLE_OK)
-				printf(" %s", gr_name);
-			else
+		}
+		printf("%s:", gr_name);
+
+		for(j = 0; j < G.gr[i].size; j++) {
+			result = librole_get_group_name(G.gr[i].list[j], gr_name, LIBROLE_MAX_NAME);
+			if (result != LIBROLE_OK) {
+				librole_print_error(result);
 				goto exit;
+			}
+			printf(" %s", gr_name);
+		}
 		printf("\n");
 	}
 

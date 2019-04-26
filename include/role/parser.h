@@ -21,8 +21,6 @@ struct librole_graph {
 	int capacity;
 };
 
-int librole_get_gid(char *, gid_t *);
-
 int librole_graph_add(struct librole_graph *, struct librole_ver);
 
 int librole_ver_add(struct librole_ver *, gid_t);
@@ -42,5 +40,16 @@ int librole_writing(const char *, struct librole_graph *);
 int librole_dfs(struct librole_graph *, gid_t, librole_group_collector *);
 
 int librole_find_id(struct librole_graph *, gid_t, int *);
+
+/* get gid by group name */
+int librole_get_gid(const char *gr_name, gid_t *ans);
+
+/* get user name by uid */
+int librole_get_user_name(uid_t uid, char *user_name, size_t user_name_size);
+
+/* get group name by uid */
+int librole_get_group_name(gid_t g, char *ans, size_t ans_size);
+
+void librole_print_error(int result);
 
 #endif

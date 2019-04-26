@@ -109,11 +109,14 @@ static int select_line_part(char *line, unsigned long len, char **last,
 	int rc = 0;
 
 	for(; i < len; i++) {
-		if (line[i] == ' ' && !in_progress) {
-			(*last)++;
-			continue;
-		} else if (line[i] != ' ' && !in_progress)
-			in_progress = 1;
+		if (!in_progress) {
+			if (line[i] == ' ') {
+				(*last)++;
+				continue;
+			} else {
+				in_progress = 1;
+			}
+		}
 
 		if (line[i] == '#') {
 			line[i++] = '\0';
@@ -139,6 +142,15 @@ static int select_line_part(char *line, unsigned long len, char **last,
 	return rc;
 }
 
+static void drop_quotes(char **str)
+{
+	size_t len = strlen(*str);
+	if (*str[0] == '"' && *str[len-1] == '"') {
+		*str[len-1] = '\0';
+		*str++;
+	}
+}
+
 static int parse_line(char *line, struct librole_graph *G)
 {
 	int result;
@@ -161,6 +173,7 @@ static int parse_line(char *line, struct librole_graph *G)
 	if (comment && *last == '\0')
 		return result;
 
+	drop_quotes(&last);
 	result = librole_get_gid(last, &role.gid);
 	if (result != LIBROLE_OK)
 		goto libnss_role_parse_line_error;
@@ -173,11 +186,12 @@ static int parse_line(char *line, struct librole_graph *G)
 
 		comment = select_line_part(line, len, &last, &i, ',');
 
+		drop_quotes(&last);
 		result = librole_get_gid(last, &gr);
-		if (result != LIBROLE_OK && result != LIBROLE_NO_SUCH_GROUP)
-			goto libnss_role_parse_line_error;
-		else if (result == LIBROLE_NO_SUCH_GROUP)
+		if (result == LIBROLE_NO_SUCH_GROUP)
 			continue;
+		if (result != LIBROLE_OK)
+			goto libnss_role_parse_line_error;
 
 		result = librole_ver_add(&role, gr);
 		if (result != LIBROLE_OK)
@@ -198,19 +212,19 @@ int librole_reading(const char *s, struct librole_graph *G)
 {
 	int result = LIBROLE_OK;
 	FILE *f = NULL;
-	unsigned long len = LIBROLE_STR_MIN_SIZE;
+	unsigned long len = LIBROLE_START_LINESIZE;
 	char *str = NULL;
 	unsigned long id = 0;
 	int c;
 
+	str = malloc(len * sizeof(char));
+	if (!str)
+		return LIBROLE_OUT_OF_RANGE;
+
 	f = fopen(s, "r");
 	if (!f)
 		return LIBROLE_IO_ERROR;
-
-	str = malloc(len * sizeof(char));
-	if (!str)
-		goto libnss_role_reading_close;
-
+	
 	while(1) {
 		c = fgetc(f);
 		if (c == EOF)
@@ -245,7 +259,6 @@ int librole_reading(const char *s, struct librole_graph *G)
 	
 libnss_role_reading_out:
 	free(str);
-libnss_role_reading_close:
 	fclose(f);
 	return result;
 }
@@ -272,65 +285,6 @@ int librole_dfs(struct librole_graph *G, gid_t v, librole_group_collector *col)
 		if (result != LIBROLE_OK && result != LIBROLE_NO_SUCH_GROUP)
 			return result;
 	}
-	return LIBROLE_OK;
-}
-
-int librole_get_gid(char *gr_name, gid_t *ans)
-{
-	unsigned long namelen = strlen(gr_name);
-	struct group grp, *grp_ptr;
-	gid_t gid;
-	char buffer[32000];
-
-	if (!namelen)
-		return LIBROLE_IO_ERROR;
-
-	if ((gr_name[0] != '"' && gr_name[namelen-1] == '"') ||
-	    (gr_name[0] == '"' && gr_name[namelen-1] != '"'))
-		return LIBROLE_IO_ERROR;
-
-	if (gr_name[0] == '"' && gr_name[namelen-1] == '"') {
-		gr_name[namelen-1] = '\0';
-		gr_name++;
-	} else {
-		char *p;
-		gid = (gid_t)strtoul(gr_name, &p, 10);
-		/* if there is gid in gr_name */
-		/* FIXME: == '0' ?? */
-		if (*p == '\0' && (gid != 0 || gr_name[0] == '0')) {
-			if (getgrgid_r(gid, &grp, buffer,
-				       32000, &grp_ptr) != 0) {
-				return LIBROLE_UNKNOWN_ERROR;
-				/* If one wants to check errno after the call, it should be set to zero before the call.
-				if (errno == ERANGE)
-					return LIBROLE_OUT_OF_RANGE;
-				if (errno != 0)
-					return LIBROLE_UNKNOWN_ERROR;
-				*/
-			}
-
-			if (!grp_ptr)
-				return LIBROLE_NO_SUCH_GROUP;
-
-			*ans = gid;
-			return LIBROLE_OK;
-		}
-	}
-	/* see man about sysconf(_SC_GETGR_R_SIZE_MAX) */
-	if (getgrnam_r(gr_name, &grp, buffer, 32000, &grp_ptr) != 0) {
-		return LIBROLE_UNKNOWN_ERROR;
-		/* If one wants to check errno after the call, it should be set to zero before the call.
-		if (errno == ERANGE)
-			return LIBROLE_OUT_OF_RANGE;
-		if (errno != 0)
-			return LIBROLE_UNKNOWN_ERROR;
-		*/
-	}
-
-	if (!grp_ptr)
-		return LIBROLE_NO_SUCH_GROUP;
-
-	*ans = grp.gr_gid;
 	return LIBROLE_OK;
 }
 

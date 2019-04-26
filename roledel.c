@@ -18,7 +18,7 @@ struct option rolelst_opt[] = {
 
 static void print_help(void)
 {
-	fprintf(stderr, "Usage: roledel [-hrm] ROLE [*PRIVS]\n");
+	fprintf(stderr, "Usage: roledel [-hrmv] ROLE [*PRIVS]\n");
 	fprintf(stderr,
 		"\t-h [ --help ]\t\tproduce help message\n");
 	fprintf(stderr,
@@ -70,31 +70,26 @@ int main(int argc, char **argv) {
 
 	result = librole_graph_init(&G);
 	if (result != LIBROLE_OK) {
-		fprintf(stderr,"Memory error!\n");
+		librole_print_error(result);
 		goto exit;
 	}
 
 	result = librole_reading("/etc/role", &G);
 	if (result != LIBROLE_OK) {
-		if (result = LIBROLE_IO_ERROR)
-			fprintf(stderr,"IO error!\n");
-		else if (result == LIBROLE_MEMORY_ERROR ||
-				result == LIBROLE_OUT_OF_RANGE)
-			fprintf(stderr,"Memory error!\n");
+		librole_print_error(result);
 		goto exit;
 	}
 
 	result = librole_ver_init(&del_role);
 	if (result != LIBROLE_OK) {
-		fprintf(stderr,"Memory error!\n");
+		librole_print_error(result);
 		goto exit;
 	}
 
 	if (optind < argc) {
 		result = librole_get_gid(argv[optind++], &del_role.gid);
 		if (result != LIBROLE_OK) {
-			if (result != LIBROLE_NO_SUCH_GROUP)
-				fprintf(stderr,"Memory error!\n");
+			librole_print_error(result);
 			goto exit;
 		}
 		while(optind < argc) {
@@ -102,6 +97,7 @@ int main(int argc, char **argv) {
 			result = librole_get_gid(argv[optind++], &tmp_gr);
 			if (result != LIBROLE_OK && !skip_flag) {
 				free(del_role.list);
+				librole_print_error(result);
 				fprintf(stderr,"No such group: %s!\n", argv[optind-1]);
 				goto exit;
 			} else if (result != LIBROLE_OK)
@@ -109,7 +105,7 @@ int main(int argc, char **argv) {
 			result = librole_ver_add(&del_role, tmp_gr);
 			if (result != LIBROLE_OK) {
 				free(del_role.list);
-				fprintf(stderr,"Memory error!\n");
+				librole_print_error(result);
 				goto exit;
 			}
 		}
@@ -127,7 +123,7 @@ int main(int argc, char **argv) {
 			if (result != LIBROLE_OK) {
 				free(new_role.list);
 				free(del_role.list);
-				fprintf(stderr,"Memory error!\n");
+				librole_print_error(result);
 				goto exit;
 			}
 			new_role.gid = G.gr[i].gid;
@@ -146,7 +142,7 @@ int main(int argc, char **argv) {
 				if (result != LIBROLE_OK) {
 					free(new_role.list);
 					free(del_role.list);
-					fprintf(stderr,"Memory error!\n");
+					librole_print_error(result);
 					goto exit;
 				}
 			}
@@ -159,17 +155,20 @@ int main(int argc, char **argv) {
 
 	result = librole_pam_check(pamh, "roledel", &pam_status);
 	if (result != LIBROLE_OK) {
+		librole_print_error(result);
 		fprintf(stderr,"Only root can do it\n");
 		goto exit;
 	}
 
 	result = librole_lock("/etc/role");
 	if (result != LIBROLE_OK) {
+		librole_print_error(result);
 		librole_pam_release(pamh, pam_status);
 		goto exit;
 	}
 
 	result = librole_writing("/etc/role", &G);
+	librole_print_error(result);
 
 	librole_unlock("/etc/role");
 
@@ -177,6 +176,6 @@ int main(int argc, char **argv) {
 
 exit:
 	librole_free_all(&G);
-	return 0;
+	return result;
 }
 

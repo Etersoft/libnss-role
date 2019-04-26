@@ -11,7 +11,7 @@ LIBDEVSUFFIX = ".so"
 
 NSS_NAME = "libnss_role"
 NSS_LIBBASEVERSION = "2"
-NSS_LIBSUBVERSION = "0.0"
+NSS_LIBSUBVERSION = "1.0"
 NSS_LIBFULLVERSION = NSS_LIBBASEVERSION + '.' + NSS_LIBSUBVERSION
 NSS_LIBBASESUFFIX = LIBDEVSUFFIX + '.' + NSS_LIBBASEVERSION
 NSS_LIBFULLSUFFIX = LIBDEVSUFFIX + '.' + NSS_LIBFULLVERSION
@@ -20,7 +20,7 @@ NSS_FULLNAME = NSS_NAME + NSS_LIBFULLSUFFIX
 
 COMMON_NAME = "librole"
 COMMON_LIBBASEVERSION = "0"
-COMMON_LIBSUBVERSION = "0.0"
+COMMON_LIBSUBVERSION = "1.0"
 COMMON_LIBFULLVERSION = COMMON_LIBBASEVERSION + '.' + COMMON_LIBSUBVERSION
 COMMON_LIBBASESUFFIX = LIBDEVSUFFIX + '.' + COMMON_LIBBASEVERSION
 COMMON_LIBFULLSUFFIX = LIBDEVSUFFIX + '.' + COMMON_LIBFULLVERSION
@@ -36,18 +36,21 @@ else:
 if 'NLS_SUPPORT' not in ARGUMENTS or ARGUMENTS['NLS_SUPPORT'] != 'no':
     env['CCFLAGS'] += ['-DENABLE_NLS', '-DLOCALEDIR=\\"/usr/share/locale\\"']
 
+# common modules, skip linking libnss-role with librole
+parser = env.SharedObject('parser', 'parser.c')
+common = env.SharedObject('common', 'common.c')
+
 libenv = env.Clone()
 libenv["SHLIBSUFFIX"] = [NSS_LIBFULLSUFFIX]
 libenv["LINKFLAGS"] = ['-Wl,-soname,' + NSS_SONAME]
-parser = libenv.SharedObject('parser', 'parser.c')
-so = libenv.SharedLibrary(NSS_NAME, ['nss_role.c', parser])
+so = libenv.SharedLibrary(NSS_NAME, ['nss_role.c', common, parser])
 solink = libenv.Command(NSS_SONAME, so[0], 'ln -sf %s %s' % (NSS_FULLNAME, NSS_SONAME))
 
-commonenv = libenv.Clone()
+commonenv = env.Clone()
 commonenv["SHLIBSUFFIX"] = [COMMON_LIBFULLSUFFIX]
 commonenv["LIBS"] = ['pam', 'pam_misc']
 commonenv["LINKFLAGS"] = ['-Wl,-soname,' + 'librole.so.0']
-common = commonenv.SharedLibrary(COMMON_NAME, [parser, 'lock_file.c', 'pam_check.c'])
+common = commonenv.SharedLibrary(COMMON_NAME, [common, parser, 'lock_file.c', 'pam_check.c'])
 commonlink = commonenv.Command(COMMON_SONAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_SONAME))
 commondevlink = commonenv.Command(COMMON_DEVNAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_DEVNAME))
 commonheaders = Glob('include/role/*.h')
@@ -59,7 +62,6 @@ utilenv["LIBPATH"] = '.'
 roleadd = utilenv.Program('roleadd', 'roleadd.c')
 roledel = utilenv.Program('roledel', 'roledel.c')
 rolelst = utilenv.Program('rolelst', 'rolelst.c')
-utilenv1 = env.Clone()
 
 commonenv.Install('$DESTDIR/$LIBDIR/', common)
 commonenv.Install('$DESTDIR/usr/include/role', commonheaders)
