@@ -1,14 +1,16 @@
 Name: libnss-role
-Version: 0.3.0
+Version: 0.3.1
 Release: alt1
 
 Summary: NSS API library and admin tools for roles and privilegies
 
 License: GPLv3
-URL: http://tartarus.ru/projects/libnss-role
+URL: https://github.com/Etersoft/libnss-role
 Group: System/Libraries
-Packager: Pavel Shilovsky <piastry@altlinux.ru>
 
+Packager: Vitaly Lipatov <lav@altlinux.ru>
+
+# https://github.com/Etersoft/libnss-role.git
 Source: %name-%version.tar
 
 Requires(pre): chrooted >= 0.3.5-alt1 chrooted-resolv sed
@@ -71,6 +73,12 @@ update_chrooted all
 %_includedir/role/
 
 %changelog
+* Fri Apr 26 2019 Vitaly Lipatov <lav@altlinux.ru> 0.3.1-alt1
+- change URL, Packager, add source url
+- rolelst: add -n arg to print gid instead of group names
+- print help to stdout
+- roleadd/roledel: improve descriptions
+
 * Fri Apr 26 2019 Vitaly Lipatov <lav@altlinux.ru> 0.3.0-alt1
 - full refactoring
 
