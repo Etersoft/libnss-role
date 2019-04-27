@@ -80,8 +80,8 @@ static int str_to_gid(const char *gr_name, gid_t *result_gid)
 /* check gid and get group name by gid */
 int librole_get_group_name(gid_t gid, char *ans, size_t ans_size)
 {
-	struct group grp, *grp_ptr;
-	void *buffer;
+    struct group grp, *grp_ptr;
+    void *buffer;
     size_t bufsize;
     int err, result;
 	
@@ -101,28 +101,28 @@ int librole_get_group_name(gid_t gid, char *ans, size_t ans_size)
     if  (err != 0) {
         free(buffer);
         return errno_to_result(err);
-	}
-	if (!grp_ptr) {
+    }
+    if (!grp_ptr) {
         free(buffer);
-		return LIBROLE_NO_SUCH_GROUP;
+        return LIBROLE_NO_SUCH_GROUP;
     }
     if (ans) {
-	    strncpy(ans, grp.gr_name, ans_size);
-	    ans[ans_size] = '\0';
+        strncpy(ans, grp.gr_name, ans_size);
+        ans[ans_size] = '\0';
     }
 
     free(buffer);
-	return LIBROLE_OK;
+    return LIBROLE_OK;
 }
 
 /* get gid by group name */
 static int get_gid_by_groupname(const char *gr_name, gid_t *gid)
 {
-	struct group grp, *grp_ptr;
-	void *buffer;
+    struct group grp, *grp_ptr;
+    void *buffer;
     size_t bufsize;
     int err, result;
-	
+
     buffer = get_buffer(_SC_GETGR_R_SIZE_MAX, &bufsize);
     if (!buffer)
         return LIBROLE_MEMORY_ERROR;
@@ -139,17 +139,17 @@ static int get_gid_by_groupname(const char *gr_name, gid_t *gid)
     if  (err != 0) {
         free(buffer);
         return errno_to_result(err);
-	}
-	if (!grp_ptr) {
+    }
+    if (!grp_ptr) {
         free(buffer);
-		return LIBROLE_NO_SUCH_GROUP;
+        return LIBROLE_NO_SUCH_GROUP;
     }
     if (gid) {
         *gid = grp.gr_gid;
     }
 
     free(buffer);
-	return LIBROLE_OK;
+    return LIBROLE_OK;
 }
 
 static int check_group_name(const char *str)
@@ -159,7 +159,7 @@ static int check_group_name(const char *str)
 	if (!len)
 		return LIBROLE_INCORRECT_VALUE;
 
-    /* if there are quotes */
+	/* if there are quotes */
 	if (str[0] == '"' || str[len-1] == '"')
 		return LIBROLE_INCORRECT_VALUE;
 
@@ -191,41 +191,41 @@ int librole_get_gid(const char *gr_name, gid_t *ans)
 /* get username by uid */
 int librole_get_user_name(uid_t uid, char *user_name, size_t user_name_size)
 {
-    size_t bufsize;
+	size_t bufsize;
 	void *buffer;
 	struct passwd pwd;
 	struct passwd* pwd_ptr;
-    int err, result;
+	int err, result;
 
-    buffer = get_buffer(_SC_GETPW_R_SIZE_MAX, &bufsize);
-    if (!buffer)
-        return LIBROLE_MEMORY_ERROR;
+	buffer = get_buffer(_SC_GETPW_R_SIZE_MAX, &bufsize);
+	if (!buffer)
+	return LIBROLE_MEMORY_ERROR;
     
-    for (int i = 0 ; i < 3 ; i++) {
-        err = getpwuid_r(uid, &pwd, buffer, bufsize, &pwd_ptr);
-        if (err != ERANGE)
-            break;
-        result = realloc_buffer(&buffer, &bufsize);
-        if (result != LIBROLE_OK)
-            return result;
-    }
+	for (int i = 0 ; i < 3 ; i++) {
+		err = getpwuid_r(uid, &pwd, buffer, bufsize, &pwd_ptr);
+		if (err != ERANGE)
+			break;
+		result = librole_realloc_buffer(&buffer, &bufsize);
+		if (result != LIBROLE_OK)
+			return result;
+	}
     
-    if  (err != 0) {
-        free(buffer);
-        return errno_to_result(err);
+	if  (err != 0) {
+		free(buffer);
+		return errno_to_result(err);
 	}
 
 	if (!pwd_ptr) {
-        free(buffer);
+		free(buffer);
 		return LIBROLE_NO_SUCH_GROUP;
-    }
+	}
 
-    if (user_name) {
-	    strncpy(user_name, pwd_ptr->pw_name, user_name_size);
-    	user_name[user_name_size - 1 ] = '\0';
-    }
+	if (user_name) {
+		strncpy(user_name, pwd_ptr->pw_name, user_name_size);
+		user_name[user_name_size - 1 ] = '\0';
+	}
 
-    free(buffer);
+	free(buffer);
 	return LIBROLE_OK;
 }
 
@@ -233,8 +233,8 @@ void librole_print_error(int result)
 {
 	const char *errtext = "Unknown error (missed in librole_print_error switch)";
 
-    if (!result)
-        return;
+	if (!result)
+		return;
 
 	switch (result) {
 		case LIBROLE_IO_ERROR:
@@ -246,27 +246,27 @@ void librole_print_error(int result)
 		case LIBROLE_OUT_OF_RANGE:
 			errtext = "Have no enough memory";
 			break;
-        case LIBROLE_NO_SUCH_GROUP:
+	case LIBROLE_NO_SUCH_GROUP:
 			errtext = "No such group";
 			break;
-        case LIBROLE_UNKNOWN_ERROR:
+	case LIBROLE_UNKNOWN_ERROR:
 			errtext = "Unknown error";
 			break;
-        case LIBROLE_NOFILE_ERROR:
+	case LIBROLE_NOFILE_ERROR:
 			errtext = "Have no free file descriptors";
 			break;
-        case LIBROLE_INTERNAL_ERROR:
+	case LIBROLE_INTERNAL_ERROR:
 			errtext = "Internal library error (program bug)";
-	    	break;
-        case LIBROLE_PAM_ERROR:
+		break;
+	case LIBROLE_PAM_ERROR:
 			errtext = "PAM error";
-	    	break;
-        case LIBROLE_INCORRECT_VALUE:
+		break;
+	case LIBROLE_INCORRECT_VALUE:
 			errtext = "Incorrect value";
-	    	break;
-        case LIBROLE_OK:
+		break;
+	case LIBROLE_OK:
 			errtext = "No error";
-	    	break;
+		break;
 	}
 	fprintf(stderr, "Error %d: %s\n", result, errtext);
 }
