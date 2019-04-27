@@ -2,14 +2,9 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <unistd.h>
-#include <grp.h>
-
-#include <security/pam_appl.h>
 
 #include "role/parser.h"
 #include "role/version.h"
-#include "role/pam_check.h"
-#include "role/lock_file.h"
 
 struct option rolelst_opt[] = {
 	{"help", no_argument, 0, 'h'},
@@ -62,114 +57,82 @@ static int parse_options(int argc, char **argv, int *set_flag, int *skip_flag)
 }
 
 int main(int argc, char **argv) {
-	int result, i, set_flag, skip_flag, pam_status;
-	pam_handle_t *pamh;
+	struct librole_graph G;
+	int result, i, set_flag, skip_flag;
+	struct librole_ver new_role;
 
 	if (!parse_options(argc, argv, &set_flag, &skip_flag))
-		goto exit;
+		return 0;
+
+	if (optind >= argc) {
+		print_help();
+		return 1;
+	}
 
 	result = librole_graph_init(&G);
-	if (result != LIBROLE_OK) {
-		librole_print_error(result);
+	if (result != LIBROLE_OK)
 		goto exit;
-	}
 
 	result = librole_reading("/etc/role", &G);
-	if (result != LIBROLE_OK) {
-		librole_print_error(result);
+	if (result != LIBROLE_OK)
 		goto exit;
-	}
 
 	result = librole_ver_init(&new_role);
-	if (result != LIBROLE_OK) {
-		librole_print_error(result);
+	if (result != LIBROLE_OK)
 		goto exit;
-	}
 
-	if (optind < argc) {
-		result = librole_get_gid(argv[optind++], &new_role.gid);
+	result = librole_get_gid(argv[optind++], &new_role.gid);
+	if (result != LIBROLE_OK)
+		goto exit;
+
+	while(optind < argc) {
+		gid_t tmp_gr;
+		result = librole_get_gid(argv[optind++], &tmp_gr);
 		if (result != LIBROLE_OK) {
-			librole_print_error(result);
+			if (skip_flag)
+				continue;
+			free(new_role.list);
+			fprintf(stderr,"No such group: %s!\n", argv[optind-1]);
 			goto exit;
 		}
-		while(optind < argc) {
-			gid_t tmp_gr;
-			result = librole_get_gid(argv[optind++], &tmp_gr);
-			if (result != LIBROLE_OK && !skip_flag) {
-				free(new_role.list);
-				librole_print_error(result);
-				fprintf(stdout,"No such group: %s!\n", argv[optind-1]);
-				goto exit;
-			} else if (result != LIBROLE_OK)
-				continue;
-			result = librole_ver_add(&new_role, tmp_gr);
-			if (result != LIBROLE_OK) {
-				free(new_role.list);
-				librole_print_error(result);
-				goto exit;
-			}
+		result = librole_ver_add(&new_role, tmp_gr);
+		if (result != LIBROLE_OK) {
+			free(new_role.list);
+			goto exit;
 		}
-	} else {
-		print_help();
-		free(new_role.list);
-		goto exit;
 	}
 
-	result = librole_find_id(&G, new_role.gid, &i);
+	result = librole_find_gid(&G, new_role.gid, &i);
 	if (result == LIBROLE_OK) {
 		if (!set_flag) {
 			int j;
 			for(j = 0; j < new_role.size; j++) {
-				int k, exist_in_role = 0;
-				for(k = 0; k < G.gr[i].size; k++)
-					if (G.gr[i].list[k] == new_role.list[j]) {
-						exist_in_role = 1;
-						break;
-					}
-				if (exist_in_role)
+				result = librole_ver_find_gid(&G.gr[i], new_role.list[j], NULL);
+				if (result == LIBROLE_OK)
 					continue;
 				result = librole_ver_add(&G.gr[i], new_role.list[j]);
 				if (result != LIBROLE_OK) {
-					free(new_role.list);
-					librole_print_error(result);
+					librole_ver_free(&new_role);
 					goto exit;
 				}
 			}
-			free(new_role.list);
+			librole_ver_free(&new_role);
 		} else {
-			free(G.gr[i].list);
+			librole_ver_free(&G.gr[i]);
 			G.gr[i] = new_role;
 		}
 	} else {
 		result = librole_graph_add(&G, new_role);
 		if (result != LIBROLE_OK) {
-			free(new_role.list);
-			librole_print_error(result);
+			librole_ver_free(&new_role);
 			goto exit;
 		}
 	}
-	result = librole_pam_check(pamh, "roleadd", &pam_status);
-	if (result != LIBROLE_OK) {
-		librole_print_error(result);
-		fprintf(stdout,"Only root can do it\n");
-		goto exit;
-	}
 
-	result = librole_lock("/etc/role");
-	if (result != LIBROLE_OK) {
-		librole_print_error(result);
-		librole_pam_release(pamh, pam_status);
-		goto exit;
-	}
-
-	result = librole_writing("/etc/role", &G);
-	librole_print_error(result);
-
-	librole_unlock("/etc/role");
-
-	librole_pam_release(pamh, pam_status);
+	result = librole_write("roleadd", &G);
 
 exit:
+	librole_print_error(result);
 	librole_graph_free(&G);
 	return result;
 }

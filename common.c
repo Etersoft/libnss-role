@@ -48,6 +48,9 @@ int librole_realloc_buffer(void **buffer, size_t *size)
     void *newbuffer;
     if (!buffer || !size)
         return LIBROLE_INTERNAL_ERROR;
+#if DEBUG
+    fprintf(stderr,"Realloc %p to %u\n", buffer, newsize);
+#endif
     newbuffer = realloc(*buffer, newsize * sizeof(char));
     if (!newbuffer) {
         free(buffer);
@@ -58,6 +61,35 @@ int librole_realloc_buffer(void **buffer, size_t *size)
 
     *buffer = newbuffer;
     *size = newsize;
+    return LIBROLE_OK;
+}
+
+int librole_en_vector(void **buffer, size_t *capacity, size_t used, size_t elsize)
+{
+    size_t newsize;
+    void *newbuffer;
+
+    if (!buffer || !capacity)
+        return LIBROLE_INTERNAL_ERROR;
+
+    if (used != *capacity)
+        return LIBROLE_OK;
+
+    if (used > *capacity)
+        return LIBROLE_INTERNAL_ERROR;
+
+    newsize = (*capacity) * 2;
+
+    newbuffer = realloc(*buffer, newsize * elsize);
+    if (!newbuffer) {
+        //free(buffer);
+        //*buffer = NULL;
+        //*capacity = 0;
+        return LIBROLE_MEMORY_ERROR;
+    }
+
+    *buffer = newbuffer;
+    *capacity = newsize;
     return LIBROLE_OK;
 }
 
@@ -83,7 +115,7 @@ int librole_get_group_name(gid_t gid, char *ans, size_t ans_size)
     void *buffer;
     size_t bufsize;
     int err, result;
-	
+
     buffer = get_buffer(_SC_GETGR_R_SIZE_MAX, &bufsize);
     if (!buffer)
         return LIBROLE_MEMORY_ERROR;
@@ -165,23 +197,23 @@ static int check_group_name(const char *str)
 	return LIBROLE_OK;
 }
 
-/* get gid by group name */
+/* get real gid by group name or gid */
 int librole_get_gid(const char *gr_name, gid_t *ans)
 {
-    gid_t gid;
-    int result;
+	gid_t gid;
+	int result;
 
-    result = check_group_name(gr_name);
-    if (result != LIBROLE_OK)
+	result = check_group_name(gr_name);
+	if (result != LIBROLE_OK)
 		return result;
  
-    if (str_to_gid(gr_name, &gid))
-        result = librole_get_group_name(gid, NULL, 0);
-    else
-        result = get_gid_by_groupname(gr_name, &gid);
+	if (str_to_gid(gr_name, &gid))
+		result = librole_get_group_name(gid, NULL, 0);
+	else
+		result = get_gid_by_groupname(gr_name, &gid);
     
-    if ((result == LIBROLE_OK) && ans)
-	    *ans = gid;
+	if ((result == LIBROLE_OK) && ans)
+		*ans = gid;
 
 	return result;
 }

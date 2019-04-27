@@ -46,63 +46,28 @@ static int parse_options(int argc, char **argv, int *numeric_flag)
 	return 1;
 }
 
-int print_group(int gid)
-{
-	int result;
-	char gr_name[LIBROLE_MAX_NAME];
-
-	result = librole_get_group_name(gid, gr_name, LIBROLE_MAX_NAME);
-	if (result != LIBROLE_OK) {
-		librole_print_error(result);
-		return result;
-	}
-	printf("%s", gr_name);
-	return LIBROLE_OK;
-}
-
 int main(int argc, char **argv) {
 	struct librole_graph G;
 	int numeric_flag;
-	int result = LIBROLE_OK;
-	int i;
-	
+	int result;
+
 	if (!parse_options(argc, argv, &numeric_flag))
-		goto exit;
-	
+		return 0;
+
 	result = librole_graph_init(&G);
-	if (result != LIBROLE_OK) {
-		librole_print_error(result);
+	if (result != LIBROLE_OK)
 		goto exit;
-	}
+
 	result = librole_reading("/etc/role", &G);
-	if (result != LIBROLE_OK) {
-		librole_print_error(result);
+	if (result != LIBROLE_OK)
 		goto exit;
-	}
-	
-	for(i = 0; i < G.size; i++) {
-		int j;
-		if (numeric_flag) {
-			printf("%u:", G.gr[i].gid);
-		} else {
-			if (print_group(G.gr[i].gid) != LIBROLE_OK)
-				goto exit;
-			putchar(':');
-		}
-		
-		for(j = 0; j < G.gr[i].size; j++) {
-			if (numeric_flag) {
-				printf(" %u", G.gr[i].list[j]);
-			} else {
-				putchar(' ');
-				if (print_group(G.gr[i].list[j]) != LIBROLE_OK)
-					goto exit;
-			}
-		}
-		printf("\n");
-	}
+
+	result = librole_writing("/dev/stdout", &G, numeric_flag);
+	if (result != LIBROLE_OK)
+		goto exit;
 
 exit:
+	librole_print_error(result);
 	librole_graph_free(&G);
 	return result;
 }

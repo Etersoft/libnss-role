@@ -4,6 +4,10 @@
 #include <string.h>
 
 #include "role/parser.h"
+#include "role/pam_check.h"
+#include "role/lock_file.h"
+
+// TODO: separate read/write and graph
 
 int librole_graph_add(struct librole_graph *G, struct librole_ver v)
 {
@@ -65,13 +69,13 @@ int librole_ver_init(struct librole_ver *v)
 	return LIBROLE_OK;
 }
 
-int librole_find_id(struct librole_graph *G, gid_t g, int *id)
+int librole_find_gid(struct librole_graph *G, gid_t g, int *idx)
 {
 	int i;
-
 	for(i = 0; i < G->size; i++) {
 		if (G->gr[i].gid == g) {
-			*id = i;
+			if (idx)
+				*idx = i;
 			return LIBROLE_OK;
 		}
 	}
@@ -79,7 +83,18 @@ int librole_find_id(struct librole_graph *G, gid_t g, int *id)
 	return LIBROLE_NO_SUCH_GROUP;
 }
 
-void librole_free_all(struct librole_graph *G)
+int librole_ver_find_gid(struct librole_ver* v, gid_t g, int *idx)
+{
+	int k;
+	for(k = 0; k < v->size; k++)
+		if (v->list[k] == g) {
+			if (idx)
+				*idx = k;
+			return LIBROLE_OK;
+		}
+	return LIBROLE_NO_SUCH_GROUP;
+}
+
 void librole_ver_free(struct librole_ver *v)
 {
 	free(v->list);
@@ -100,6 +115,7 @@ void librole_graph_free(struct librole_graph *G)
 	G->capacity = 0;
 }
 
+// TODO: move to internal (nss)
 int librole_realloc_groups(long int **size, gid_t ***groups, long int new_size)
 {
 	gid_t *new_groups;
@@ -280,7 +296,7 @@ int librole_dfs(struct librole_graph *G, gid_t v, librole_group_collector *col)
 {
 	int i, j, result;
 
-	result = librole_find_id(G, v, &i);
+	result = librole_find_gid(G, v, &i);
 	if (result != LIBROLE_OK) {
 		result = librole_ver_add(col, v);
 		return result;
@@ -301,27 +317,56 @@ int librole_dfs(struct librole_graph *G, gid_t v, librole_group_collector *col)
 	return LIBROLE_OK;
 }
 
-int librole_writing(const char *file, struct librole_graph *G)
+/* delim: 0 - '', > 0 - ',' before, < 0 - ':' after */
+static int write_group(FILE *f, int gid, int delim, int numeric_flag)
 {
-	int i, j, result = LIBROLE_IO_ERROR;
+	/* print ',' before if needed */
+	if (delim > 0 && fputc(',', f) < 0)
+		return LIBROLE_IO_ERROR;
+
+	if (numeric_flag) {
+		if (fprintf(f, "%u", gid) < 0)
+			return LIBROLE_IO_ERROR;
+	} else {
+		int result;
+		char gr_name[LIBROLE_MAX_NAME];
+		result = librole_get_group_name(gid, gr_name, LIBROLE_MAX_NAME);
+		if (result != LIBROLE_OK)
+			return result;
+		if (fprintf(f, "%s", gr_name) < 0)
+			return LIBROLE_IO_ERROR;
+	}
+
+	/* print ':' after if needed */
+	if (delim < 0 && fputc(':', f) < 0)
+		return LIBROLE_IO_ERROR;
+
+	return LIBROLE_OK;
+}
+
+// TODO: the same like in rolelst
+// TODO: write in a new file and atomically rename
+int librole_writing(const char *file, struct librole_graph *G, int numeric_flag)
+{
+	int i, j, result;
 	FILE *f = fopen(file, "w");
 	if (!f)
-		return result;
+		return LIBROLE_IO_ERROR;
 
 	for(i = 0; i < G->size; i++) {
 		if (!G->gr[i].size)
 			continue;
-		if (fprintf(f, "%u:", G->gr[i].gid) < 0)
+
+		result = write_group(f, G->gr[i].gid, -1, numeric_flag);
+		if (result != LIBROLE_OK)
 			goto libnss_role_writing_exit;
 
 		for(j = 0; j < G->gr[i].size; j++) {
-			if (j)
-				if (fprintf(f, ",") < 0)
-					goto libnss_role_writing_exit;
-			if (fprintf(f, "%u", G->gr[i].list[j]) < 0)
+			result = write_group(f, G->gr[i].list[j], j, numeric_flag);
+			if (result != LIBROLE_OK)
 				goto libnss_role_writing_exit;
 		}
-		if (fprintf(f, "\n") < 0)
+		if (fputc('\n', f) < 0)
 			goto libnss_role_writing_exit;
 	}
 
@@ -329,5 +374,29 @@ int librole_writing(const char *file, struct librole_graph *G)
 
 libnss_role_writing_exit:
 	fclose(f);
+	return result;
+}
+
+int librole_write(const char* pam_role, struct librole_graph *G)
+{
+	int result;
+	int pam_status;
+	pam_handle_t *pamh;
+
+	result = librole_pam_check(pamh, pam_role, &pam_status);
+	if (result != LIBROLE_OK)
+		return result;
+
+	result = librole_lock("/etc/role");
+	if (result != LIBROLE_OK)
+		goto exit;
+
+	result = librole_writing("/etc/role", G, 0);
+
+	librole_unlock("/etc/role");
+
+// TODO: can we release immediately?
+exit:
+	librole_pam_release(pamh, pam_status);
 	return result;
 }

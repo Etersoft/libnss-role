@@ -36,11 +36,14 @@ int librole_realloc_groups(long int **, gid_t ***, long int);
 
 int librole_reading(const char *, struct librole_graph *);
 
-int librole_writing(const char *, struct librole_graph *);
+int librole_writing(const char *, struct librole_graph *, int numeric_flag);
+int librole_write(const char* pam_role, struct librole_graph *G);
 
 int librole_dfs(struct librole_graph *, gid_t, librole_group_collector *);
 
-int librole_find_id(struct librole_graph *, gid_t, int *);
+int librole_find_gid(struct librole_graph *v, gid_t g, int *idx);
+int librole_ver_find_gid(struct librole_ver *v, gid_t g, int *idx);
+
 
 /* get gid by group name */
 int librole_get_gid(const char *gr_name, gid_t *ans);
@@ -55,4 +58,7 @@ void librole_print_error(int result);
 
 /* internal */
 int librole_realloc_buffer(void **buffer, size_t *size);
+int librole_en_vector(void **buffer, size_t *capacity, size_t used, size_t elsize);
+
+
 #endif
