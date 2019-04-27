@@ -53,4 +53,6 @@ int librole_get_group_name(gid_t g, char *ans, size_t ans_size);
 
 void librole_print_error(int result);
 
+/* internal */
+int librole_realloc_buffer(void **buffer, size_t *size);
 #endif

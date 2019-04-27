@@ -42,14 +42,13 @@ static void *get_buffer(int const_name, size_t *actual_size)
 }
 
 /* more buffer size (new size will in size) */
-static int realloc_buffer(void **buffer, size_t *size)
+int librole_realloc_buffer(void **buffer, size_t *size)
 {
     size_t newsize = 2 * (*size);
     void *newbuffer;
     if (!buffer || !size)
         return LIBROLE_INTERNAL_ERROR;
-
-    newbuffer = realloc(*buffer, newsize);
+    newbuffer = realloc(*buffer, newsize * sizeof(char));
     if (!newbuffer) {
         free(buffer);
         *buffer = NULL;
@@ -93,7 +92,7 @@ int librole_get_group_name(gid_t gid, char *ans, size_t ans_size)
         err = getgrgid_r(gid, &grp, buffer, bufsize, &grp_ptr);
         if (err != ERANGE)
             break;
-        result = realloc_buffer(&buffer, &bufsize);
+        result = librole_realloc_buffer((void**)&buffer, &bufsize);
         if (result != LIBROLE_OK)
             return result;
     }
@@ -131,7 +130,7 @@ static int get_gid_by_groupname(const char *gr_name, gid_t *gid)
         err = getgrnam_r(gr_name, &grp, buffer, bufsize, &grp_ptr);
         if (err != ERANGE)
             break;
-        result = realloc_buffer(&buffer, &bufsize);
+        result = librole_realloc_buffer(&buffer, &bufsize);
         if (result != LIBROLE_OK)
             return result;
     }
