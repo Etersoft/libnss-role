@@ -12,7 +12,8 @@ int librole_graph_add(struct librole_graph *G, struct librole_ver v)
 		G->gr = (struct librole_ver *) realloc(G->gr, sizeof(struct librole_ver) * G->capacity);
 		if (!G->gr)
 			return LIBROLE_MEMORY_ERROR;
-		G->used = (int *) malloc(sizeof(int) * G->capacity);
+
+		G->used = (int *) realloc(G->used, sizeof(int) * G->capacity);
 		if (!G->used) {
 			free(G->gr);
 			return LIBROLE_MEMORY_ERROR;
