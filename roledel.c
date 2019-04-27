@@ -60,9 +60,7 @@ static int parse_options(int argc, char **argv, int *remove_flag, int *skip_flag
 }
 
 int main(int argc, char **argv) {
-	struct librole_graph G = {0,0,0,10};
 	int result, i, remove_flag, skip_flag, pam_status;
-	struct librole_ver del_role = {0,0,0,10};
 	pam_handle_t *pamh;
 
 	if (!parse_options(argc, argv, &remove_flag, &skip_flag))
@@ -118,12 +116,11 @@ int main(int argc, char **argv) {
 	result = librole_find_id(&G, del_role.gid, &i);
 	if (result == LIBROLE_OK) {
 		if (!remove_flag) {
-			struct librole_ver new_role = {0, 0, 0, 10};
+			struct librole_ver new_role;
 			result = librole_ver_init(&new_role);
 			if (result != LIBROLE_OK) {
-				free(new_role.list);
-				free(del_role.list);
-				librole_print_error(result);
+				librole_ver_free(&new_role);
+				librole_ver_free(&del_role);
 				goto exit;
 			}
 			new_role.gid = G.gr[i].gid;
@@ -140,13 +137,12 @@ int main(int argc, char **argv) {
 					continue;
 				result = librole_ver_add(&new_role, G.gr[i].list[j]);
 				if (result != LIBROLE_OK) {
-					free(new_role.list);
-					free(del_role.list);
-					librole_print_error(result);
+					librole_ver_free(&new_role);
+					librole_ver_free(&del_role);
 					goto exit;
 				}
 			}
-			free(G.gr[i].list);
+			librole_ver_free(&G.gr[i]);
 			G.gr[i] = new_role;
 		} else
 			G.gr[i].size = 0;
@@ -175,7 +171,7 @@ int main(int argc, char **argv) {
 	librole_pam_release(pamh, pam_status);
 
 exit:
-	librole_free_all(&G);
+	librole_graph_free(&G);
 	return result;
 }
 

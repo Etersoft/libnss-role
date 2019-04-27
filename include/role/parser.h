@@ -29,7 +29,8 @@ int librole_graph_init(struct librole_graph *);
 
 int librole_ver_init(struct librole_ver *);
 
-void librole_free_all(struct librole_graph *);
+void librole_graph_free(struct librole_graph *);
+void librole_ver_free(struct librole_ver *);
 
 int librole_realloc_groups(long int **, gid_t ***, long int);
 

@@ -61,7 +61,7 @@ int print_group(int gid)
 }
 
 int main(int argc, char **argv) {
-	struct librole_graph G = {0,0,0,10};
+	struct librole_graph G;
 	int numeric_flag;
 	int result = LIBROLE_OK;
 	int i;
@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
 	}
 
 exit:
-	librole_free_all(&G);
+	librole_graph_free(&G);
 	return result;
 }
 

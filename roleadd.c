@@ -62,9 +62,7 @@ static int parse_options(int argc, char **argv, int *set_flag, int *skip_flag)
 }
 
 int main(int argc, char **argv) {
-	struct librole_graph G = {0, 0, 0, 10};
 	int result, i, set_flag, skip_flag, pam_status;
-	struct librole_ver new_role = {0, 0, 0, 10};
 	pam_handle_t *pamh;
 
 	if (!parse_options(argc, argv, &set_flag, &skip_flag))
@@ -172,7 +170,7 @@ int main(int argc, char **argv) {
 	librole_pam_release(pamh, pam_status);
 
 exit:
-	librole_free_all(&G);
+	librole_graph_free(&G);
 	return result;
 }
 

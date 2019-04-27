@@ -37,6 +37,8 @@ int librole_ver_add(struct librole_ver *v, gid_t g)
 
 int librole_graph_init(struct librole_graph *G)
 {
+	G->capacity = 10;
+	G->size = 0;
 	G->gr = (struct librole_ver *) malloc(sizeof(struct librole_ver) * G->capacity);
 	if (!G->gr)
 		return LIBROLE_MEMORY_ERROR;
@@ -46,12 +48,16 @@ int librole_graph_init(struct librole_graph *G)
 		free(G->gr);
 		return LIBROLE_MEMORY_ERROR;
 	}
+	memset(G->used, 0, sizeof(int) * G->capacity);
 
 	return LIBROLE_OK;
 }
 
 int librole_ver_init(struct librole_ver *v)
 {
+	v->capacity = 10;
+	v->size = 0;
+	v->gid = 0;
 	v->list = (gid_t *) malloc(sizeof(gid_t) * v->capacity);
 	if (!v->list)
 		return LIBROLE_MEMORY_ERROR;
@@ -74,14 +80,24 @@ int librole_find_id(struct librole_graph *G, gid_t g, int *id)
 }
 
 void librole_free_all(struct librole_graph *G)
+void librole_ver_free(struct librole_ver *v)
+{
+	free(v->list);
+	v->size = 0;
+	v->capacity = 0;
+}
+
+void librole_graph_free(struct librole_graph *G)
 {
 	int i;
 
 	for(i = 0; i < G->size; i++)
-		free(G->gr[i].list);
+		librole_ver_free(&G->gr[i]);
 
 	free(G->gr);
 	free(G->used);
+	G->size = 0;
+	G->capacity = 0;
 }
 
 int librole_realloc_groups(long int **size, gid_t ***groups, long int new_size)

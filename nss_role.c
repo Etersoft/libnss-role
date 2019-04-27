@@ -17,9 +17,9 @@ enum nss_status _nss_role_initgroups_dyn(char *user, gid_t main_group,
 	enum nss_status ret = NSS_STATUS_SUCCESS;
 	pthread_mutex_lock(&mutex);
 
-	struct librole_graph G = {0, 0, 0, 10};
+	struct librole_graph G;
 	int i, result;
-	librole_group_collector col = {0, 0, 0, 10}, ans = {0, 0, 0, 10};
+	librole_group_collector col, ans;
 
 	result = librole_graph_init(&G);
 	if (result != LIBROLE_OK) {
@@ -113,7 +113,7 @@ enum nss_status _nss_role_initgroups_dyn(char *user, gid_t main_group,
 libnss_role_out:
 	free(ans.list);
 	free(col.list);
-	librole_free_all(&G);
+	librole_graph_free(&G);
 	pthread_mutex_unlock(&mutex);
 	return ret;
 }
