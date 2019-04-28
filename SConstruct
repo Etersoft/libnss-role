@@ -32,7 +32,7 @@ env['CCFLAGS'] = ['-Iinclude', '-DPACKAGE=\\"nss_role\\"']
 if 'DEBUG' in ARGUMENTS and ARGUMENTS['DEBUG'] == 'yes':
     env['CCFLAGS'] += ['-DDEBUG', '-g', '-O0']
 else:
-    env['CCFLAGS'] += ['-O2']
+    env['CCFLAGS'] += ['-g', '-O2']
 if 'NLS_SUPPORT' not in ARGUMENTS or ARGUMENTS['NLS_SUPPORT'] != 'no':
     env['CCFLAGS'] += ['-DENABLE_NLS', '-DLOCALEDIR=\\"/usr/share/locale\\"']
 
