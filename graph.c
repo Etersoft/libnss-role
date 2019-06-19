@@ -74,27 +74,27 @@ int librole_role_del(struct librole_graph *G, struct librole_ver del_role)
         return result;
 
     /* create new ver instead old */
-	result = librole_ver_init(&new_role);
-	if (result != LIBROLE_OK) {
-		librole_ver_free(&new_role);
-		return result;
-	}
-	new_role.gid = G->gr[idx].gid;
+    result = librole_ver_init(&new_role);
+    if (result != LIBROLE_OK) {
+        librole_ver_free(&new_role);
+        return result;
+    }
+    new_role.gid = G->gr[idx].gid;
 
-	for(j = 0; j < G->gr[idx].size; j++) {
-		/* skip role to del */
-		result = librole_ver_find_gid(&del_role, G->gr[idx].list[j], NULL);
-		if (result == LIBROLE_OK)
-			continue;
+    for(j = 0; j < G->gr[idx].size; j++) {
+        /* skip role to del */
+        result = librole_ver_find_gid(&del_role, G->gr[idx].list[j], NULL);
+        if (result == LIBROLE_OK)
+            continue;
 
-		result = librole_ver_add(&new_role, G->gr[idx].list[j]);
-		if (result != LIBROLE_OK) {
-			librole_ver_free(&new_role);
-			return result;
-		}
-	}
+        result = librole_ver_add(&new_role, G->gr[idx].list[j]);
+        if (result != LIBROLE_OK) {
+            librole_ver_free(&new_role);
+            return result;
+        }
+    }
 
-	return librole_role_set(G, new_role);
+    return librole_role_set(G, new_role);
 }
 
 
