@@ -77,59 +77,19 @@ int main(int argc, char **argv) {
 	if (result != LIBROLE_OK)
 		goto exit;
 
-	result = librole_ver_init(&new_role);
+	result = librole_create_ver_from_args(argc, argv, optind, &new_role, skip_flag);
 	if (result != LIBROLE_OK)
 		goto exit;
 
-	result = librole_get_gid(argv[optind++], &new_role.gid);
-	if (result != LIBROLE_OK)
-		goto exit;
-
-	while(optind < argc) {
-		gid_t tmp_gr;
-		result = librole_get_gid(argv[optind++], &tmp_gr);
-		if (result != LIBROLE_OK) {
-			if (skip_flag)
-				continue;
-			free(new_role.list);
-			fprintf(stderr,"No such group: %s!\n", argv[optind-1]);
-			goto exit;
-		}
-		result = librole_ver_add(&new_role, tmp_gr);
-		if (result != LIBROLE_OK) {
-			free(new_role.list);
-			goto exit;
-		}
+	if (set_flag)
+		result = librole_role_set(&G, new_role);
+	else {
+		result = librole_role_add(&G, new_role);
+		librole_ver_free(&new_role);
 	}
 
-	result = librole_find_gid(&G, new_role.gid, &i);
-	if (result == LIBROLE_OK) {
-		if (!set_flag) {
-			int j;
-			for(j = 0; j < new_role.size; j++) {
-				result = librole_ver_find_gid(&G.gr[i], new_role.list[j], NULL);
-				if (result == LIBROLE_OK)
-					continue;
-				result = librole_ver_add(&G.gr[i], new_role.list[j]);
-				if (result != LIBROLE_OK) {
-					librole_ver_free(&new_role);
-					goto exit;
-				}
-			}
-			librole_ver_free(&new_role);
-		} else {
-			librole_ver_free(&G.gr[i]);
-			G.gr[i] = new_role;
-		}
-	} else {
-		result = librole_graph_add(&G, new_role);
-		if (result != LIBROLE_OK) {
-			librole_ver_free(&new_role);
-			goto exit;
-		}
-	}
-
-	result = librole_write("roleadd", &G);
+	if (result == LIBROLE_OK)
+		result = librole_write("roleadd", &G);
 
 exit:
 	librole_print_error(result);

@@ -44,6 +44,11 @@ int librole_dfs(struct librole_graph *, gid_t, librole_group_collector *);
 int librole_find_gid(struct librole_graph *v, gid_t g, int *idx);
 int librole_ver_find_gid(struct librole_ver *v, gid_t g, int *idx);
 
+int librole_role_add(struct librole_graph *G, struct librole_ver new_role);
+int librole_role_set(struct librole_graph *G, struct librole_ver new_role);
+
+int librole_role_del(struct librole_graph *G, struct librole_ver del_role);
+int librole_role_drop(struct librole_graph *G, struct librole_ver del_role);
 
 /* get gid by group name */
 int librole_get_gid(const char *gr_name, gid_t *ans);
@@ -60,5 +65,6 @@ void librole_print_error(int result);
 int librole_realloc_buffer(void **buffer, size_t *size);
 int librole_en_vector(void **buffer, size_t *capacity, size_t used, size_t elsize);
 
+int librole_create_ver_from_args(int argc, char **argv, int optind, struct librole_ver *new_role, int skip_flag);
 
 #endif

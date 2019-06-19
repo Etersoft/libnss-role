@@ -305,3 +305,32 @@ void librole_print_error(int result)
 	fprintf(stderr, "Error %d: %s\n", result, errtext);
 }
 
+int librole_create_ver_from_args(int argc, char **argv, int optind, struct librole_ver *new_role, int skip_flag)
+{
+    int result;
+	result = librole_ver_init(new_role);
+	if (result != LIBROLE_OK)
+		return result;
+
+	result = librole_get_gid(argv[optind++], &new_role->gid);
+	if (result != LIBROLE_OK)
+		return result;
+
+	while (optind < argc) {
+		gid_t gid;
+		result = librole_get_gid(argv[optind++], &gid);
+		if (result == LIBROLE_NO_SUCH_GROUP) {
+			if (skip_flag)
+				continue;
+			fprintf(stderr,"No such group: %s!\n", argv[optind-1]);
+			return result;
+		}
+    	if (result != LIBROLE_OK)
+	    	return result;
+
+		result = librole_ver_add(new_role, gid);
+		if (result != LIBROLE_OK)
+			return result;
+	}
+    return LIBROLE_OK;
+}
