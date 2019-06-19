@@ -36,21 +36,25 @@ else:
 if 'NLS_SUPPORT' not in ARGUMENTS or ARGUMENTS['NLS_SUPPORT'] != 'no':
     env['CCFLAGS'] += ['-DENABLE_NLS', '-DLOCALEDIR=\\"/usr/share/locale\\"']
 
+# TODO: link libnss-role with librole
 # common modules, skip linking libnss-role with librole
 parser = env.SharedObject('parser', 'parser.c')
+locking = env.SharedObject('locking', 'lock_file.c')
+pamcheck = env.SharedObject('pamcheck', 'pam_check.c')
 common = env.SharedObject('common', 'common.c')
 
 libenv = env.Clone()
 libenv["SHLIBSUFFIX"] = [NSS_LIBFULLSUFFIX]
+libenv["LIBS"] = ['pam', 'pam_misc']
 libenv["LINKFLAGS"] = ['-Wl,-soname,' + NSS_SONAME]
-so = libenv.SharedLibrary(NSS_NAME, ['nss_role.c', common, parser])
+so = libenv.SharedLibrary(NSS_NAME, ['nss_role.c', common, parser, locking, pamcheck])
 solink = libenv.Command(NSS_SONAME, so[0], 'ln -sf %s %s' % (NSS_FULLNAME, NSS_SONAME))
 
 commonenv = env.Clone()
 commonenv["SHLIBSUFFIX"] = [COMMON_LIBFULLSUFFIX]
 commonenv["LIBS"] = ['pam', 'pam_misc']
 commonenv["LINKFLAGS"] = ['-Wl,-soname,' + COMMON_SONAME]
-common = commonenv.SharedLibrary(COMMON_NAME, [common, parser, 'lock_file.c', 'pam_check.c', 'graph.c'])
+common = commonenv.SharedLibrary(COMMON_NAME, [common, parser, locking, pamcheck, 'graph.c'])
 commonlink = commonenv.Command(COMMON_SONAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_SONAME))
 commondevlink = commonenv.Command(COMMON_DEVNAME, common[0], 'ln -sf %s %s' % (COMMON_FULLNAME, COMMON_DEVNAME))
 commonheaders = Glob('include/role/*.h')
