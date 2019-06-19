@@ -62,6 +62,7 @@ utilenv["LIBPATH"] = '.'
 roleadd = utilenv.Program('roleadd', 'roleadd.c')
 roledel = utilenv.Program('roledel', 'roledel.c')
 rolelst = utilenv.Program('rolelst', 'rolelst.c')
+test_role = utilenv.Program('test_role', 'test_role.c')
 
 commonenv.Install('$DESTDIR/$LIBDIR/', common)
 commonenv.Install('$DESTDIR/usr/include/role', commonheaders)
