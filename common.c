@@ -11,6 +11,9 @@
 
 #include "role/parser.h"
 
+/* how many times try double buffer */
+#define BUFFERCOUNT 100
+
 /* convert errno to librule result */
 static int errno_to_result(int err)
 {
@@ -120,7 +123,7 @@ int librole_get_group_name(gid_t gid, char *ans, size_t ans_size)
     if (!buffer)
         return LIBROLE_MEMORY_ERROR;
     
-    for (int i = 0 ; i < 3 ; i++) {
+    for (int i = 0 ; i < BUFFERCOUNT ; i++) {
         err = getgrgid_r(gid, &grp, buffer, bufsize, &grp_ptr);
         if (err != ERANGE)
             break;
@@ -158,7 +161,7 @@ static int get_gid_by_groupname(const char *gr_name, gid_t *gid)
     if (!buffer)
         return LIBROLE_MEMORY_ERROR;
     
-    for (int i = 0 ; i < 3 ; i++) {
+    for (int i = 0 ; i < BUFFERCOUNT ; i++) {
         err = getgrnam_r(gr_name, &grp, buffer, bufsize, &grp_ptr);
         if (err != ERANGE)
             break;
@@ -232,7 +235,7 @@ int librole_get_user_name(uid_t uid, char *user_name, size_t user_name_size)
 	if (!buffer)
 	return LIBROLE_MEMORY_ERROR;
     
-	for (int i = 0 ; i < 3 ; i++) {
+	for (int i = 0 ; i < BUFFERCOUNT ; i++) {
 		err = getpwuid_r(uid, &pwd, buffer, bufsize, &pwd_ptr);
 		if (err != ERANGE)
 			break;
