@@ -1,6 +1,6 @@
-.TH ROLEDEL "18" "October 2010" "libnss_role" "Tartarus User's Manual"
+.TH ROLEDEL "8" "" "" "libnss-role manual"
 .SH NAME
-roledel \- Delete roles and remove priviledges from role
+roledel \- Remove roles and priviledges from role
 .SH SYNOPSIS
 .B roledel
 [\fI-m\fR] \fIROLE \fR[\fIGROUP*\fR]\fR
@@ -8,9 +8,9 @@ roledel \- Delete roles and remove priviledges from role
 .B roledel
 [\fI-r\fR] \fIROLE\fR
 .SH DESCRIPTION
-roledel is utility allows to remove priviledges groups from role groups.
-This mean that all users at role group excludes from all
-privileges groups which removed from modified role.
+roledel is an utility which allows to remove priviledges and groups from role groups.
+This mean that all users at role group get excluded from all
+privileges groups which are removed from the modified role.
 .SH "OPTIONS"
 .TP
 \fB\-h\fR [ \fB\-\-help\fR ]
@@ -24,14 +24,10 @@ skipping for missed privilegies instead error
 .TP
 \fB\-v\fR [ \fB\-\-version\fR ]
 print the version of roledel being used
+.SH "FEEDBACK"
+Send bug reports and pull requests to
+https://github.com/Etersoft/libnss-role
 .SH "SEE ALSO"
-The full documentation for
-.B roleadd
-is maintained as part of documentation of
-.B Tartarus
-project available at:
-.br
-.BR http://tartarus.ru/projects/libnss-role
 .PP
 .BR roleadd (8),
-.BR rolelst (8),
+.BR rolelst (8)
