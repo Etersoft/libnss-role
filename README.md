@@ -33,9 +33,8 @@ This module implements such permission management model.
 
 ## How to build
 In order to build this project, you will need:
-* boost (program_options, spirit)
 * scons
-* gcc-c++
+* C++ compiler (e.g. gcc-c++)
 * headers for glibc, pam
 
 After installing all of the above, enter the directory with the source code and run:
