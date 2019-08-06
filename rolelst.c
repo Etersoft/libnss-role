@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
     if (result != LIBROLE_OK)
         goto exit;
 
-    result = librole_reading("/etc/role", &G);
+    result = librole_reading(LIBROLE_CONFIG, &G);
     if (result != LIBROLE_OK)
         goto exit;
 

@@ -387,13 +387,13 @@ int librole_write(const char* pam_role, struct librole_graph *G)
     if (result != LIBROLE_OK)
         return result;
 
-    result = librole_lock("/etc/role");
+    result = librole_lock(LIBROLE_CONFIG);
     if (result != LIBROLE_OK)
         goto exit;
 
-    result = librole_writing("/etc/role", G, 0);
+    result = librole_writing(LIBROLE_CONFIG, G, 0);
 
-    librole_unlock("/etc/role");
+    librole_unlock(LIBROLE_CONFIG);
 
 // TODO: can we release immediately?
 exit:

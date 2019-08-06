@@ -15,5 +15,7 @@
 #define LIBROLE_INCORRECT_VALUE     148
 #define LIBROLE_OK			0
 
+#define LIBROLE_CONFIG "/etc/role"
+
 #endif
 
