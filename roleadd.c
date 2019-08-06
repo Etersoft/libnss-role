@@ -83,10 +83,8 @@ int main(int argc, char **argv) {
 
     if (set_flag)
         result = librole_role_set(&G, new_role);
-    else {
+    else
         result = librole_role_add(&G, new_role);
-        librole_ver_free(&new_role);
-    }
 
     if (result == LIBROLE_OK)
         result = librole_write("roleadd", &G);

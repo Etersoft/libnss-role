@@ -89,8 +89,6 @@ int main(int argc, char **argv) {
     if (result == LIBROLE_OK)
         result = librole_write("roledel", &G);
 
-    librole_ver_free(&del_role);
-
 exit:
     librole_print_error(result);
     librole_graph_free(&G);
