@@ -204,7 +204,7 @@ static int parse_line(char *line, struct librole_graph *G)
     comment = select_line_part(line, len, &last, &i, ':');
 
     if (comment && *last == '\0')
-        return result;
+        goto libnss_role_parse_line_error;
 
     drop_quotes(&last);
     result = librole_get_gid(last, &role.gid);
@@ -255,8 +255,10 @@ int librole_reading(const char *s, struct librole_graph *G)
         return LIBROLE_OUT_OF_RANGE;
 
     f = fopen(s, "r");
-    if (!f)
-        return LIBROLE_IO_ERROR;
+    if (!f) {
+        result = LIBROLE_IO_ERROR;
+        goto libnss_role_reading_out_free;
+    }
     
     while(1) {
         c = fgetc(f);
@@ -287,8 +289,9 @@ int librole_reading(const char *s, struct librole_graph *G)
     }
     
 libnss_role_reading_out:
-    free(str);
     fclose(f);
+libnss_role_reading_out_free:
+    free(str);
     return result;
 }
 
