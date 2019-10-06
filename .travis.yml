@@ -19,6 +19,11 @@ install:
   - sudo apt-get install scons
 
 script:
+  - if [[ "${COVERITY_SCAN_BRANCH}" == 1 ]];
+      then
+        echo "Don't build on coverity_scan branch.";
+        exit 0;
+    fi
   - scons
 
 addons:
@@ -29,4 +34,4 @@ addons:
     notification_email: lav@etersoft.ru
     build_command_prepend: 
     build_command: scons
-    branch_pattern: coverity_scan
+    branch_pattern: sisyphus

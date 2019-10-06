@@ -1,4 +1,4 @@
-# libnss-role
+# libnss-role [![Build Status](https://travis-ci.org/Etersoft/libnss-role.svg?branch=master)](https://travis-ci.org/Etersoft/libnss-role) [![Coverity Scan Build Status](https://scan.coverity.com/projects/etersoft-libnss-role/badge.svg)](https://scan.coverity.com/projects/etersoft-libnss-role)
 
 Библиотека для NSS и набор инструментов для администрирования ролей и привилегий.
 Этот README также доступен на [английском (English)](README.md)
