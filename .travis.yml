@@ -18,6 +18,9 @@ before_install:
 install:
   - sudo apt-get install scons
 
+script:
+  - scons
+
 addons:
   coverity_scan:
     project:
