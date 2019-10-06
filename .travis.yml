@@ -1,12 +1,13 @@
 language: c
 compiler:
   - gcc
+  - clang
 
 env:
   global:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
    #   via the "travis encrypt" command using the project repo's public key
-   - secure: "MQ9Q5cvFggoZOYP6/kVYRwR731v4BNKlCEm5VSo4aPdPPpNFRyJyBm0RRlVB68AEHGYm2p5v2AM8BhMbzVYwo7q+Yb7IIdaOJXmPS9UdN2nF1T2KqfhHkblcbH0Z2zk1Ym+R+S5mbS1Gg59JlXoYT0A0MGQIbSkIoABRD2SM4UPq1bchoftd8JzXPJgZLXBmzX3ZZ8wHNChKR/FXh5LJPbCXAUCl686v3IaHf4JNP3mkgNZ7NRUKsJV0HXV2jl4Ag3lTDCp91HtZXoC7Nt6FzPnYaym6teGAG4kzviEdeHJmTn9yrXL7sGtYft88bkrB/XEDVIDjjYF57UeIl4ePKqMo/I9bTGb2/GZ2VHvi1wbgbriLZ0JD+6nhmYoXi02RzP5kOGquzpt+g0T3N80EgxiIOcFXe5svs75G0bRqyvuNLsk30KibwNB5ZUv5rjEu6AJNIrXp8vSqSnL6x/1CZO6dlA0RpaafxUv6GIi/COZ07YE3aUOrOI03P2DQWrdOTqgP3HW5zRhC6Q5tZU0bOmaiOUxYD2Lc+yn8+jIw+PIlBUfyQv+mTBZg81WxlwSwg6VIoo5ohu0JIF1gCSbjqnDW8aFL52YCQoJhjWrt54Jb0pLnbvjZc9/7eN1bOOLs9qADRlyEr4Mg7+aSF7B9l2IOuUT96do4x2i96cxPuxU="
+   - secure: "RT2pH9ro/wD4/TbfkhWzCN3/xh+6XoZag3yZEY8As48B7Gep4qIoM/J1+Ck5x0Kx9RnleICSQE/4hNT87xwM5xxtVxCDHoWkIXgMiYyvY2H/yuOLDIIkUXEEG3vk6EbV/yT9z5uqdoMPV/6G6S6AZQchq3GYJZPksjaxf8IaNhi/9tf4+Y3eDATvHLCrfJOShnkwjcWKohop1vshlY1NTB+a/Hlub9x2yDaSr8+QcXmv5PwR/XoNVgtUUfvzPvLoEzg5sGCtsMYZcJxgaWdPKYBTsBjcop6giOBqlemJEUBPJlRYWOQlAu9zpHf7TNCdwzhY0KUlao1rdGtZVzAk62CN1zgqFzV+upJzuM5MILtmtKPeC6wtwELlyd6ra68W4piei1/7Smtknh7seuRDQZdVvI6CiuUzrq9k4oFkIpo0Ni0Ej04VDDMM4kebFbmBXIlAPt4KaN4Cg4trjLp25cPvYhxFVYkgplhfTfsRf5mzTAUT8Z+7m8RfbCuuHHPBcoLyast1x6wssgeonwEvk4PCCqRpUdxs6+LaoXS7ru3YTORy+8c2oXsMNIRkw+Bbrk3gpqQDRQ12sDEmnUBv1muCX6X+jfZGYpYy59N2tHwIZwqM37JjkxL6pHzjHWrNyjy7D+UhoK9GzB0CGnSOXXvAVHsSIQTv9SpX2IUFv9k="
 
 branches:
   only:
@@ -30,8 +31,8 @@ addons:
   coverity_scan:
     project:
       name: "Etersoft/libnss-role"
-      description: "NSS API library and admin tools for roles and privilegies"
+      description: "NSS API library and admin tools for roles and privilegies build submitted via Travis CI"
     notification_email: lav@etersoft.ru
     build_command_prepend: 
     build_command: scons
-    branch_pattern: sisyphus
+    branch_pattern: coverity_scan
