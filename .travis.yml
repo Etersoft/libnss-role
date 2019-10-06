@@ -34,6 +34,6 @@ addons:
       name: "Etersoft/libnss-role"
       description: "NSS API library and admin tools for roles and privilegies build submitted via Travis CI"
     notification_email: lav@etersoft.ru
-    build_command_prepend: 
+    build_command_prepend: echo "P_N: $PROJECT_NAME C_S: $COVERITY_SCAN_TOKEN"
     build_command: scons
     branch_pattern: coverity_scan
