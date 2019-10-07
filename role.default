@@ -1,2 +1,4 @@
 # Roles and privileges (based on system groups) - is groups in groups mechanism.
 # Format - ROLE: PRIV1, PRIV2, ... where ROLEs and PRIVs is name or id of group.
+
+#users: audio, cdrom, video, uucp
