@@ -286,16 +286,18 @@ int librole_reading(const char *s, struct librole_graph *G)
     unsigned long id = 0;
     int c;
 
-    str = malloc(len * sizeof(char));
-    if (!str)
-        return LIBROLE_OUT_OF_RANGE;
-
     f = fopen(s, "r");
     if (!f) {
         result = LIBROLE_IO_ERROR;
-        goto libnss_role_reading_out_free;
+        return result;
     }
-    
+
+    str = malloc(len * sizeof(char));
+    if (!str) {
+        result = LIBROLE_OUT_OF_RANGE;
+        fclose(f);
+        return result;
+    }
     while(1) {
         c = fgetc(f);
         if (c == EOF)
@@ -323,11 +325,10 @@ int librole_reading(const char *s, struct librole_graph *G)
         if (result != LIBROLE_OK)
             goto libnss_role_reading_out;
     }
-    
+
 libnss_role_reading_out:
-    fclose(f);
-libnss_role_reading_out_free:
     free(str);
+    fclose(f);
     return result;
 }
 
