@@ -74,18 +74,19 @@ int main(int argc, char **argv) {
         goto exit;
 
     result = librole_reading("/etc/role", &G);
+
+/*  skip reading error, will create the file later
     if (result != LIBROLE_OK)
         goto exit;
-
+*/
     result = librole_create_ver_from_args(argc, argv, optind, &new_role, skip_flag);
     if (result != LIBROLE_OK)
         goto exit;
 
     if (set_flag)
-        result = librole_role_set(&G, new_role);
+        result = librole_role_set(&G, &new_role);
     else {
-        result = librole_role_add(&G, new_role);
-        librole_ver_free(&new_role);
+        result = librole_role_add(&G, &new_role);
     }
 
     if (result == LIBROLE_OK)

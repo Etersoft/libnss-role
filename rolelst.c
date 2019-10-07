@@ -68,6 +68,8 @@ int main(int argc, char **argv) {
 
 exit:
     librole_print_error(result);
+    if (result == LIBROLE_IO_ERROR)
+        fprintf(stderr, "File %s is missed.\n", "/etc/role");
     librole_graph_free(&G);
     return result;
 }

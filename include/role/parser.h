@@ -12,8 +12,6 @@ struct librole_ver {
 	int capacity;
 };
 
-typedef struct librole_ver librole_group_collector;
-
 struct librole_graph {
 	struct librole_ver *gr;
 	int *used;
@@ -21,31 +19,29 @@ struct librole_graph {
 	int capacity;
 };
 
-int librole_graph_add(struct librole_graph *, struct librole_ver);
+int librole_graph_add(struct librole_graph *G, struct librole_ver *new_role);
 
 int librole_ver_add(struct librole_ver *, gid_t);
 
-int librole_graph_init(struct librole_graph *);
+int librole_graph_init(struct librole_graph *G);
 
 int librole_ver_init(struct librole_ver *);
 
 void librole_graph_free(struct librole_graph *);
 void librole_ver_free(struct librole_ver *);
 
-int librole_realloc_groups(long int **, gid_t ***, long int);
-
 int librole_reading(const char *, struct librole_graph *);
 
 int librole_writing(const char *, struct librole_graph *, int numeric_flag);
 int librole_write(const char* pam_role, struct librole_graph *G);
 
-int librole_dfs(struct librole_graph *, gid_t, librole_group_collector *);
+int librole_dfs(const struct librole_graph *, gid_t, struct librole_ver *);
 
-int librole_find_gid(struct librole_graph *v, gid_t g, int *idx);
-int librole_ver_find_gid(struct librole_ver *v, gid_t g, int *idx);
+int librole_find_gid(const struct librole_graph *v, gid_t g, int *idx);
+int librole_ver_find_gid(const struct librole_ver *v, gid_t g, int *idx);
 
-int librole_role_add(struct librole_graph *G, struct librole_ver new_role);
-int librole_role_set(struct librole_graph *G, struct librole_ver new_role);
+int librole_role_add(struct librole_graph *G, struct librole_ver *new_role);
+int librole_role_set(struct librole_graph *G, struct librole_ver *new_role);
 
 int librole_role_del(struct librole_graph *G, struct librole_ver del_role);
 int librole_role_drop(struct librole_graph *G, struct librole_ver del_role);

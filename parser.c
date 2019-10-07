@@ -9,7 +9,7 @@
 
 // TODO: separate read/write and graph
 
-int librole_graph_add(struct librole_graph *G, struct librole_ver v)
+int librole_graph_add(struct librole_graph *G, struct librole_ver *new_role)
 {
     if (G->size == G->capacity) {
         G->capacity <<= 1;
@@ -19,11 +19,11 @@ int librole_graph_add(struct librole_graph *G, struct librole_ver v)
 
         G->used = (int *) realloc(G->used, sizeof(int) * G->capacity);
         if (!G->used) {
-            free(G->gr);
+            /* free(G->gr); */
             return LIBROLE_MEMORY_ERROR;
         }
     }
-    G->gr[G->size++] = v;
+    G->gr[G->size++] = *new_role;
     return LIBROLE_OK;
 }
 
@@ -69,7 +69,7 @@ int librole_ver_init(struct librole_ver *v)
     return LIBROLE_OK;
 }
 
-int librole_find_gid(struct librole_graph *G, gid_t g, int *idx)
+int librole_find_gid(const struct librole_graph *G, gid_t g, int *idx)
 {
     int i;
     for(i = 0; i < G->size; i++) {
@@ -83,7 +83,7 @@ int librole_find_gid(struct librole_graph *G, gid_t g, int *idx)
     return LIBROLE_NO_SUCH_GROUP;
 }
 
-int librole_ver_find_gid(struct librole_ver* v, gid_t g, int *idx)
+int librole_ver_find_gid(const struct librole_ver* v, gid_t g, int *idx)
 {
     int k;
     for(k = 0; k < v->size; k++)
@@ -113,24 +113,6 @@ void librole_graph_free(struct librole_graph *G)
     free(G->used);
     G->size = 0;
     G->capacity = 0;
-}
-
-// TODO: move to internal (nss)
-int librole_realloc_groups(long int **size, gid_t ***groups, long int new_size)
-{
-    gid_t *new_groups;
-
-    new_groups = (gid_t *)
-        realloc((**groups),
-            new_size * sizeof(***groups));
-
-    if (!new_groups)
-        return LIBROLE_MEMORY_ERROR;
-
-    **groups = new_groups;
-    **size = new_size;
-
-    return LIBROLE_OK;
 }
 
 /* return 1 if finished on the start of the comment, otherwise - return 0 */
@@ -190,7 +172,7 @@ static int parse_line(char *line, struct librole_graph *G)
     unsigned long len = strlen(line);
     unsigned long i = 0;
     char *last = line;
-    struct librole_ver role = {0, 0, 0, 10};
+    struct librole_ver role;
     int comment = 0;
 
     /* skip blank line */
@@ -215,29 +197,29 @@ static int parse_line(char *line, struct librole_graph *G)
         if (i >= len)
             break;
         last = line + i;
-        gid_t gr;
+        gid_t group;
 
         comment = select_line_part(line, len, &last, &i, ',');
 
         drop_quotes(&last);
-        result = librole_get_gid(last, &gr);
+        result = librole_get_gid(last, &group);
         if (result == LIBROLE_NO_SUCH_GROUP)
             continue;
         if (result != LIBROLE_OK)
             goto libnss_role_parse_line_error;
 
-        result = librole_ver_add(&role, gr);
+        result = librole_ver_add(&role, group);
         if (result != LIBROLE_OK)
             goto libnss_role_parse_line_error;
     }
 
-    result = librole_graph_add(G, role);
+    result = librole_graph_add(G, &role);
     if (result != LIBROLE_OK)
         goto libnss_role_parse_line_error;
     return result;
 
 libnss_role_parse_line_error:
-    free(role.list);
+    librole_ver_free(&role);
     return result;
 }
 
@@ -293,19 +275,20 @@ libnss_role_reading_out:
     return result;
 }
 
-int librole_dfs(struct librole_graph *G, gid_t v, librole_group_collector *col)
+/* put all privileges for the group in to col list */
+int librole_dfs(const struct librole_graph *G, gid_t group, struct librole_ver *col)
 {
     int i, j, result;
 
-    result = librole_find_gid(G, v, &i);
+    result = librole_find_gid(G, group, &i);
     if (result != LIBROLE_OK) {
-        result = librole_ver_add(col, v);
+        result = librole_ver_add(col, group);
         return result;
     }
 
     if (G->used[i])
         return LIBROLE_OK;
-    result = librole_ver_add(col, v);
+    result = librole_ver_add(col, group);
     if (result != LIBROLE_OK)
         return result;
     G->used[i] = 1;
