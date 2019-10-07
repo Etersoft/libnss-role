@@ -250,14 +250,15 @@ int librole_reading(const char *s, struct librole_graph *G)
     unsigned long id = 0;
     int c;
 
-    str = malloc(len * sizeof(char));
-    if (!str)
-        return LIBROLE_OUT_OF_RANGE;
-
     f = fopen(s, "r");
     if (!f)
         return LIBROLE_IO_ERROR;
     
+    str = malloc(len * sizeof(char));
+    if (!str) {
+        result = LIBROLE_OUT_OF_RANGE;
+        goto libnss_role_reading_out;
+    }
     while(1) {
         c = fgetc(f);
         if (c == EOF)
