@@ -1,13 +1,14 @@
-language: c
-compiler:
-  - gcc
-  - clang
-
 env:
   global:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
    #   via the "travis encrypt" command using the project repo's public key
-   - secure: "RT2pH9ro/wD4/TbfkhWzCN3/xh+6XoZag3yZEY8As48B7Gep4qIoM/J1+Ck5x0Kx9RnleICSQE/4hNT87xwM5xxtVxCDHoWkIXgMiYyvY2H/yuOLDIIkUXEEG3vk6EbV/yT9z5uqdoMPV/6G6S6AZQchq3GYJZPksjaxf8IaNhi/9tf4+Y3eDATvHLCrfJOShnkwjcWKohop1vshlY1NTB+a/Hlub9x2yDaSr8+QcXmv5PwR/XoNVgtUUfvzPvLoEzg5sGCtsMYZcJxgaWdPKYBTsBjcop6giOBqlemJEUBPJlRYWOQlAu9zpHf7TNCdwzhY0KUlao1rdGtZVzAk62CN1zgqFzV+upJzuM5MILtmtKPeC6wtwELlyd6ra68W4piei1/7Smtknh7seuRDQZdVvI6CiuUzrq9k4oFkIpo0Ni0Ej04VDDMM4kebFbmBXIlAPt4KaN4Cg4trjLp25cPvYhxFVYkgplhfTfsRf5mzTAUT8Z+7m8RfbCuuHHPBcoLyast1x6wssgeonwEvk4PCCqRpUdxs6+LaoXS7ru3YTORy+8c2oXsMNIRkw+Bbrk3gpqQDRQ12sDEmnUBv1muCX6X+jfZGYpYy59N2tHwIZwqM37JjkxL6pHzjHWrNyjy7D+UhoK9GzB0CGnSOXXvAVHsSIQTv9SpX2IUFv9k="
+  - secure: "CdLEA9BQaQeKOarC7drslgk7nqu3ha/QZ98WZG7x/eaMubp5IbVVMiE2nRrpcMz7CJUCaCIe+TleC8AGcDS7shj8gwgUzDq6EdKf2nje59bpPHhQMzuqI+tAZAnSakdXglvWpd/3e3MRuAKx2cCNCdGukQwOLZ4GAFSMFykMGt0="
+
+
+language: c
+compiler:
+  - gcc
+  - clang
 
 branches:
   only:
@@ -34,6 +35,6 @@ addons:
       name: "Etersoft/libnss-role"
       description: "NSS API library and admin tools for roles and privilegies build submitted via Travis CI"
     notification_email: lav@etersoft.ru
-    build_command_prepend: echo "P_N: $PROJECT_NAME C_S: $COVERITY_SCAN_TOKEN"
+    build_command_prepend: echo "P_N: ${PROJECT_NAME} C_S: ${COVERITY_SCAN_TOKEN}"
     build_command: scons
     branch_pattern: coverity_scan
