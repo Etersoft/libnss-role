@@ -53,9 +53,6 @@ int librole_role_drop(struct librole_graph *G, struct librole_ver del_role);
 /* get gid by group name */
 int librole_get_gid(const char *gr_name, gid_t *ans);
 
-/* get user name by uid */
-int librole_get_user_name(uid_t uid, char *user_name, size_t user_name_size);
-
 /* get group name by uid */
 int librole_get_group_name(gid_t g, char *ans, size_t ans_size);
 
