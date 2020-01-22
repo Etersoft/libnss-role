@@ -9,7 +9,7 @@
 struct option rolelst_opt[] = {
     {"help", no_argument, 0, 'h'},
     {"remove", no_argument, 0, 'r'},
-    {"skip_errors", no_argument, 0, 'm'},
+    {"skip-missing-groups", no_argument, 0, 'm'},
     {"version", no_argument, 0, 'v'}
 };
 
@@ -21,7 +21,7 @@ static void print_help(void)
     fprintf(stdout,
         "\t-r [ --remove ]\t\tremove all privileges from role\n");
     fprintf(stdout,
-        "\t-m [ --skip-errors ]\tskip missed privileges\n");
+        "\t-m [ --skip-missing-groups ]\tskip missed privileges\n");
     fprintf(stdout,
         "\t-v [ --version]\t\tprint roledel version being used\n");
     fprintf(stdout, "\n");
