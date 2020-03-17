@@ -10,7 +10,8 @@
 
 ## Introduction
 
-**libnss-role** is libc module to provide functionality analogous to
+**libnss-role** is an NSS libc module that implements adding groups to
+groups for Linux / Unix systems and also provides functionality similar to
 Windows' "Restricted Groups".
 
 ## Dependencies
