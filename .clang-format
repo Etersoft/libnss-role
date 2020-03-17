@@ -1,0 +1,64 @@
+# vi: ft=yaml
+---
+
+#BasedOnStyle: LLVM
+AlignAfterOpenBracket: DontAlign
+AlignConsecutiveDeclarations: false
+#AlignConsecutiveMacros: false
+AlignEscapedNewlines: DontAlign
+AlignOperands: false
+AlignTrailingComments: false
+#AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: true
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBraces: Custom
+# BreakBeforeBraces: Allman
+BraceWrapping:
+#AfterCaseLabel: true
+  AfterEnum: true
+  AfterStruct: true
+  AfterControlStatement: true
+  AfterFunction: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeElse: true
+  SplitEmptyFunction: true
+BreakBeforeBinaryOperators: All
+BreakStringLiterals: true
+ColumnLimit: 80
+ContinuationIndentWidth: 4
+FixNamespaceComments: true
+IncludeBlocks: Preserve
+#IndentCaseBlocks: false
+IndentCaseLabels: false
+#IndentGotoLabels: false
+IndentPPDirectives: AfterHash
+IndentWidth: 4
+IndentWrappedFunctionNames: false
+KeepEmptyLinesAtTheStartOfBlocks: false
+Language: Cpp
+PointerAlignment: Right
+ReflowComments: true
+SpaceAfterCStyleCast: true
+#SpaceAfterLogicalNot: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+#SpaceBeforeSquareBrackets: false
+#SpaceInEmptyBlock: false
+SpaceInEmptyParentheses: false
+SpacesInCStyleCastParentheses: false
+#SpacesInConditionalStatement: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+TabWidth: 4
+#UseCRLF: false
+UseTab: Never
+
