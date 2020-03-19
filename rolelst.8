@@ -1,11 +1,14 @@
-.TH ROLELST "18" "October 2010" "libnss_role" "Tartarus User's Manual"
+.TH ROLELST "8" "March 2020" "libnss-role" ""
 .SH NAME
 rolelst \- Print list of roles and priviledge
 .SH SYNOPSIS
 .B rolelst
 [\fIROLES*\fR]\fR
 .SH DESCRIPTION
-rolelst is utility prints current list of roles and privileges.
+rolelst is utility prints current list of roles and privileges. The
+data is read from \fI/etc/role\fR file and starting from 0.5.0 version
+it is also \fI/etc/role.d\fR directory supported to allow installing
+separate role configurations.
 .SH OPTIONS
 .TP
 \fB\-h\fR [ \fB\-\-help\fR ]
@@ -13,14 +16,11 @@ produce help message
 .TP
 \fB\-v\fR [ \fB\-\-version\fR ]
 print the version of rolelst being used
+.TP
+\fB\-V\fR [ \fB\-\-verbose\fR ]
+print data read from only \fI/etc/role\fR and after merge with
+\fI/etc/role.d\fR separately.
 .SH "SEE ALSO"
-The full documentation for
-.B roleadd
-is maintained as part of documentation of
-.B Tartarus
-project available at:
-.br
-.BR http://tartarus.ru/projects/libnss-role
 .PP
 .BR roleadd (8),
 .BR roledel (8),
