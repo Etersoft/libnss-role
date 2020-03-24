@@ -2,8 +2,11 @@
 # Suppress warning emerging from mentioning this macro in changelog
 %define _sysconfigdir /etc
 
+# Enable cmake RPATH for unit tests
+%global _cmake_skip_rpath %nil
+
 Name: libnss-role
-Version: 0.4.1
+Version: 0.5.0
 Release: alt1
 
 Summary: NSS API library and admin tools for roles and privilegies
@@ -46,23 +49,20 @@ NSS API library for roles and privilegies.
 %setup
 
 %build
-mkdir build
-cd build
-cmake \
+%cmake \
 	-DNSS_LIBDIR=/%_lib \
 	-DROLE_LIBDIR=%_libdir \
 	-DMANDIR=%_man8dir \
-	-DCMAKE_INSTALL_PREFIX:PATH=/usr \
-	..
-make
+	-DCMAKE_INSTALL_PREFIX:PATH=%_prefix
+%cmake_build
 
 %check
-cd build
-make test
+cd BUILD
+%make_build test
+mkdir -p %buildroot%_sysconfdir/role.d
 
 %install
-cd build
-make DESTDIR=%buildroot install
+%cmakeinstall_std
 
 %post
 if [ "$1" = "1" ]; then
@@ -82,12 +82,13 @@ fi
 update_chrooted all
 
 %files
-%config(noreplace) %_sysconfdir/role
+%config(noreplace) %verify(not md5 size mtime) %_sysconfdir/role
+%dir %_sysconfdir/role.d
 %_sysconfdir/pam.d/role*
-/%_lib/libnss_*.so*
+/%_lib/libnss_*.so.*
 %_sbindir/*
 %_bindir/*
-%_libdir/*.so*
+%_libdir/*.so.*
 %_man8dir/*
 
 %files devel
@@ -95,6 +96,14 @@ update_chrooted all
 %_includedir/role/
 
 %changelog
+* Wed Apr 15 2020 Evgeny Sinelnikov <sin@altlinux.org> 0.5.0-alt1
+- Add support /etc/role.d directory as addition installable configuration
+- Replace build system to cmake
+- Add unit testing
+
+* Sat Apr 04 2020 Igor Vlasenko <viy@altlinux.ru> 0.4.1-alt1.1
+- NMU: fixed SConstruct
+
 * Tue Aug 06 2019 Evgeny Sinelnikov <sin@altlinux.org> 0.4.1-alt1
 - Fix double memory free with crash before writing (Closes: 37077)
 
