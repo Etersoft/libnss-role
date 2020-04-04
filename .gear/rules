@@ -1,2 +1,3 @@
 tar: .
 spec: .gear/libnss-role.spec
+copy?: .gear/*.patch

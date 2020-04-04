@@ -1,0 +1,10 @@
+diff --git a/SConstruct b/SConstruct
+index 75d1631..9f3dc1b 100644
+--- a/SConstruct
++++ b/SConstruct
+@@ -1,4 +1,4 @@
+-opts = Options()
++opts = Variables()
+ opts.Add('DESTDIR', 'Directory to install', '/')
+ opts.Add('DEBUG', 'Set DEBUG=yes for building with enabled debuging', 'no')
+ opts.Add('NLS_SUPPORT', 'Set NLS_SUPPORT=no for building with disable gettext i18n', 'yes')
