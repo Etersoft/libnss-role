@@ -24,10 +24,10 @@ if(ENABLE_TESTS)
 endif()
 
 set(NSS_SOURCES
-	${CMAKE_CURRENT_SOURCE_DIR}/common.c
-	${CMAKE_CURRENT_SOURCE_DIR}/lock_file.c
-	${CMAKE_CURRENT_SOURCE_DIR}/pam_check.c
-	${CMAKE_CURRENT_SOURCE_DIR}/parser.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/common.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/lock_file.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/pam_check.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/parser.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/fileop.c)
 
 set(MANPAGES
@@ -54,7 +54,7 @@ include_directories(BEFORE
 	${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_library(role SHARED
-	${CMAKE_CURRENT_SOURCE_DIR}/graph.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/graph.c
 	${NSS_SOURCES})
 
 target_link_libraries(role pam pam_misc)
@@ -64,7 +64,7 @@ set_target_properties(role PROPERTIES
 	SOVERSION ${LIBROLE_SOVERSION})
 
 add_library(nss_role SHARED
-	${CMAKE_CURRENT_SOURCE_DIR}/nss_role.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nss_role.c
 	${NSS_SOURCES})
 
 target_link_libraries(nss_role pam pam_misc)
@@ -74,17 +74,17 @@ set_target_properties(nss_role PROPERTIES
 	SOVERSION ${LIBNSSROLE_SOVERSION})
 
 add_executable(roleadd
-	${CMAKE_CURRENT_SOURCE_DIR}/roleadd.c)
+	${CMAKE_CURRENT_SOURCE_DIR}/src/roleadd.c)
 
 target_link_libraries(roleadd role pam pam_misc)
 
 add_executable(roledel
-	${CMAKE_CURRENT_SOURCE_DIR}/roledel.c)
+	${CMAKE_CURRENT_SOURCE_DIR}/src/roledel.c)
 
 target_link_libraries(roledel role pam pam_misc)
 
 add_executable(rolelst
-	${CMAKE_CURRENT_SOURCE_DIR}/rolelst.c)
+	${CMAKE_CURRENT_SOURCE_DIR}/src/rolelst.c)
 
 target_link_libraries(rolelst role pam pam_misc)
 
