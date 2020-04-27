@@ -60,6 +60,8 @@ NSS API library for roles and privilegies.
 cd BUILD
 %make_build test
 
+./checkver %version
+
 %install
 %cmakeinstall_std
 mkdir -p %buildroot%_sysconfdir/role.d
