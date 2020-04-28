@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(libnss-role
 	LANGUAGES C
-	VERSION 0.4.1
+	VERSION 0.5.0
 	DESCRIPTION "NSS library to work with roles")
 set(C_STANDARD 89)
 set(C_STANDARD_REQUIRED ON)
@@ -87,6 +87,8 @@ add_executable(rolelst
 	${CMAKE_CURRENT_SOURCE_DIR}/src/rolelst.c)
 
 target_link_libraries(rolelst role pam pam_misc)
+
+add_executable(checkver ${CMAKE_CURRENT_SOURCE_DIR}/src/checkver.c)
 
 install(TARGETS rolelst
 	RUNTIME DESTINATION bin)
