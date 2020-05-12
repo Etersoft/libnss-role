@@ -92,7 +92,7 @@ add_executable(checkver ${CMAKE_CURRENT_SOURCE_DIR}/src/checkver.c)
 
 install(TARGETS rolelst
 	RUNTIME DESTINATION bin)
-install(TARGETS roledel rolelst
+install(TARGETS roledel roleadd
 	RUNTIME DESTINATION sbin)
 install(TARGETS role
 	LIBRARY DESTINATION ${ROLE_LIBDIR})
