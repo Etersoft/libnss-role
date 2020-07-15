@@ -61,6 +61,35 @@ librole_is_file_end:
 }
 
 /*
+ * \brief Validate single role file name from roles directory.
+ *
+ * \param[in] filename Validate File name in a roles directory.
+ * \return
+ *  - LIBROLE_OK: if filename is valid.
+ *  - LIBROLE_INVALID_ROLE_FILENAME: if filename is invalid.
+ */
+static int librole_validate_filename_from_dir(const char *filename)
+{
+    int retcode = LIBROLE_INVALID_ROLE_FILENAME;
+
+    if (NULL == filename)
+    {
+        return LIBROLE_INTERNAL_ERROR;
+    }
+
+    const char *extension_pattern = ".role";
+    size_t extensionlen = strlen(extension_pattern);
+    size_t namelen = strlen(filename);
+
+    if (strcmp(extension_pattern, filename + namelen - extensionlen) == 0)
+    {
+        retcode = LIBROLE_OK;
+    }
+
+    return retcode;
+}
+
+/*
  * \brief Read single role file from specified directory right into
  * role graph node.
  *
@@ -143,9 +172,12 @@ int librole_get_directory_files(const char const *directory,
     int i = 0;
     for (i = 0; i < file_count; ++i)
     {
-        /* Don't do anything on errors and try to continue reading */
-        retcode = librole_read_file_from_dir(
-            directory, files[i]->d_name, role_graph);
+        /* Validate reading filename and skip if name is not valid */
+        if (librole_validate_filename_from_dir(files[i]->d_name) == LIBROLE_OK) {
+            /* Don't do anything on errors and try to continue reading */
+            retcode = librole_read_file_from_dir(
+                directory, files[i]->d_name, role_graph);
+        }
         free(files[i]);
     }
     free(files);
