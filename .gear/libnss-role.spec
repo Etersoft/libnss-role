@@ -57,10 +57,9 @@ NSS API library for roles and privilegies.
 %cmake_build
 
 %check
-cd BUILD
-%make_build test
+%cmake_build -t test
 
-./checkver %version
+%_cmake__builddir/checkver %version
 
 %install
 %cmakeinstall_std
