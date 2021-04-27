@@ -7,7 +7,7 @@
 
 Name: libnss-role
 Version: 0.5.1
-Release: alt1
+Release: alt1.1
 
 Summary: NSS API library and admin tools for roles and privilegies
 
@@ -98,6 +98,9 @@ update_chrooted all
 %_includedir/role/
 
 %changelog
+* Tue Apr 27 2021 Arseny Maslennikov <arseny@altlinux.org> 0.5.1-alt1.1
+- NMU: spec: adapted to new cmake macros.
+
 * Wed Jul 15 2020 Evgeny Sinelnikov <sin@altlinux.org> 0.5.1-alt1
 - Validate that each used filename in the role directory ends with .role
   extension. Not validated files skips.
