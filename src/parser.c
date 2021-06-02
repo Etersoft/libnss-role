@@ -460,3 +460,42 @@ exit:
     librole_pam_release(pamh, pam_status);
     return result;
 }
+
+int librole_write_dir(const char* filename, const char* pam_role, struct librole_graph *G)
+{
+    int result;
+    int pam_status;
+    pam_handle_t *pamh;
+
+    result = librole_pam_check(pamh, pam_role, &pam_status);
+    if (result != LIBROLE_OK)
+        return result;
+
+    size_t dirlen = strlen(LIBROLE_CONFIG_DIR);
+    size_t namelen = strlen(filename);
+    size_t fullpathlen = dirlen + namelen + 1 + 1;
+
+    if (fullpathlen > 4096)
+    {
+        return ENAMETOOLONG;
+    }
+    char fullpath[fullpathlen];
+
+    /* Build full path to the file being read for roles */
+    strcpy(fullpath, LIBROLE_CONFIG_DIR);
+    strcat(fullpath, "/");
+    strcat(fullpath, filename);
+
+    result = librole_lock(fullpath);
+    if (result != LIBROLE_OK)
+        goto exit;
+
+    result = librole_writing(fullpath, G, 0);
+
+    librole_unlock(fullpath);
+
+// TODO: can we release immediately?
+exit:
+    librole_pam_release(pamh, pam_status);
+    return result;
+}

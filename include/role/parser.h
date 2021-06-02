@@ -38,6 +38,7 @@ int librole_reading(const char *, struct librole_graph *);
 
 int librole_writing(const char *, struct librole_graph *, int numeric_flag);
 int librole_write(const char* pam_role, struct librole_graph *G);
+int librole_write_dir(const char* filename, const char* pam_role, struct librole_graph *G);
 
 int librole_dfs(struct librole_graph *, gid_t, librole_group_collector *);
 

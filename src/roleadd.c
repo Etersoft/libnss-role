@@ -26,12 +26,14 @@
 
 #include "role/parser.h"
 #include "role/version.h"
+#include "role/fileop.h"
 
 struct option rolelst_opt[] = {
     {"help", no_argument, 0, 'h'},
     {"set", no_argument, 0, 's'},
     {"skip-missing-groups", no_argument, 0, 'm'},
-    {"version", no_argument, 0, 'v'}
+    {"version", no_argument, 0, 'v'},
+    {"add-to-role.d", no_argument, 0, 'f'}
 };
 
 static void print_help(void)
@@ -45,15 +47,18 @@ static void print_help(void)
         "\t-m [ --skip-missing-groups ]\tskip missed privileges\n");
     fprintf(stdout,
         "\t-v [ --version]\t\tprint roleadd version being used\n");
+    fprintf(stdout,
+        "\t-f [ --add file in /etc/role.d/]\tadd role to file in /etc/role.d/\n");
     fprintf(stdout, "\n");
 }
 
-static int parse_options(int argc, char **argv, int *set_flag, int *skip_flag)
+static int parse_options(int argc, char **argv, int *set_flag, int *skip_flag, int *roled_flag)
 {
     int c, opt_ind;
     *set_flag = 0;
     *skip_flag = 0;
-    while((c = getopt_long(argc, argv, "hmsv", rolelst_opt, &opt_ind)) != -1) {
+    *roled_flag = 0;
+    while((c = getopt_long(argc, argv, "hmsvf", rolelst_opt, &opt_ind)) != -1) {
         switch(c) {
             case 'h':
                 print_help();
@@ -63,6 +68,9 @@ static int parse_options(int argc, char **argv, int *set_flag, int *skip_flag)
                 break;
             case 's':
                 *set_flag = 1;
+                break;
+            case 'f':
+                *roled_flag = 1;
                 break;
             case 'v':
                 printf("roleadd is the utility for libnss_role version %s\n",
@@ -79,10 +87,11 @@ static int parse_options(int argc, char **argv, int *set_flag, int *skip_flag)
 
 int main(int argc, char **argv) {
     struct librole_graph G;
-    int result, i, set_flag, skip_flag;
+    int result, i, set_flag, skip_flag, roled_flag;
     struct librole_ver new_role;
+    const char *filename = NULL;
 
-    if (!parse_options(argc, argv, &set_flag, &skip_flag))
+    if (!parse_options(argc, argv, &set_flag, &skip_flag, &roled_flag))
         return 0;
 
     if (optind >= argc) {
@@ -94,9 +103,19 @@ int main(int argc, char **argv) {
     if (result != LIBROLE_OK)
         goto exit;
 
-    result = librole_reading(LIBROLE_CONFIG, &G);
-    if (result != LIBROLE_OK)
-        goto exit;
+    if (roled_flag) {
+        filename = argv[optind++];
+
+        result = librole_validate_filename_from_dir(filename);
+        if (result != LIBROLE_OK)
+            goto exit;
+
+        librole_read_file_from_dir(LIBROLE_CONFIG_DIR, filename, &G);
+    } else {
+        result = librole_reading(LIBROLE_CONFIG, &G);
+        if (result != LIBROLE_OK)
+            goto exit;
+    }
 
     result = librole_create_ver_from_args(argc, argv, optind, &new_role, skip_flag);
     if (result != LIBROLE_OK)
@@ -107,7 +126,9 @@ int main(int argc, char **argv) {
     else
         result = librole_role_add(&G, new_role);
 
-    if (result == LIBROLE_OK)
+    if (result == LIBROLE_OK && roled_flag)
+        result = librole_write_dir(filename, "roleadd", &G);
+    else if (result == LIBROLE_OK)
         result = librole_write("roleadd", &G);
 
 exit:
