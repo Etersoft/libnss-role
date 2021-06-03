@@ -33,7 +33,7 @@ struct option rolelst_opt[] = {
     {"set", no_argument, 0, 's'},
     {"skip-missing-groups", no_argument, 0, 'm'},
     {"version", no_argument, 0, 'v'},
-    {"add-to-role.d", no_argument, 0, 'f'}
+    {"file", no_argument, 0, 'f'}
 };
 
 static void print_help(void)
@@ -48,7 +48,7 @@ static void print_help(void)
     fprintf(stdout,
         "\t-v [ --version]\t\tprint roleadd version being used\n");
     fprintf(stdout,
-        "\t-f [ --add file in /etc/role.d/]\tadd role to file in /etc/role.d/\n");
+        "\t-f [ --file ]\tadd role to file in /etc/role.d/\n");
     fprintf(stdout, "\n");
 }
 
