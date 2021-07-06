@@ -6,8 +6,8 @@
 %global _cmake_skip_rpath %nil
 
 Name: libnss-role
-Version: 0.5.1
-Release: alt1.1
+Version: 0.5.2
+Release: alt1
 
 Summary: NSS API library and admin tools for roles and privilegies
 
@@ -98,6 +98,10 @@ update_chrooted all
 %_includedir/role/
 
 %changelog
+* Tue Jul 06 2021 Ivan Savin <svn17@altlinux.org> 0.5.2-alt1
+- Add the ability to remove roles and privileges from files in /etc/role.d/.
+- Add the ability to add roles and privileges to files in /etc/role.d/.
+
 * Tue Apr 27 2021 Arseny Maslennikov <arseny@altlinux.org> 0.5.1-alt1.1
 - NMU: spec: adapted to new cmake macros.
 
