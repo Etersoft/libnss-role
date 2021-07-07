@@ -68,7 +68,7 @@ librole_is_file_end:
  *  - LIBROLE_OK: if filename is valid.
  *  - LIBROLE_INVALID_ROLE_FILENAME: if filename is invalid.
  */
-static int librole_validate_filename_from_dir(const char *filename)
+int librole_validate_filename_from_dir(const char *filename)
 {
     int retcode = LIBROLE_INVALID_ROLE_FILENAME;
 
@@ -99,7 +99,7 @@ static int librole_validate_filename_from_dir(const char *filename)
  * \return
  *  - LIBROLE_OK: Don't try to fail.
  */
-static int librole_read_file_from_dir(const char const *directory,
+int librole_read_file_from_dir(const char const *directory,
     const char const *filename,
     struct librole_graph *role_graph)
 {
