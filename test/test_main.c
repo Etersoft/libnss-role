@@ -36,17 +36,18 @@
 #include "role/parser.h"
 
 static void test_drop_quotes(void **state) {
-    (void) state;
-
+    char *orig_ptr = NULL;
     /* Create mutable memory area for test string */
     char *immutable_line[] = { "\"role_name\"" };
     size_t line_length = strlen(*immutable_line);
     char *mutable_line = calloc(line_length + 1, sizeof(char));
+    (void) state;
+
     assert_non_null(mutable_line);
     /* drop_quotes increments the pointer making it impossible to free
      * the memory so it is needed to store the original pointer to
      * be able to free the memory block allocated */
-    char *orig_ptr = mutable_line;
+    orig_ptr = mutable_line;
     strncpy(mutable_line, *immutable_line, line_length);
     strcpy(mutable_line, *immutable_line);
 
@@ -61,10 +62,11 @@ static void test_drop_quotes(void **state) {
 
 static void test_parse_line(void **state) {
     struct librole_graph G;
-    assert_int_equal(librole_graph_init(&G), LIBROLE_OK);
     char *immutable_line[] = { "users:\"tftp\",named" };
     size_t line_length = strlen(*immutable_line);
     char *mutable_line = calloc(line_length + 1, sizeof(char));
+
+    assert_int_equal(librole_graph_init(&G), LIBROLE_OK);
     assert_non_null(mutable_line);
     strncpy(mutable_line, *immutable_line, line_length);
 
@@ -75,8 +77,8 @@ static void test_parse_line(void **state) {
 }
 
 static void test_main(void **state) {
-    (void) state;
     struct librole_graph G;
+    (void) state;
 
     assert_int_equal(librole_graph_init(&G), LIBROLE_OK);
     assert_int_equal(librole_reading("test/role.source", &G), LIBROLE_OK);

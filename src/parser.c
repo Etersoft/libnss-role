@@ -229,6 +229,7 @@ int parse_line(char *line, struct librole_graph *G)
     int comment = 0;
     int role_exists = 0;
     int gid_index = 0;
+    gid_t gr;
 
     /* skip blank line */
     if (!len)
@@ -260,7 +261,6 @@ int parse_line(char *line, struct librole_graph *G)
         if (i >= len)
             break;
         last = line + i;
-        gid_t gr;
 
         comment = select_line_part(line, len, &last, &i, ',');
 
@@ -444,12 +444,14 @@ int librole_write(const char* pam_role, struct librole_graph *G)
     pam_handle_t *pamh;
 
     result = librole_pam_check(pamh, pam_role, &pam_status);
-    if (result != LIBROLE_OK)
-        return result;
+    if (result != LIBROLE_OK) {
+        goto exit;
+    }
 
     result = librole_lock(LIBROLE_CONFIG);
-    if (result != LIBROLE_OK)
+    if (result != LIBROLE_OK) {
         goto exit;
+    }
 
     result = librole_writing(LIBROLE_CONFIG, G, 0);
 
@@ -463,23 +465,25 @@ exit:
 
 int librole_write_dir(const char* filename, const char* pam_role, struct librole_graph *G)
 {
-    int result;
+    int result = 0;
     int pam_status;
-    pam_handle_t *pamh;
+    size_t dirlen = strlen(LIBROLE_CONFIG_DIR);
+    size_t namelen = strlen(filename);
+    size_t fullpathlen = dirlen + namelen + 1 + 1;
+    pam_handle_t *pamh = NULL;
+    char *fullpath = NULL;
 
     result = librole_pam_check(pamh, pam_role, &pam_status);
     if (result != LIBROLE_OK)
         return result;
 
-    size_t dirlen = strlen(LIBROLE_CONFIG_DIR);
-    size_t namelen = strlen(filename);
-    size_t fullpathlen = dirlen + namelen + 1 + 1;
 
     if (fullpathlen > 4096)
     {
-        return ENAMETOOLONG;
+        result = ENAMETOOLONG;
+        goto librole_write_dir_done;
     }
-    char fullpath[fullpathlen];
+    fullpath = calloc(fullpathlen, sizeof(char));
 
     /* Build full path to the file being read for roles */
     strcpy(fullpath, LIBROLE_CONFIG_DIR);
@@ -487,15 +491,19 @@ int librole_write_dir(const char* filename, const char* pam_role, struct librole
     strcat(fullpath, filename);
 
     result = librole_lock(fullpath);
-    if (result != LIBROLE_OK)
-        goto exit;
+    if (result != LIBROLE_OK) {
+        goto librole_write_dir_done;
+    }
 
     result = librole_writing(fullpath, G, 0);
 
     librole_unlock(fullpath);
 
-// TODO: can we release immediately?
-exit:
+/* TODO: can we release immediately? */
+librole_write_dir_done:
     librole_pam_release(pamh, pam_status);
+    free(fullpath);
+    fullpath = NULL;
+
     return result;
 }

@@ -71,15 +71,14 @@ librole_is_file_end:
 int librole_validate_filename_from_dir(const char *filename)
 {
     int retcode = LIBROLE_INVALID_ROLE_FILENAME;
+    const char *extension_pattern = ".role";
+    size_t extensionlen = strlen(extension_pattern);
+    size_t namelen = strlen(filename);
 
     if (NULL == filename)
     {
         return LIBROLE_INTERNAL_ERROR;
     }
-
-    const char *extension_pattern = ".role";
-    size_t extensionlen = strlen(extension_pattern);
-    size_t namelen = strlen(filename);
 
     if (strcmp(extension_pattern, filename + namelen - extensionlen) == 0)
     {
@@ -103,23 +102,25 @@ int librole_read_file_from_dir(const char const *directory,
     const char const *filename,
     struct librole_graph *role_graph)
 {
-    errno = 0;
     int retcode = LIBROLE_OK;
-
-    if (NULL == directory || NULL == filename || NULL == role_graph)
-    {
-        return retcode;
-    }
-
     size_t dirlen = strlen(directory);
     size_t namelen = strlen(filename);
     size_t fullpathlen = dirlen + namelen + 1 + 1;
+    char *fullpath = NULL;
+
+    errno = 0;
+
+    if (NULL == directory || NULL == filename || NULL == role_graph)
+    {
+        goto librole_read_file_from_dir_done;
+    }
 
     if (fullpathlen > MAX_PATH_LEN)
     {
-        return ENAMETOOLONG;
+        retcode = ENAMETOOLONG;
+        goto librole_read_file_from_dir_done;
     }
-    char fullpath[fullpathlen];
+    fullpath = calloc(fullpathlen, sizeof(char));
 
     /* Build full path to the file being read for roles */
     strcpy(fullpath, directory);
@@ -129,6 +130,10 @@ int librole_read_file_from_dir(const char const *directory,
     /* Ignore return code from librole_reading to retain previous
      * (without /etc/role.d) behavior. */
     retcode = librole_reading(fullpath, role_graph);
+
+librole_read_file_from_dir_done:
+    free(fullpath);
+    fullpath = NULL;
 
     return retcode;
 }
@@ -148,6 +153,12 @@ int librole_get_directory_files(const char const *directory,
     struct librole_graph *role_graph)
 {
     int retcode = LIBROLE_OK;
+    struct dirent **files;
+    int file_count = 0;
+    DIR *role_catalog = NULL;
+    int i = 0;
+
+    errno = 0;
 
     if (NULL == directory || NULL == role_graph)
     {
@@ -155,11 +166,6 @@ int librole_get_directory_files(const char const *directory,
         goto librole_get_directory_files_end;
     }
 
-    errno = 0;
-
-    struct dirent **files;
-    int file_count = 0;
-    DIR *role_catalog = NULL;
 
     /* Get all regular files in directory */
     file_count = scandir(directory, &files, librole_is_file, alphasort);
@@ -169,7 +175,6 @@ int librole_get_directory_files(const char const *directory,
         goto librole_get_directory_files_end;
     }
 
-    int i = 0;
     for (i = 0; i < file_count; ++i)
     {
         /* Validate reading filename and skip if name is not valid */
