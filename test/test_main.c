@@ -36,8 +36,6 @@
 #include "role/parser.h"
 
 static void test_drop_quotes(void **state) {
-    (void) state;
-
     /* Create mutable memory area for test string */
     char *immutable_line[] = { "\"role_name\"" };
     size_t line_length = strlen(*immutable_line);
@@ -74,6 +72,24 @@ static void test_parse_line(void **state) {
     mutable_line = NULL;
 }
 
+/*
+ * Unfortunately it is pretty problematic to test realloc() call
+ * failures during ordinary unit testing.
+ */
+static void test_librole_realloc_buffer_success(void** state) {
+    size_t buffer_size = 1024;
+    char* membuf = calloc(buffer_size, sizeof(char));
+    int result = 0;
+
+    result = librole_realloc_buffer((void**)&membuf, &buffer_size);
+
+    assert_null(result);
+    assert_equal(2048, buffer_size);
+    assert_non_null(membuf);
+
+    free(membuf);
+}
+
 static void test_main(void **state) {
     (void) state;
     struct librole_graph G;
@@ -93,6 +109,7 @@ int main(int argc, char **argv) {
     const struct CMUnitTest tests[] = {
           cmocka_unit_test(test_drop_quotes)
         , cmocka_unit_test(test_parse_line)
+        , cmocka_unit_test(test_librole_realloc_buffer)
         /*cmocka_unit_test(test_main)*/
     };
 

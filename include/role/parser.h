@@ -63,6 +63,17 @@ int librole_get_group_name(gid_t g, char *ans, size_t ans_size);
 void librole_print_error(int result);
 
 /* internal */
+
+/**
+ * \brief Allocate new memory area on heap doubling the passed buffer
+ * capacity
+ *
+ * \param[in,out] buffer malloc()ed memory area.
+ * \param[in] size Actual buffer size which will be doubled
+ * \return
+ *  - 0: Success
+ *  - 1: Failure
+ */
 int librole_realloc_buffer(void **buffer, size_t *size);
 int librole_en_vector(void **buffer, size_t *capacity, size_t used, size_t elsize);
 

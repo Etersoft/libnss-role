@@ -67,27 +67,30 @@ static void *get_buffer(int const_name, size_t *actual_size)
     return buf;
 }
 
-/* more buffer size (new size will in size) */
 int librole_realloc_buffer(void **buffer, size_t *size)
 {
+    int result = LIBROLE_OK;
     size_t newsize = 2 * (*size);
     void *newbuffer;
-    if (!buffer || !size)
-        return LIBROLE_INTERNAL_ERROR;
+
+    if (!buffer || !size) {
+        result = LIBROLE_INTERNAL_ERROR;
+        goto librole_realloc_buffer_end;
+    }
 #if DEBUG
     fprintf(stderr,"Realloc %p to %u\n", buffer, newsize);
 #endif
     newbuffer = realloc(*buffer, newsize * sizeof(char));
     if (!newbuffer) {
-        free(buffer);
-        *buffer = NULL;
-        *size = 0;
-        return LIBROLE_MEMORY_ERROR;
+        result = LIBROLE_MEMORY_ERROR;
+        goto librole_realloc_buffer_end;
     }
 
     *buffer = newbuffer;
     *size = newsize;
-    return LIBROLE_OK;
+
+librole_realloc_buffer_end:
+    return result;
 }
 
 int librole_en_vector(void **buffer, size_t *capacity, size_t used, size_t elsize)
@@ -140,36 +143,43 @@ int librole_get_group_name(gid_t gid, char *ans, size_t ans_size)
     struct group grp, *grp_ptr;
     void *buffer;
     size_t bufsize;
-    int err, result;
+    int err = 0;
+    int result = LIBROLE_OK;
 
     buffer = get_buffer(_SC_GETGR_R_SIZE_MAX, &bufsize);
-    if (!buffer)
-        return LIBROLE_MEMORY_ERROR;
+    if (!buffer) {
+        result = LIBROLE_MEMORY_ERROR;
+        goto librole_get_group_name_end;
+    }
 
     for (int i = 0 ; i < BUFFERCOUNT ; i++) {
         err = getgrgid_r(gid, &grp, buffer, bufsize, &grp_ptr);
         if (err != ERANGE)
             break;
         result = librole_realloc_buffer((void**)&buffer, &bufsize);
-        if (result != LIBROLE_OK)
-            return result;
+        if (result != LIBROLE_OK) {
+            goto librole_get_group_name_end;
+        }
     }
 
     if  (err != 0) {
-        free(buffer);
-        return errno_to_result(err);
+        result = errno_to_result(err)
+        goto librole_get_group_name_end;
     }
     if (!grp_ptr) {
-        free(buffer);
-        return LIBROLE_NO_SUCH_GROUP;
+        result = LIBROLE_NO_SUCH_GROUP;
+        goto librole_get_group_name_end;
     }
     if (ans) {
         strncpy(ans, grp.gr_name, ans_size);
         ans[ans_size] = '\0';
     }
 
-    free(buffer);
-    return LIBROLE_OK;
+librole_get_group_name_end:
+    if (buffer) {
+        free(buffer);
+    }
+    return result;
 }
 
 /* get gid by group name */
@@ -178,35 +188,42 @@ static int get_gid_by_groupname(const char *gr_name, gid_t *gid)
     struct group grp, *grp_ptr;
     void *buffer;
     size_t bufsize;
-    int err, result;
+    int err = 0;
+    int result = LIBROLE_OK;
 
     buffer = get_buffer(_SC_GETGR_R_SIZE_MAX, &bufsize);
-    if (!buffer)
-        return LIBROLE_MEMORY_ERROR;
+    if (!buffer) {
+        result = LIBROLE_MEMORY_ERROR;
+        goto get_gid_by_groupname_end;
+    }
 
     for (int i = 0 ; i < BUFFERCOUNT ; i++) {
         err = getgrnam_r(gr_name, &grp, buffer, bufsize, &grp_ptr);
         if (err != ERANGE)
             break;
         result = librole_realloc_buffer(&buffer, &bufsize);
-        if (result != LIBROLE_OK)
-            return result;
+        if (result != LIBROLE_OK) {
+            goto get_gid_by_groupname_end;
+        }
     }
 
     if  (err != 0) {
-        free(buffer);
-        return errno_to_result(err);
+        result = errno_to_result(err);
+        goto get_gid_by_groupname_end;
     }
     if (!grp_ptr) {
-        free(buffer);
-        return LIBROLE_NO_SUCH_GROUP;
+        result = LIBROLE_NO_SUCH_GROUP;
+        goto get_gid_by_groupname_end;
     }
     if (gid) {
         *gid = grp.gr_gid;
     }
 
-    free(buffer);
-    return LIBROLE_OK;
+get_gid_by_groupname_end:
+    if (buffer) {
+        free(buffer);
+    }
+    return result;
 }
 
 static int check_group_name(const char *str)
@@ -252,29 +269,32 @@ int librole_get_user_name(uid_t uid, char *user_name, size_t user_name_size)
     void *buffer;
     struct passwd pwd;
     struct passwd* pwd_ptr;
-    int err, result;
+    int err = 0;
+    int result = LIBROLE_OK;
 
     buffer = get_buffer(_SC_GETPW_R_SIZE_MAX, &bufsize);
-    if (!buffer)
-    return LIBROLE_MEMORY_ERROR;
+    if (!buffer) {
+        goto librole_get_user_name_end;
+    }
 
     for (int i = 0 ; i < BUFFERCOUNT ; i++) {
         err = getpwuid_r(uid, &pwd, buffer, bufsize, &pwd_ptr);
         if (err != ERANGE)
             break;
         result = librole_realloc_buffer(&buffer, &bufsize);
-        if (result != LIBROLE_OK)
-            return result;
+        if (result != LIBROLE_OK) {
+            goto librole_get_user_name_end;
+        }
     }
 
     if  (err != 0) {
-        free(buffer);
-        return errno_to_result(err);
+        result = errno_to_result(err);
+        goto librole_get_user_name_end;
     }
 
     if (!pwd_ptr) {
-        free(buffer);
-        return LIBROLE_NO_SUCH_GROUP;
+        result = LIBROLE_NO_SUCH_GROUP;
+        goto librol_get_user_name_end;
     }
 
     if (user_name) {
@@ -282,8 +302,11 @@ int librole_get_user_name(uid_t uid, char *user_name, size_t user_name_size)
         user_name[user_name_size - 1 ] = '\0';
     }
 
-    free(buffer);
-    return LIBROLE_OK;
+librole_get_user_name_end:
+    if (buffer) {
+        free(buffer);
+    }
+    return result;
 }
 
 void librole_print_error(int result)
