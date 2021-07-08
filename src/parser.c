@@ -315,8 +315,9 @@ int librole_reading(const char *s, struct librole_graph *G)
         str[id++] = c;
         if (id == len) {
             result = librole_realloc_buffer((void**)&str, &len);
-            if (result != LIBROLE_OK)
+            if (result != LIBROLE_OK) {
                 goto libnss_role_reading_out;
+            }
         }
     }
     if (id) {
