@@ -444,12 +444,14 @@ int librole_write(const char* pam_role, struct librole_graph *G)
     pam_handle_t *pamh;
 
     result = librole_pam_check(pamh, pam_role, &pam_status);
-    if (result != LIBROLE_OK)
-        return result;
+    if (result != LIBROLE_OK) {
+        goto exit;
+    }
 
     result = librole_lock(LIBROLE_CONFIG);
-    if (result != LIBROLE_OK)
+    if (result != LIBROLE_OK) {
         goto exit;
+    }
 
     result = librole_writing(LIBROLE_CONFIG, G, 0);
 
@@ -477,7 +479,8 @@ int librole_write_dir(const char* filename, const char* pam_role, struct librole
 
     if (fullpathlen > 4096)
     {
-        return ENAMETOOLONG;
+        result = ENAMETOOLONG;
+        goto exit;
     }
     char fullpath[fullpathlen];
 
