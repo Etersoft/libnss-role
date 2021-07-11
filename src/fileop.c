@@ -46,7 +46,7 @@
  */
 static int librole_is_role_file(const struct dirent *entry)
 {
-    const char *extension_pattern = ".role";
+    const char *extension_pattern = LIBROLE_ROLE_EXTENSION;
     size_t extensionlen = strlen(extension_pattern);
     size_t namelen = strlen(entry->d_name);
 
@@ -77,7 +77,7 @@ librole_is_file_end:
 int librole_validate_filename_from_dir(const char *filename)
 {
     int retcode = LIBROLE_INVALID_ROLE_FILENAME;
-    const char *extension_pattern = ".role";
+    const char *extension_pattern = LIBROLE_ROLE_EXTENSION;
     size_t extensionlen = strlen(extension_pattern);
     size_t namelen = strlen(filename);
 

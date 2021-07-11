@@ -22,5 +22,7 @@
 
 #define LIBROLE_CONFIG_DIR "/etc/role.d"
 
+#define LIBROLE_ROLE_EXTENSION ".role"
+
 #endif
 
