@@ -98,8 +98,8 @@ int librole_validate_filename_from_dir(const char *filename)
  * \return
  *  - LIBROLE_OK: Don't try to fail.
  */
-int librole_read_file_from_dir(const char const *directory,
-    const char const *filename,
+int librole_read_file_from_dir(const char * const directory,
+    const char * const filename,
     struct librole_graph *role_graph)
 {
     int retcode = LIBROLE_OK;
@@ -149,7 +149,7 @@ librole_read_file_from_dir_done:
  *  - LIBROLE_OK: Operation succeeded.
  *  - errno: Undefined error.
  */
-int librole_get_directory_files(const char const *directory,
+int librole_get_directory_files(const char * const directory,
     struct librole_graph *role_graph)
 {
     int retcode = LIBROLE_OK;
