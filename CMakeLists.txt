@@ -3,7 +3,8 @@ project(libnss-role
 	LANGUAGES C
 	VERSION 0.5.2
 	DESCRIPTION "NSS library to work with roles")
-set(C_STANDARD 89)
+set(C_STANDARD 90)
+set(CMAKE_C_STANDARD 90)
 set(C_STANDARD_REQUIRED ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")

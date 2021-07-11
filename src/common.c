@@ -108,9 +108,9 @@ int librole_en_vector(void **buffer, size_t *capacity, size_t used, size_t elsiz
 
     newbuffer = realloc(*buffer, newsize * elsize);
     if (!newbuffer) {
-        //free(buffer);
-        //*buffer = NULL;
-        //*capacity = 0;
+        /* free(buffer);
+        *buffer = NULL;
+        *capacity = 0;*/
         return LIBROLE_MEMORY_ERROR;
     }
 
@@ -140,13 +140,13 @@ int librole_get_group_name(gid_t gid, char *ans, size_t ans_size)
     struct group grp, *grp_ptr;
     void *buffer;
     size_t bufsize;
-    int err, result;
+    int err, result, i;
 
     buffer = get_buffer(_SC_GETGR_R_SIZE_MAX, &bufsize);
     if (!buffer)
         return LIBROLE_MEMORY_ERROR;
 
-    for (int i = 0 ; i < BUFFERCOUNT ; i++) {
+    for (i = 0 ; i < BUFFERCOUNT ; i++) {
         err = getgrgid_r(gid, &grp, buffer, bufsize, &grp_ptr);
         if (err != ERANGE)
             break;
@@ -178,13 +178,13 @@ static int get_gid_by_groupname(const char *gr_name, gid_t *gid)
     struct group grp, *grp_ptr;
     void *buffer;
     size_t bufsize;
-    int err, result;
+    int err, result, i;
 
     buffer = get_buffer(_SC_GETGR_R_SIZE_MAX, &bufsize);
     if (!buffer)
         return LIBROLE_MEMORY_ERROR;
 
-    for (int i = 0 ; i < BUFFERCOUNT ; i++) {
+    for (i = 0 ; i < BUFFERCOUNT ; i++) {
         err = getgrnam_r(gr_name, &grp, buffer, bufsize, &grp_ptr);
         if (err != ERANGE)
             break;
@@ -252,13 +252,13 @@ int librole_get_user_name(uid_t uid, char *user_name, size_t user_name_size)
     void *buffer;
     struct passwd pwd;
     struct passwd* pwd_ptr;
-    int err, result;
+    int err, result, i;
 
     buffer = get_buffer(_SC_GETPW_R_SIZE_MAX, &bufsize);
     if (!buffer)
     return LIBROLE_MEMORY_ERROR;
 
-    for (int i = 0 ; i < BUFFERCOUNT ; i++) {
+    for (i = 0 ; i < BUFFERCOUNT ; i++) {
         err = getpwuid_r(uid, &pwd, buffer, bufsize, &pwd_ptr);
         if (err != ERANGE)
             break;

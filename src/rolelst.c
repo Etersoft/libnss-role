@@ -82,9 +82,9 @@ static int parse_options(int argc, char **argv, struct rolelst_settings *setting
 
 int main(int argc, char **argv) {
     struct rolelst_settings settings;
-    memset(&settings, 0, sizeof(settings));
     struct librole_graph G;
-    int result;
+    int result = LIBROLE_OK;
+    memset(&settings, 0, sizeof(settings));
 
     if (!parse_options(argc, argv, &settings))
         return 0;

@@ -32,7 +32,7 @@ static struct pam_conv conv = {
     NULL
 };
 
-// check program prog for current user, put result in status
+/* check program prog for current user, put result in status */
 int librole_pam_check(pam_handle_t *pamh, const char *prog, int *status)
 {
     int result;

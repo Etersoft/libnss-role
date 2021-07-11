@@ -37,11 +37,11 @@ enum nss_status _nss_role_initgroups_dyn(char *user, gid_t main_group,
         long int limit, int *errnop)
 {
     enum nss_status ret = NSS_STATUS_SUCCESS;
-    pthread_mutex_lock(&mutex);
-
     struct librole_graph G = {0};
     int i, result;
     librole_group_collector col = {0}, ans = {0};
+
+    pthread_mutex_lock(&mutex);
 
     result = librole_graph_init(&G);
     if (result != LIBROLE_OK) {
