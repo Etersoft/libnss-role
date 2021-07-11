@@ -23,6 +23,9 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+/* For PATH_MAX */
+#include <linux/limits.h>
+
 
 #include "role/parser.h"
 #include "role/pam_check.h"
@@ -478,7 +481,7 @@ int librole_write_dir(const char* filename, const char* pam_role, struct librole
         return result;
 
 
-    if (fullpathlen > 4096)
+    if (fullpathlen > PATH_MAX)
     {
         result = ENAMETOOLONG;
         goto librole_write_dir_done;
