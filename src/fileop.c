@@ -30,11 +30,11 @@
 #include <unistd.h>
 /* For strlen */
 #include <string.h>
+/* For PATH_MAX */
+#include <linux/limits.h>
 
 #include "role/glob.h"
 #include "role/parser.h"
-
-#define MAX_PATH_LEN 4096
 
 /*
  * \brief Selector function for scandir which gets all regular files.
@@ -44,8 +44,12 @@
  *  - 0: Entry is not a regular file
  *  - 1: Entry is a regular file
  */
-static int librole_is_file(const struct dirent *entry)
+static int librole_is_role_file(const struct dirent *entry)
 {
+    const char *extension_pattern = LIBROLE_ROLE_EXTENSION;
+    size_t extensionlen = strlen(extension_pattern);
+    size_t namelen = strlen(entry->d_name);
+
     if (NULL == entry)
     {
         goto librole_is_file_end;
@@ -53,7 +57,9 @@ static int librole_is_file(const struct dirent *entry)
 
     if (DT_REG == entry->d_type)
     {
-        return 1;
+        if (!strcmp(extension_pattern, entry->d_name + namelen - extensionlen)) {
+            return 1;
+        }
     }
 
 librole_is_file_end:
@@ -71,7 +77,7 @@ librole_is_file_end:
 int librole_validate_filename_from_dir(const char *filename)
 {
     int retcode = LIBROLE_INVALID_ROLE_FILENAME;
-    const char *extension_pattern = ".role";
+    const char *extension_pattern = LIBROLE_ROLE_EXTENSION;
     size_t extensionlen = strlen(extension_pattern);
     size_t namelen = strlen(filename);
 
@@ -115,7 +121,7 @@ int librole_read_file_from_dir(const char * const directory,
         goto librole_read_file_from_dir_done;
     }
 
-    if (fullpathlen > MAX_PATH_LEN)
+    if (fullpathlen > PATH_MAX)
     {
         retcode = ENAMETOOLONG;
         goto librole_read_file_from_dir_done;
@@ -168,7 +174,7 @@ int librole_get_directory_files(const char * const directory,
 
 
     /* Get all regular files in directory */
-    file_count = scandir(directory, &files, librole_is_file, alphasort);
+    file_count = scandir(directory, &files, librole_is_role_file, alphasort);
     if (0 != errno)
     {
         retcode = errno;
