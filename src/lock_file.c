@@ -33,7 +33,7 @@
 
 static int get_pid(char *buf, pid_t *pid)
 {
-    if (sscanf(buf, "%u", pid) < 1)
+    if (sscanf(buf, "%i", pid) < 1)
         return LIBROLE_IO_ERROR;
 
     return LIBROLE_OK;
