@@ -28,7 +28,7 @@
 #include "role/pam_check.h"
 #include "role/lock_file.h"
 
-// TODO: separate read/write and graph
+/* TODO: separate read/write and graph */
 
 int librole_graph_add(struct librole_graph *G, struct librole_ver v)
 {
@@ -149,7 +149,7 @@ void librole_graph_free(struct librole_graph *G)
     G->capacity = 0;
 }
 
-// TODO: move to internal (nss)
+/* TODO: move to internal (nss) */
 int librole_realloc_groups(long int **size, gid_t ***groups, long int new_size)
 {
     gid_t *new_groups;
@@ -404,8 +404,8 @@ static int write_group(FILE *f, int gid, int delim, int numeric_flag)
     return LIBROLE_OK;
 }
 
-// TODO: the same like in rolelst
-// TODO: write in a new file and atomically rename
+/* TODO: the same like in rolelst
+ TODO: write in a new file and atomically rename */
 int librole_writing(const char *file, struct librole_graph *G, int numeric_flag)
 {
     int i, j, result;
@@ -457,7 +457,7 @@ int librole_write(const char* pam_role, struct librole_graph *G)
 
     librole_unlock(LIBROLE_CONFIG);
 
-// TODO: can we release immediately?
+/* TODO: can we release immediately? */
 exit:
     librole_pam_release(pamh, pam_status);
     return result;

@@ -108,9 +108,9 @@ int librole_en_vector(void **buffer, size_t *capacity, size_t used, size_t elsiz
 
     newbuffer = realloc(*buffer, newsize * elsize);
     if (!newbuffer) {
-        //free(buffer);
-        //*buffer = NULL;
-        //*capacity = 0;
+        /* free(buffer);
+        *buffer = NULL;
+        *capacity = 0;*/
         return LIBROLE_MEMORY_ERROR;
     }
 
