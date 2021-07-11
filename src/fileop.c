@@ -30,11 +30,11 @@
 #include <unistd.h>
 /* For strlen */
 #include <string.h>
+/* For PATH_MAX */
+#include <linux/limits.h>
 
 #include "role/glob.h"
 #include "role/parser.h"
-
-#define MAX_PATH_LEN 4096
 
 /*
  * \brief Selector function for scandir which gets all regular files.
@@ -115,7 +115,7 @@ int librole_read_file_from_dir(const char * const directory,
         goto librole_read_file_from_dir_done;
     }
 
-    if (fullpathlen > MAX_PATH_LEN)
+    if (fullpathlen > PATH_MAX)
     {
         retcode = ENAMETOOLONG;
         goto librole_read_file_from_dir_done;
