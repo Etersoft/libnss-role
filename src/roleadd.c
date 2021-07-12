@@ -52,7 +52,7 @@ static void print_help(void)
     fprintf(stdout,
         "\t-f [ --file=file.role ]\tchange role in additional file /etc/role.d/file.role\n");
     fprintf(stdout,
-        "\t-S [ --system ]\tchange system ROLE in additional file /etc/role.d/ROLE.role");
+        "\t-S [ --system ]\t\tchange system ROLE in additional file /etc/role.d/ROLE.role");
     fprintf(stdout, "\n");
 }
 
