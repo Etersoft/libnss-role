@@ -409,7 +409,7 @@ static int write_group(FILE *f, int gid, int delim, int numeric_flag)
 
 /* TODO: the same like in rolelst
  TODO: write in a new file and atomically rename */
-int librole_writing(const char *file, struct librole_graph *G, int numeric_flag)
+int librole_writing(const char *file, struct librole_graph *G, int numeric_flag, int empty_flag)
 {
     int i, j, result;
     FILE *f = fopen(file, "w");
@@ -417,7 +417,7 @@ int librole_writing(const char *file, struct librole_graph *G, int numeric_flag)
         return LIBROLE_IO_ERROR;
 
     for(i = 0; i < G->size; i++) {
-        if (!G->gr[i].size)
+        if (!G->gr[i].size && !empty_flag)
             continue;
 
         result = write_group(f, G->gr[i].gid, -1, numeric_flag);
@@ -440,7 +440,7 @@ libnss_role_writing_exit:
     return result;
 }
 
-int librole_write(const char* pam_role, struct librole_graph *G)
+int librole_write(const char* pam_role, struct librole_graph *G, int empty_flag)
 {
     int result;
     int pam_status;
@@ -456,7 +456,7 @@ int librole_write(const char* pam_role, struct librole_graph *G)
         goto exit;
     }
 
-    result = librole_writing(LIBROLE_CONFIG, G, 0);
+    result = librole_writing(LIBROLE_CONFIG, G, 0, empty_flag);
 
     librole_unlock(LIBROLE_CONFIG);
 
@@ -466,7 +466,7 @@ exit:
     return result;
 }
 
-int librole_write_dir(const char* filename, const char* pam_role, struct librole_graph *G)
+int librole_write_dir(const char* filename, const char* pam_role, struct librole_graph *G, int empty_flag)
 {
     int result = 0;
     int pam_status;
@@ -498,7 +498,7 @@ int librole_write_dir(const char* filename, const char* pam_role, struct librole
         goto librole_write_dir_done;
     }
 
-    result = librole_writing(fullpath, G, 0);
+    result = librole_writing(fullpath, G, 0, empty_flag);
 
     librole_unlock(fullpath);
 
