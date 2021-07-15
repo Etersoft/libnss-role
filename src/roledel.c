@@ -64,7 +64,7 @@ static int parse_options(int argc, char **argv, int *remove_flag, int *skip_flag
     *skip_flag = 0;
     *roled_flag = 0;
     *system_role_flag = 0;
-    while((c = getopt_long(argc, argv, "hmsvf:S", rolelst_opt, &opt_ind)) != -1) {
+    while((c = getopt_long(argc, argv, "hrmvSf:", rolelst_opt, &opt_ind)) != -1) {
         switch(c) {
             case 'h':
                 print_help();
