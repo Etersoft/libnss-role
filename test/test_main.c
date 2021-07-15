@@ -82,11 +82,11 @@ static void test_main(void **state) {
 
     assert_int_equal(librole_graph_init(&G), LIBROLE_OK);
     assert_int_equal(librole_reading("test/role.source", &G), LIBROLE_OK);
-    assert_int_equal(librole_writing("/dev/stdout", &G, 0, 0), LIBROLE_OK);
-    assert_int_equal(librole_writing("/dev/stdout", &G, 1, 0), LIBROLE_OK);
-    assert_int_equal(librole_writing("test/role.test.new", &G, 0, 0), LIBROLE_OK);
-    assert_int_equal(librole_writing("test/role.test.add", &G, 0, 0), LIBROLE_OK);
-    assert_int_equal(librole_writing("test/role.test.del", &G, 0, 0), LIBROLE_OK);
+    assert_int_equal(librole_writing("/dev/stdout", &G, 0, 0, NULL), LIBROLE_OK);
+    assert_int_equal(librole_writing("/dev/stdout", &G, 1, 0, NULL), LIBROLE_OK);
+    assert_int_equal(librole_writing("test/role.test.new", &G, 0, 0, NULL), LIBROLE_OK);
+    assert_int_equal(librole_writing("test/role.test.add", &G, 0, 0, NULL), LIBROLE_OK);
+    assert_int_equal(librole_writing("test/role.test.del", &G, 0, 0, NULL), LIBROLE_OK);
 
     librole_graph_free(&G);
 }

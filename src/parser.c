@@ -28,8 +28,6 @@
 
 
 #include "role/parser.h"
-#include "role/pam_check.h"
-#include "role/lock_file.h"
 
 /* TODO: separate read/write and graph */
 
@@ -134,7 +132,10 @@ int librole_ver_find_gid(struct librole_ver* v, gid_t g, int *idx)
 
 void librole_ver_free(struct librole_ver *v)
 {
-    free(v->list);
+    if (v->list)
+        free(v->list);
+
+    v->list = NULL;
     v->size = 0;
     v->capacity = 0;
 }
@@ -221,6 +222,12 @@ void drop_quotes(char **str)
     }
 }
 
+void skip_next_spaces(char **str)
+{
+    while ((*str)[0] == ' ' || (*str)[0] == '\t')
+        (*str)++;
+}
+
 int parse_line(char *line, struct librole_graph *G)
 {
     int result;
@@ -247,6 +254,7 @@ int parse_line(char *line, struct librole_graph *G)
     if (comment && *last == '\0')
         goto libnss_role_parse_line_error;
 
+    skip_next_spaces(&last);
     drop_quotes(&last);
     result = librole_get_gid(last, &role->gid);
     if (result != LIBROLE_OK)
@@ -267,6 +275,7 @@ int parse_line(char *line, struct librole_graph *G)
 
         comment = select_line_part(line, len, &last, &i, ',');
 
+        skip_next_spaces(&last);
         drop_quotes(&last);
         result = librole_get_gid(last, &gr);
         if (result == LIBROLE_NO_SUCH_GROUP)
@@ -378,135 +387,4 @@ int librole_dfs(struct librole_graph *G, gid_t v, librole_group_collector *col)
             return result;
     }
     return LIBROLE_OK;
-}
-
-/* delim: 0 - '', > 0 - ',' before, < 0 - ':' after */
-static int write_group(FILE *f, int gid, int delim, int numeric_flag)
-{
-    /* print ',' before if needed */
-    if (delim > 0 && fputc(',', f) < 0)
-        return LIBROLE_IO_ERROR;
-
-    if (numeric_flag) {
-        if (fprintf(f, "%u", gid) < 0)
-            return LIBROLE_IO_ERROR;
-    } else {
-        int result;
-        char gr_name[LIBROLE_MAX_NAME];
-        result = librole_get_group_name(gid, gr_name, LIBROLE_MAX_NAME);
-        if (result != LIBROLE_OK)
-            return result;
-        if (fprintf(f, "%s", gr_name) < 0)
-            return LIBROLE_IO_ERROR;
-    }
-
-    /* print ':' after if needed */
-    if (delim < 0 && fputc(':', f) < 0)
-        return LIBROLE_IO_ERROR;
-
-    return LIBROLE_OK;
-}
-
-/* TODO: the same like in rolelst
- TODO: write in a new file and atomically rename */
-int librole_writing(const char *file, struct librole_graph *G, int numeric_flag, int empty_flag)
-{
-    int i, j, result;
-    FILE *f = fopen(file, "w");
-    if (!f)
-        return LIBROLE_IO_ERROR;
-
-    for(i = 0; i < G->size; i++) {
-        if (!G->gr[i].size && !empty_flag)
-            continue;
-
-        result = write_group(f, G->gr[i].gid, -1, numeric_flag);
-        if (result != LIBROLE_OK)
-            goto libnss_role_writing_exit;
-
-        for(j = 0; j < G->gr[i].size; j++) {
-            result = write_group(f, G->gr[i].list[j], j, numeric_flag);
-            if (result != LIBROLE_OK)
-                goto libnss_role_writing_exit;
-        }
-        if (fputc('\n', f) < 0)
-            goto libnss_role_writing_exit;
-    }
-
-    result = LIBROLE_OK;
-
-libnss_role_writing_exit:
-    fclose(f);
-    return result;
-}
-
-int librole_write(const char* pam_role, struct librole_graph *G, int empty_flag)
-{
-    int result;
-    int pam_status;
-    pam_handle_t *pamh;
-
-    result = librole_pam_check(pamh, pam_role, &pam_status);
-    if (result != LIBROLE_OK) {
-        goto exit;
-    }
-
-    result = librole_lock(LIBROLE_CONFIG);
-    if (result != LIBROLE_OK) {
-        goto exit;
-    }
-
-    result = librole_writing(LIBROLE_CONFIG, G, 0, empty_flag);
-
-    librole_unlock(LIBROLE_CONFIG);
-
-/* TODO: can we release immediately? */
-exit:
-    librole_pam_release(pamh, pam_status);
-    return result;
-}
-
-int librole_write_dir(const char* filename, const char* pam_role, struct librole_graph *G, int empty_flag)
-{
-    int result = 0;
-    int pam_status;
-    size_t dirlen = strlen(LIBROLE_CONFIG_DIR);
-    size_t namelen = strlen(filename);
-    size_t fullpathlen = dirlen + namelen + 1 + 1;
-    pam_handle_t *pamh = NULL;
-    char *fullpath = NULL;
-
-    result = librole_pam_check(pamh, pam_role, &pam_status);
-    if (result != LIBROLE_OK)
-        return result;
-
-
-    if (fullpathlen > PATH_MAX)
-    {
-        result = ENAMETOOLONG;
-        goto librole_write_dir_done;
-    }
-    fullpath = calloc(fullpathlen, sizeof(char));
-
-    /* Build full path to the file being read for roles */
-    strcpy(fullpath, LIBROLE_CONFIG_DIR);
-    strcat(fullpath, "/");
-    strcat(fullpath, filename);
-
-    result = librole_lock(fullpath);
-    if (result != LIBROLE_OK) {
-        goto librole_write_dir_done;
-    }
-
-    result = librole_writing(fullpath, G, 0, empty_flag);
-
-    librole_unlock(fullpath);
-
-/* TODO: can we release immediately? */
-librole_write_dir_done:
-    librole_pam_release(pamh, pam_status);
-    free(fullpath);
-    fullpath = NULL;
-
-    return result;
 }

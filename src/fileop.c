@@ -35,6 +35,9 @@
 
 #include "role/glob.h"
 #include "role/parser.h"
+#include "role/fileop.h"
+#include "role/pam_check.h"
+#include "role/lock_file.h"
 
 /*
  * \brief Selector function for scandir which gets all regular files.
@@ -95,6 +98,62 @@ int librole_validate_filename_from_dir(const char *filename)
 }
 
 /*
+ * \brief Validate single system role file name from roles directory.
+ *
+ * \param[in] filename Validate File name in a roles directory.
+ * \return
+ *  - LIBROLE_OK: if filename is valid.
+ *  - LIBROLE_INVALID_ROLE_FILENAME: if filename is invalid.
+ */
+int librole_validate_system_role_filename(const char *filename, char **rolename)
+{
+    int retcode = LIBROLE_INVALID_ROLE_FILENAME;
+    const char *extension_pattern = LIBROLE_ROLE_EXTENSION;
+    size_t extensionlen = strlen(extension_pattern);
+    size_t namelen = strlen(filename);
+    char *system_role = NULL;
+    struct group *gr = NULL;
+    struct gid_t *gid;
+    struct librole_graph G;
+
+    retcode = librole_validate_filename_from_dir(filename);
+    if (retcode != LIBROLE_OK)
+        return retcode;
+
+    system_role = strdup(filename);
+    if (system_role == NULL)
+        return LIBROLE_MEMORY_ERROR;
+    system_role[namelen - extensionlen] = 0;
+
+    gr = getgrnam(system_role);
+    if (gr == NULL) {
+        retcode = LIBROLE_NO_SUCH_GROUP;
+        goto librole_validate_system_role_filename_from_dir_done;
+    }
+    gid = gr->gr_gid;
+
+    retcode = librole_graph_init(&G);
+    if (retcode != LIBROLE_OK)
+        goto librole_validate_system_role_filename_from_dir_done;
+
+    retcode = librole_read_file_from_dir(LIBROLE_CONFIG_DIR, filename, &G);
+    if (retcode != LIBROLE_OK)
+        goto librole_validate_system_role_filename_from_dir_done;
+
+    retcode = librole_find_gid(&G, gid, NULL);
+    librole_graph_free(&G);
+
+librole_validate_system_role_filename_from_dir_done:
+    if (retcode == LIBROLE_OK && rolename != NULL) {
+        *rolename = system_role;
+    } else {
+        free(system_role);
+    }
+
+    return retcode;
+}
+
+/*
  * \brief Read single role file from specified directory right into
  * role graph node.
  *
@@ -118,6 +177,7 @@ int librole_read_file_from_dir(const char * const directory,
 
     if (NULL == directory || NULL == filename || NULL == role_graph)
     {
+        retcode = LIBROLE_INCORRECT_VALUE;
         goto librole_read_file_from_dir_done;
     }
 
@@ -161,7 +221,6 @@ int librole_get_directory_files(const char * const directory,
     int retcode = LIBROLE_OK;
     struct dirent **files;
     int file_count = 0;
-    DIR *role_catalog = NULL;
     int i = 0;
 
     errno = 0;
@@ -195,4 +254,196 @@ int librole_get_directory_files(const char * const directory,
 
 librole_get_directory_files_end:
     return retcode;
+}
+
+/**
+ * \brief Read system role entries from /etc/role.d catalog.
+ *
+ * \param[in] directory directory to open.
+ * \return
+ *  - LIBROLE_INCORRECT_VALUE: Incorrect values passed to function
+ *  - LIBROLE_ERROR_OPENING_DIRECTORY: Error occured while trying to
+ *    open directory.
+ *  - LIBROLE_OK: Operation succeeded.
+ *  - errno: Undefined error.
+ */
+int librole_get_system_roles(const char * const directory,
+    char *system_roles[])
+{
+    int retcode = LIBROLE_OK;
+    struct dirent **files;
+    int file_count = 0;
+    int i, r;
+
+    errno = 0;
+
+    if (NULL == directory || NULL == system_roles)
+    {
+        retcode = LIBROLE_INCORRECT_VALUE;
+        goto librole_get_directory_files_end;
+    }
+
+
+    /* Get all regular files in directory */
+    file_count = scandir(directory, &files, librole_is_role_file, alphasort);
+    if (0 != errno)
+    {
+        retcode = errno;
+        goto librole_get_directory_files_end;
+    }
+
+    for (i = 0, r = 0; i < file_count; ++i)
+    {
+        char* rolename;
+        /* Validate reading filename and skip if name is not valid */
+        if (librole_validate_system_role_filename(files[i]->d_name, &rolename) == LIBROLE_OK) {
+            if (r < LIBROLE_MAX_SYSTEM_ROLES) {
+                system_roles[r++] = rolename;
+            }
+        }
+        free(files[i]);
+    }
+    free(files);
+    system_roles[r] = NULL;
+
+librole_get_directory_files_end:
+    return retcode;
+}
+
+/* delim: 0 - '', > 0 - ',' before, < 0 - ':' after */
+static int write_group(FILE *f, int gid, int delim, int numeric_flag)
+{
+    /* print ',' before if needed */
+    if (delim > 0 && fputc(',', f) < 0)
+        return LIBROLE_IO_ERROR;
+
+    if (numeric_flag) {
+        if (fprintf(f, "%u", gid) < 0)
+            return LIBROLE_IO_ERROR;
+    } else {
+        int result;
+        char gr_name[LIBROLE_MAX_NAME];
+        result = librole_get_group_name(gid, gr_name, LIBROLE_MAX_NAME);
+        if (result != LIBROLE_OK)
+            return result;
+        if (fprintf(f, "%s", gr_name) < 0)
+            return LIBROLE_IO_ERROR;
+    }
+
+    /* print ':' after if needed */
+    if (delim < 0 && fputc(':', f) < 0)
+        return LIBROLE_IO_ERROR;
+
+    return LIBROLE_OK;
+}
+
+
+/* TODO: the same like in rolelst
+ TODO: write in a new file and atomically rename */
+int librole_writing(const char *file, struct librole_graph *G, int numeric_flag, int empty_flag, librole_roles_filter filter)
+{
+    int i, j, result;
+    FILE *f = fopen(file, "w");
+    if (!f)
+        return LIBROLE_IO_ERROR;
+
+    for(i = 0; i < G->size; i++) {
+        if (filter) {
+            char gr_name[LIBROLE_MAX_NAME];
+            if (librole_get_group_name(G->gr[i].gid, gr_name, LIBROLE_MAX_NAME) != LIBROLE_OK)
+                continue;
+            if (!filter(gr_name))
+                continue;
+        } else if (!G->gr[i].size && !empty_flag)
+            continue;
+
+        result = write_group(f, G->gr[i].gid, -1, numeric_flag);
+        if (result != LIBROLE_OK)
+            goto libnss_role_writing_exit;
+
+        for(j = 0; j < G->gr[i].size; j++) {
+            result = write_group(f, G->gr[i].list[j], j, numeric_flag);
+            if (result != LIBROLE_OK)
+                goto libnss_role_writing_exit;
+        }
+        if (fputc('\n', f) < 0)
+            goto libnss_role_writing_exit;
+    }
+
+    result = LIBROLE_OK;
+
+libnss_role_writing_exit:
+    fclose(f);
+    return result;
+}
+
+int librole_write(const char* pam_role, struct librole_graph *G, int empty_flag)
+{
+    int result;
+    int pam_status;
+    pam_handle_t *pamh;
+
+    result = librole_pam_check(pamh, pam_role, &pam_status);
+    if (result != LIBROLE_OK) {
+        goto exit;
+    }
+
+    result = librole_lock(LIBROLE_CONFIG);
+    if (result != LIBROLE_OK) {
+        goto exit;
+    }
+
+    result = librole_writing(LIBROLE_CONFIG, G, 0, empty_flag, NULL);
+
+    librole_unlock(LIBROLE_CONFIG);
+
+/* TODO: can we release immediately? */
+exit:
+    librole_pam_release(pamh, pam_status);
+    return result;
+}
+
+int librole_write_dir(const char* filename, const char* pam_role, struct librole_graph *G, int empty_flag)
+{
+    int result = 0;
+    int pam_status;
+    size_t dirlen = strlen(LIBROLE_CONFIG_DIR);
+    size_t namelen = strlen(filename);
+    size_t fullpathlen = dirlen + namelen + 1 + 1;
+    pam_handle_t *pamh = NULL;
+    char *fullpath = NULL;
+
+    result = librole_pam_check(pamh, pam_role, &pam_status);
+    if (result != LIBROLE_OK)
+        return result;
+
+
+    if (fullpathlen > PATH_MAX)
+    {
+        result = ENAMETOOLONG;
+        goto librole_write_dir_done;
+    }
+    fullpath = calloc(fullpathlen, sizeof(char));
+
+    /* Build full path to the file being read for roles */
+    strcpy(fullpath, LIBROLE_CONFIG_DIR);
+    strcat(fullpath, "/");
+    strcat(fullpath, filename);
+
+    result = librole_lock(fullpath);
+    if (result != LIBROLE_OK) {
+        goto librole_write_dir_done;
+    }
+
+    result = librole_writing(fullpath, G, 0, empty_flag, NULL);
+
+    librole_unlock(fullpath);
+
+/* TODO: can we release immediately? */
+librole_write_dir_done:
+    librole_pam_release(pamh, pam_status);
+    free(fullpath);
+    fullpath = NULL;
+
+    return result;
 }
