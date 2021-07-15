@@ -222,6 +222,12 @@ void drop_quotes(char **str)
     }
 }
 
+void skip_next_spaces(char **str)
+{
+    while ((*str)[0] == ' ' || (*str)[0] == '\t')
+        (*str)++;
+}
+
 int parse_line(char *line, struct librole_graph *G)
 {
     int result;
@@ -248,6 +254,7 @@ int parse_line(char *line, struct librole_graph *G)
     if (comment && *last == '\0')
         goto libnss_role_parse_line_error;
 
+    skip_next_spaces(&last);
     drop_quotes(&last);
     result = librole_get_gid(last, &role->gid);
     if (result != LIBROLE_OK)
@@ -268,6 +275,7 @@ int parse_line(char *line, struct librole_graph *G)
 
         comment = select_line_part(line, len, &last, &i, ',');
 
+        skip_next_spaces(&last);
         drop_quotes(&last);
         result = librole_get_gid(last, &gr);
         if (result == LIBROLE_NO_SUCH_GROUP)
