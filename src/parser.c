@@ -132,7 +132,10 @@ int librole_ver_find_gid(struct librole_ver* v, gid_t g, int *idx)
 
 void librole_ver_free(struct librole_ver *v)
 {
-    free(v->list);
+    if (v->list)
+        free(v->list);
+
+    v->list = NULL;
     v->size = 0;
     v->capacity = 0;
 }
