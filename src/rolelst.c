@@ -51,7 +51,7 @@ struct rolelst_settings {
 static int parse_options(int argc, char **argv, struct rolelst_settings *settings)
 {
     int c, opt_ind;
-    while((c = getopt_long(argc, argv, "hnvVf:S::", rolelst_opt, &opt_ind)) != -1) {
+    while((c = getopt_long(argc, argv, "hnvVS::f:", rolelst_opt, &opt_ind)) != -1) {
         switch(c) {
             case 'h':
                 fprintf(stdout, "Usage: rolelst [-hnv]\n");
