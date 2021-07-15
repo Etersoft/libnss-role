@@ -28,9 +28,11 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
+
 #include "test_config.h"
 #include "test_parser.h"
 #include "test_paths.h"
+
 
 int main(int argc, char **argv) {
     int result = 0;
