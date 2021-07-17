@@ -81,7 +81,12 @@ static int parse_options(int argc, char **argv, struct rolelst_settings *setting
                 break;
             case 'S':
                 settings->system_role_mode = 1;
-                settings->system_role = optarg;
+                if (optarg == NULL && argv[optind] != NULL && argv[optind][0] != '-') {
+                    settings->system_role = argv[optind];
+                    ++optind;
+                } else {
+                    settings->system_role = optarg;
+                }
                 break;
             case 'v':
                 printf("rolelst is the utility for libnss_role version %s\n",
