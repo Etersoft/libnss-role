@@ -53,7 +53,7 @@ static int librole_is_role_file(const struct dirent *entry)
     size_t extensionlen = strlen(extension_pattern);
     size_t namelen = strlen(entry->d_name);
 
-    if (NULL == entry)
+    if (!entry)
     {
         goto librole_is_file_end;
     }
@@ -76,7 +76,7 @@ int librole_validate_filename_from_dir(const char *filename)
     size_t extensionlen = strlen(extension_pattern);
     size_t namelen = strlen(filename);
 
-    if (NULL == filename)
+    if (!filename)
     {
         return LIBROLE_INTERNAL_ERROR;
     }
@@ -118,7 +118,7 @@ int librole_validate_system_role_filename(const char *filename, char **rolename)
     system_role[namelen - extensionlen] = 0;
 
     gr = getgrnam(system_role);
-    if (gr == NULL) {
+    if (!gr) {
         retcode = LIBROLE_NO_SUCH_GROUP;
         goto librole_validate_system_role_filename_from_dir_done;
     }
@@ -157,7 +157,7 @@ int librole_read_file_from_dir(const char * const directory,
 
     errno = 0;
 
-    if (NULL == directory || NULL == filename || NULL == role_graph)
+    if (!directory || !filename || !role_graph)
     {
         retcode = LIBROLE_INCORRECT_VALUE;
         goto librole_read_file_from_dir_done;
@@ -196,7 +196,7 @@ int librole_get_directory_files(const char * const directory,
 
     errno = 0;
 
-    if (NULL == directory || NULL == role_graph)
+    if (!directory || !role_graph)
     {
         retcode = LIBROLE_INCORRECT_VALUE;
         goto librole_get_directory_files_end;
@@ -237,7 +237,7 @@ int librole_get_system_roles(const char * const directory,
 
     errno = 0;
 
-    if (NULL == directory || NULL == system_roles)
+    if (!directory || !system_roles)
     {
         retcode = LIBROLE_INCORRECT_VALUE;
         goto librole_get_directory_files_end;
