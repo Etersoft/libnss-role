@@ -31,6 +31,8 @@
 #include "role/version.h"
 #include "role/fileop.h"
 #include "role/paths.h"
+#include "role/fileop_rw.h"
+
 
 struct option rolelst_opt[] = {
     {"help", no_argument, 0, 'h'},
@@ -141,21 +143,21 @@ int main(int argc, char **argv) {
         if (result != LIBROLE_OK)
             goto exit;
 
-        librole_read_file_from_dir(LIBROLE_CONFIG_DIR, settings.roled_filename, &G);
+        librole_read_file_from_dir(librole_config_dir(), settings.roled_filename, &G);
     } else {
         if (settings.system_role_mode) {
             if (settings.system_role) {
                 system_roles[0] = settings.system_role;
                 system_roles[1] = NULL;
             } else {
-                result = librole_get_system_roles(LIBROLE_CONFIG_DIR, system_roles);
+                result = librole_get_system_roles(librole_config_dir(), system_roles);
                 if (result != LIBROLE_OK)
                     goto exit;
             }
             roles_filter = system_roles_filter;
         }
 
-        result = librole_reading(LIBROLE_CONFIG, &G);
+        result = librole_reading(librole_config_file(), &G);
         if (result != LIBROLE_OK)
             goto exit;
     }
@@ -177,7 +179,7 @@ int main(int argc, char **argv) {
 
     /* Don't check return code in order to retain previous utility
      * behavior in common mode */
-    result = librole_get_directory_files(LIBROLE_CONFIG_DIR, &G);
+    result = librole_get_directory_files(librole_config_dir(), &G);
     /* Check return code in system roles mode */
     if (LIBROLE_OK != result && settings.system_role_mode) {
         goto exit;

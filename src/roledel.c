@@ -29,6 +29,7 @@
 #include "role/version.h"
 #include "role/paths.h"
 #include "role/fileop.h"
+#include "role/fileop_rw.h"
 
 struct option rolelst_opt[] = {
     {"help", no_argument, 0, 'h'},
