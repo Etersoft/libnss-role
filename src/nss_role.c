@@ -29,6 +29,7 @@
 
 #include "role/parser.h"
 #include "role/fileop.h"
+#include "role/paths.h"
 
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -50,7 +51,7 @@ enum nss_status _nss_role_initgroups_dyn(char *user, gid_t main_group,
         goto libnss_role_out;
     }
 
-    result = librole_reading(LIBROLE_CONFIG, &G);
+    result = librole_reading(librole_config_file(), &G);
     if (result != LIBROLE_OK) {
         if (result == LIBROLE_MEMORY_ERROR) {
             *errnop = ENOMEM;
@@ -61,7 +62,7 @@ enum nss_status _nss_role_initgroups_dyn(char *user, gid_t main_group,
     }
 
     /* Don't do anything on errors and try to continue operating */
-    result = librole_get_directory_files(LIBROLE_CONFIG_DIR, &G);
+    result = librole_get_directory_files(librole_config_dir(), &G);
 
     result = librole_ver_init(&col);
     if (result != LIBROLE_OK) {

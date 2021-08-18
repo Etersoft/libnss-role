@@ -30,6 +30,7 @@
 #include "role/parser.h"
 #include "role/pam_check.h"
 #include "role/lock_file.h"
+#include "role/paths.h"
 
 /* TODO: separate read/write and graph */
 
@@ -451,14 +452,14 @@ int librole_write(const char* pam_role, struct librole_graph *G, int empty_flag)
         goto exit;
     }
 
-    result = librole_lock(LIBROLE_CONFIG);
+    result = librole_lock(librole_config_file());
     if (result != LIBROLE_OK) {
         goto exit;
     }
 
-    result = librole_writing(LIBROLE_CONFIG, G, 0, empty_flag);
+    result = librole_writing(librole_config_file(), G, 0, empty_flag);
 
-    librole_unlock(LIBROLE_CONFIG);
+    librole_unlock(librole_config_file());
 
 /* TODO: can we release immediately? */
 exit:
@@ -470,7 +471,7 @@ int librole_write_dir(const char* filename, const char* pam_role, struct librole
 {
     int result = 0;
     int pam_status;
-    size_t dirlen = strlen(LIBROLE_CONFIG_DIR);
+    size_t dirlen = strlen(librole_config_dir());
     size_t namelen = strlen(filename);
     size_t fullpathlen = dirlen + namelen + 1 + 1;
     pam_handle_t *pamh = NULL;
@@ -489,7 +490,7 @@ int librole_write_dir(const char* filename, const char* pam_role, struct librole
     fullpath = calloc(fullpathlen, sizeof(char));
 
     /* Build full path to the file being read for roles */
-    strcpy(fullpath, LIBROLE_CONFIG_DIR);
+    strcpy(fullpath, librole_config_dir());
     strcat(fullpath, "/");
     strcat(fullpath, filename);
 

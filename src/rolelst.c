@@ -30,6 +30,7 @@
 #include "role/parser.h"
 #include "role/version.h"
 #include "role/fileop.h"
+#include "role/paths.h"
 
 struct option rolelst_opt[] = {
     {"help", no_argument, 0, 'h'},
@@ -119,7 +120,7 @@ int main(int argc, char **argv) {
         if (result != LIBROLE_OK)
             goto exit;
 
-        librole_read_file_from_dir(LIBROLE_CONFIG_DIR, filename, &G);
+        librole_read_file_from_dir(librole_config_dir(), filename, &G);
     } else if (settings.system_role) {
         int filename_sz = strlen(settings.system_role) + strlen(LIBROLE_ROLE_EXTENSION) + 1;
 
@@ -134,9 +135,9 @@ int main(int argc, char **argv) {
         if (result != LIBROLE_OK)
             goto exit;
 
-        librole_read_file_from_dir(LIBROLE_CONFIG_DIR, filename, &G);
+        librole_read_file_from_dir(librole_config_dir(), filename, &G);
     } else {
-        result = librole_reading(LIBROLE_CONFIG, &G);
+        result = librole_reading(librole_config_file(), &G);
         if (result != LIBROLE_OK)
             goto exit;
     }
@@ -166,7 +167,7 @@ int main(int argc, char **argv) {
 
     /* Don't check return code in order to retain previous utility
      * behavior */
-    result = librole_get_directory_files(LIBROLE_CONFIG_DIR, &G);
+    result = librole_get_directory_files(librole_config_dir(), &G);
     if (0 != settings.verbose_mode) {
         printf("# Resulting settings merged with /etc/role.d entries\n");
         fflush(stdout);

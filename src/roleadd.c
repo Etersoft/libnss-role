@@ -28,6 +28,7 @@
 #include "role/parser.h"
 #include "role/version.h"
 #include "role/fileop.h"
+#include "role/paths.h"
 
 struct option rolelst_opt[] = {
     {"help", no_argument, 0, 'h'},
@@ -122,7 +123,7 @@ int main(int argc, char **argv) {
         if (result != LIBROLE_OK)
             goto exit;
 
-        librole_read_file_from_dir(LIBROLE_CONFIG_DIR, filename, &G);
+        librole_read_file_from_dir(librole_config_dir(), filename, &G);
     } else if (system_role_flag) {
         int filename_sz = strlen(argv[optind]) + strlen(LIBROLE_ROLE_EXTENSION) + 1;
 
@@ -137,9 +138,9 @@ int main(int argc, char **argv) {
         if (result != LIBROLE_OK)
             goto exit;
 
-        librole_read_file_from_dir(LIBROLE_CONFIG_DIR, filename, &G);
+        librole_read_file_from_dir(librole_config_dir(), filename, &G);
     } else {
-        result = librole_reading(LIBROLE_CONFIG, &G);
+        result = librole_reading(librole_config_file(), &G);
         if (result != LIBROLE_OK)
             goto exit;
     }
