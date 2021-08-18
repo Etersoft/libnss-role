@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2008-2020 Etersoft
- * Copyright (c) 2020 BaseALT
+ * Copyright (c) 2020-2021 BaseALT Ltd. <org@basealt.ru>
+ * Copyright (c) 2020-2021 Igor Chudov <nir@nir.org.ru>
  *
  * NSS library for roles and privileges.
  *
@@ -33,9 +34,11 @@
 #include <errno.h>
 #include <string.h>
 
+#include "test_config.h"
+#include "test_parser.h"
 #include "role/parser.h"
 
-static void test_drop_quotes(void **state) {
+void test_drop_quotes(void **state) {
     char *orig_ptr = NULL;
     /* Create mutable memory area for test string */
     char *immutable_line[] = { "\"role_name\"" };
@@ -60,7 +63,7 @@ static void test_drop_quotes(void **state) {
     orig_ptr = NULL;
 }
 
-static void test_parse_line(void **state) {
+void test_parse_line(void **state) {
     struct librole_graph G;
     char *immutable_line[] = { "users:\"tftp\",named" };
     size_t line_length = strlen(*immutable_line);
@@ -76,28 +79,17 @@ static void test_parse_line(void **state) {
     mutable_line = NULL;
 }
 
-static void test_main(void **state) {
+void test_librole_writing(void **state) {
     struct librole_graph G;
     (void) state;
 
     assert_int_equal(librole_graph_init(&G), LIBROLE_OK);
-    assert_int_equal(librole_reading("test/role.source", &G), LIBROLE_OK);
+    assert_int_equal(librole_reading(__LIBROLE_TEST_DATADIR "/role.source", &G), LIBROLE_OK);
     assert_int_equal(librole_writing("/dev/stdout", &G, 0, 0), LIBROLE_OK);
     assert_int_equal(librole_writing("/dev/stdout", &G, 1, 0), LIBROLE_OK);
-    assert_int_equal(librole_writing("test/role.test.new", &G, 0, 0), LIBROLE_OK);
-    assert_int_equal(librole_writing("test/role.test.add", &G, 0, 0), LIBROLE_OK);
-    assert_int_equal(librole_writing("test/role.test.del", &G, 0, 0), LIBROLE_OK);
+    assert_int_equal(librole_writing(__LIBROLE_TEST_DATADIR "/role.test.new", &G, 0, 0), LIBROLE_OK);
+    assert_int_equal(librole_writing(__LIBROLE_TEST_DATADIR "/role.test.add", &G, 0, 0), LIBROLE_OK);
+    assert_int_equal(librole_writing(__LIBROLE_TEST_DATADIR "/role.test.del", &G, 0, 0), LIBROLE_OK);
 
     librole_graph_free(&G);
 }
-
-int main(int argc, char **argv) {
-    const struct CMUnitTest tests[] = {
-          cmocka_unit_test(test_drop_quotes)
-        , cmocka_unit_test(test_parse_line)
-        /*cmocka_unit_test(test_main)*/
-    };
-
-    return cmocka_run_group_tests(tests, NULL, NULL);
-}
-
