@@ -29,6 +29,7 @@ set(NSS_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/lock_file.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/pam_check.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/parser.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/paths.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/fileop.c)
 
 set(MANPAGES
@@ -41,6 +42,7 @@ set(HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/include/role/glob.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/role/lock_file.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/role/pam_check.h
+	${CMAKE_CURRENT_SOURCE_DIR}/include/role/paths.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/role/parser.h)
 
 set(LIBROLE_VERSION 1.0.0)
