@@ -25,7 +25,16 @@
 
 void test_drop_quotes(void **state);
 void test_parse_line(void **state);
-void test_librole_writing(void **state);
+
+int librole_writing_test_group_setup(void **state);
+int librole_writing_test_setup(void **state);
+int librole_writing_test_teardown(void **state);
+
+void test_librole_writing_to_file(void **state);
+void test_librole_writing_to_file_addgroup(void **state);
+void test_librole_writing_to_file_setgroup(void **state);
+void test_librole_writing_to_file_delgroup(void **state);
+void test_librole_writing_to_file_dropgroup(void **state);
 
 #endif
 

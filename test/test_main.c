@@ -20,6 +20,8 @@
  * USA.
  */
 
+#define UNIT_TESTING 1
+
 /* cmocka requirements */
 #include <stdarg.h>
 #include <stddef.h>
@@ -31,13 +33,48 @@
 #include "test_paths.h"
 
 int main(int argc, char **argv) {
-    const struct CMUnitTest tests[] = {
+    int result = 0;
+
+    const struct CMUnitTest parser_tests[] = {
           cmocka_unit_test(test_drop_quotes)
         , cmocka_unit_test(test_parse_line)
-        , cmocka_unit_test(test_librole_writing)
-        , cmocka_unit_test(test_librole_config_vars)
     };
 
-    return cmocka_run_group_tests(tests, NULL, NULL);
+    const struct CMUnitTest librole_writing_tests[] = {
+          cmocka_unit_test_setup_teardown(
+              test_librole_writing_to_file
+            , librole_writing_test_setup
+            , librole_writing_test_teardown)
+        , cmocka_unit_test_setup_teardown(
+              test_librole_writing_to_file_addgroup
+            , librole_writing_test_setup
+            , librole_writing_test_teardown)
+        , cmocka_unit_test_setup_teardown(
+              test_librole_writing_to_file_setgroup
+            , librole_writing_test_setup
+            , librole_writing_test_teardown)
+        , cmocka_unit_test_setup_teardown(
+              test_librole_writing_to_file_delgroup
+            , librole_writing_test_setup
+            , librole_writing_test_teardown)
+        , cmocka_unit_test_setup_teardown(
+              test_librole_writing_to_file_dropgroup
+            , librole_writing_test_setup
+            , librole_writing_test_teardown)
+    };
+
+    const struct CMUnitTest paths_tests[] = {
+        cmocka_unit_test(test_librole_config_vars)
+    };
+
+    result = cmocka_run_group_tests_name("parser_tests", parser_tests, NULL, NULL);
+    result += cmocka_run_group_tests_name(
+          "librole_writing_tests"
+        , librole_writing_tests
+        , librole_writing_test_group_setup
+        , NULL);
+    result += cmocka_run_group_tests_name("paths_tests", paths_tests, NULL, NULL);
+
+    return result;
 }
 

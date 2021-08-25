@@ -35,9 +35,6 @@ const char *librole_config_dir() {
 	return mock_ptr_type(const char *);
 }
 
-/**
- * Test for functions to retrieve system paths.
- */
 void test_librole_config_vars(void **state) {
     (void) state;
     will_return(librole_config_dir, testdir);

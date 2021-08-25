@@ -33,10 +33,12 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <grp.h>
 
 #include "test_config.h"
 #include "test_parser.h"
 #include "role/parser.h"
+#include "role/glob.h"
 
 void test_drop_quotes(void **state) {
     char *orig_ptr = NULL;
@@ -79,17 +81,153 @@ void test_parse_line(void **state) {
     mutable_line = NULL;
 }
 
-void test_librole_writing(void **state) {
-    struct librole_graph G;
-    (void) state;
+int librole_writing_test_group_setup(void **state) {
+    int result;
 
-    assert_int_equal(librole_graph_init(&G), LIBROLE_OK);
-    assert_int_equal(librole_reading(__LIBROLE_TEST_DATADIR "/role.source", &G), LIBROLE_OK);
-    assert_int_equal(librole_writing("/dev/stdout", &G, 0, 0), LIBROLE_OK);
-    assert_int_equal(librole_writing("/dev/stdout", &G, 1, 0), LIBROLE_OK);
-    assert_int_equal(librole_writing(__LIBROLE_TEST_DATADIR "/role.test.new", &G, 0, 0), LIBROLE_OK);
-    assert_int_equal(librole_writing(__LIBROLE_TEST_DATADIR "/role.test.add", &G, 0, 0), LIBROLE_OK);
-    assert_int_equal(librole_writing(__LIBROLE_TEST_DATADIR "/role.test.del", &G, 0, 0), LIBROLE_OK);
+    result = unlink(__LIBROLE_TEST_DATADIR "/role.test.string.new" LIBROLE_ROLE_EXTENSION);
+    if (ENOENT == errno || !result) {
+        result = 0;
+    } else {
+        fail_msg("Unable to perform test setup");
+    }
 
-    librole_graph_free(&G);
+    result = unlink(__LIBROLE_TEST_DATADIR "/role.test.int.new" LIBROLE_ROLE_EXTENSION);
+    if (ENOENT == errno || !result) {
+        result = 0;
+    } else {
+        fail_msg("Unable to perform test setup");
+    }
+
+    result = unlink(__LIBROLE_TEST_DATADIR "/role.test.add" LIBROLE_ROLE_EXTENSION);
+    if (ENOENT == errno || !result) {
+        result = 0;
+    } else {
+        fail_msg("Unable to perform test setup");
+    }
+
+    result = unlink(__LIBROLE_TEST_DATADIR "/role.test.set" LIBROLE_ROLE_EXTENSION);
+    if (ENOENT == errno || !result) {
+        result = 0;
+    } else {
+        fail_msg("Unable to perform test setup");
+    }
+
+    result = unlink(__LIBROLE_TEST_DATADIR "/role.test.del" LIBROLE_ROLE_EXTENSION);
+    if (ENOENT == errno || !result) {
+        result = 0;
+    } else {
+        fail_msg("Unable to perform test setup");
+    }
+
+    result = unlink(__LIBROLE_TEST_DATADIR "/role.test.drop" LIBROLE_ROLE_EXTENSION);
+    if (ENOENT == errno || !result) {
+        result = 0;
+    } else {
+        fail_msg("Unable to perform test setup");
+    }
+    return 0;
+}
+
+int librole_writing_test_setup(void **state) {
+    struct librole_graph *rolegraph = malloc(sizeof(struct librole_graph));
+
+    assert_int_equal(librole_graph_init(rolegraph), LIBROLE_OK);
+    assert_int_equal(
+        librole_reading(__LIBROLE_TEST_DATADIR "/role_file" LIBROLE_ROLE_EXTENSION, rolegraph),
+        LIBROLE_OK);
+
+    (*state) = rolegraph;
+
+    return 0;
+}
+
+int librole_writing_test_teardown(void **state) {
+    struct librole_graph *rolegraph = NULL;
+
+    rolegraph = (struct librole_graph*)(*state);
+
+    librole_graph_free(rolegraph);
+    rolegraph = NULL;
+
+    return 0;
+}
+
+void test_librole_writing_to_file(void **state) {
+    struct librole_graph *rolegraph = (struct librole_graph*)(*state);
+
+    assert_int_equal(librole_writing(__LIBROLE_TEST_DATADIR "/role.test.string.new" LIBROLE_ROLE_EXTENSION, rolegraph, 0, 0), LIBROLE_OK);
+    assert_int_equal(librole_writing(__LIBROLE_TEST_DATADIR "/role.test.int.new" LIBROLE_ROLE_EXTENSION, rolegraph, 1, 0), LIBROLE_OK);
+}
+
+void test_librole_writing_to_file_addgroup(void **state) {
+    struct librole_graph *rolegraph = (struct librole_graph*)(*state);
+    struct librole_ver *test_role = malloc(sizeof(struct librole_ver));
+    gid_t gid = 0;
+
+    assert_int_equal(librole_ver_init(test_role), LIBROLE_OK);
+
+    assert_int_equal(librole_get_gid("users", &test_role->gid), LIBROLE_OK);
+    assert_int_equal(librole_get_gid("audio", &gid), LIBROLE_OK);
+    assert_int_equal(librole_ver_add(test_role, gid), LIBROLE_OK);
+
+    assert_int_equal(librole_role_add(rolegraph, *test_role), LIBROLE_OK);
+    assert_int_equal(librole_writing(__LIBROLE_TEST_DATADIR "/role.test.add" LIBROLE_ROLE_EXTENSION, rolegraph, 0, 0), LIBROLE_OK);
+
+    librole_ver_free(test_role);
+}
+
+void test_librole_writing_to_file_setgroup(void **state) {
+    struct librole_graph *rolegraph = (struct librole_graph*)(*state);
+    struct librole_ver *test_role = malloc(sizeof(struct librole_ver));
+    gid_t gid = 0;
+
+    assert_int_equal(librole_ver_init(test_role), LIBROLE_OK);
+
+    assert_int_equal(librole_get_gid("users", &test_role->gid), LIBROLE_OK);
+    assert_int_equal(librole_get_gid("audio", &gid), LIBROLE_OK);
+    assert_int_equal(librole_ver_add(test_role, gid), LIBROLE_OK);
+
+    assert_int_equal(librole_role_set(rolegraph, *test_role), LIBROLE_OK);
+    assert_int_equal(librole_writing(__LIBROLE_TEST_DATADIR "/role.test.set" LIBROLE_ROLE_EXTENSION, rolegraph, 0, 0), LIBROLE_OK);
+
+    /*
+     * Don't try to free librole_ver using librole_ver_free() because
+     * it's linked to librole_graph after librole_role_set() call.
+     *
+     * librole_ver_free(test_role);
+     */
+}
+
+void test_librole_writing_to_file_delgroup(void **state) {
+    struct librole_graph *rolegraph = (struct librole_graph*)(*state);
+    struct librole_ver *test_role = malloc(sizeof(struct librole_ver));
+    gid_t gid = 0;
+
+    assert_int_equal(librole_ver_init(test_role), LIBROLE_OK);
+
+    assert_int_equal(librole_get_gid("users", &test_role->gid), LIBROLE_OK);
+    assert_int_equal(librole_get_gid("video", &gid), LIBROLE_OK);
+    assert_int_equal(librole_ver_add(test_role, gid), LIBROLE_OK);
+
+    assert_int_equal(librole_role_del(rolegraph, *test_role), LIBROLE_OK);
+    assert_int_equal(librole_writing(__LIBROLE_TEST_DATADIR "/role.test.del" LIBROLE_ROLE_EXTENSION, rolegraph, 0, 0), LIBROLE_OK);
+
+    librole_ver_free(test_role);
+}
+
+void test_librole_writing_to_file_dropgroup(void **state) {
+    struct librole_graph *rolegraph = (struct librole_graph*)(*state);
+    struct librole_ver *test_role = malloc(sizeof(struct librole_ver));
+    gid_t gid = 0;
+
+    assert_int_equal(librole_ver_init(test_role), LIBROLE_OK);
+
+    assert_int_equal(librole_get_gid("users", &test_role->gid), LIBROLE_OK);
+    assert_int_equal(librole_get_gid("video", &gid), LIBROLE_OK);
+    assert_int_equal(librole_ver_add(test_role, gid), LIBROLE_OK);
+
+    assert_int_equal(librole_role_drop(rolegraph, *test_role), LIBROLE_OK);
+    assert_int_equal(librole_writing(__LIBROLE_TEST_DATADIR "/role.test.drop" LIBROLE_ROLE_EXTENSION, rolegraph, 0, 0), LIBROLE_OK);
+
+    librole_ver_free(test_role);
 }
