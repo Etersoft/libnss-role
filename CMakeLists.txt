@@ -38,6 +38,7 @@ set(MANPAGES
 
 set(HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/include/role/fileop.h
+	${CMAKE_CURRENT_SOURCE_DIR}/include/role/fileop_rw.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/role/glob.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/role/lock_file.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/role/pam_check.h
@@ -55,6 +56,7 @@ include_directories(BEFORE
 	${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_library(role SHARED
+	${CMAKE_CURRENT_SOURCE_DIR}/src/fileop_rw.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/graph.c
 	${NSS_SOURCES})
 
