@@ -40,6 +40,30 @@
 #include "role/parser.h"
 #include "role/glob.h"
 
+
+static const char *file_role_test_string_new = __LIBROLE_TEST_DATADIR "/role.test.string.new" LIBROLE_ROLE_EXTENSION;
+static const char *file_role_test_int_new = __LIBROLE_TEST_DATADIR "/role.test.int.new" LIBROLE_ROLE_EXTENSION;
+static const char *file_role_test_add = __LIBROLE_TEST_DATADIR "/role.test.add" LIBROLE_ROLE_EXTENSION;
+static const char *file_role_test_set = __LIBROLE_TEST_DATADIR "/role.test.set" LIBROLE_ROLE_EXTENSION;
+static const char *file_role_test_del = __LIBROLE_TEST_DATADIR "/role.test.del" LIBROLE_ROLE_EXTENSION;
+static const char *file_role_test_drop = __LIBROLE_TEST_DATADIR "/role.test.drop" LIBROLE_ROLE_EXTENSION;
+
+
+static int unlink_test_file(const char *filename) {
+    int result = 1;
+
+    result = unlink(filename);
+    if (ENOENT == errno || !result) {
+        result = 0;
+        goto unlink_test_file_end;
+    }
+    fail_msg("Unable to unlink %s", file_role_test_string_new);
+
+unlink_test_file_end:
+    return result;
+}
+
+
 void test_drop_quotes(void **state) {
     char *orig_ptr = NULL;
     /* Create mutable memory area for test string */
@@ -82,50 +106,16 @@ void test_parse_line(void **state) {
 }
 
 int librole_writing_test_group_setup(void **state) {
-    int result;
+    int result = 1;
 
-    result = unlink(__LIBROLE_TEST_DATADIR "/role.test.string.new" LIBROLE_ROLE_EXTENSION);
-    if (ENOENT == errno || !result) {
-        result = 0;
-    } else {
-        fail_msg("Unable to perform test setup");
-    }
+    result = unlink_test_file(file_role_test_string_new);
+    result = unlink_test_file(file_role_test_int_new);
+    result = unlink_test_file(file_role_test_add);
+    result = unlink_test_file(file_role_test_set);
+    result = unlink_test_file(file_role_test_del);
+    result = unlink_test_file(file_role_test_drop);
 
-    result = unlink(__LIBROLE_TEST_DATADIR "/role.test.int.new" LIBROLE_ROLE_EXTENSION);
-    if (ENOENT == errno || !result) {
-        result = 0;
-    } else {
-        fail_msg("Unable to perform test setup");
-    }
-
-    result = unlink(__LIBROLE_TEST_DATADIR "/role.test.add" LIBROLE_ROLE_EXTENSION);
-    if (ENOENT == errno || !result) {
-        result = 0;
-    } else {
-        fail_msg("Unable to perform test setup");
-    }
-
-    result = unlink(__LIBROLE_TEST_DATADIR "/role.test.set" LIBROLE_ROLE_EXTENSION);
-    if (ENOENT == errno || !result) {
-        result = 0;
-    } else {
-        fail_msg("Unable to perform test setup");
-    }
-
-    result = unlink(__LIBROLE_TEST_DATADIR "/role.test.del" LIBROLE_ROLE_EXTENSION);
-    if (ENOENT == errno || !result) {
-        result = 0;
-    } else {
-        fail_msg("Unable to perform test setup");
-    }
-
-    result = unlink(__LIBROLE_TEST_DATADIR "/role.test.drop" LIBROLE_ROLE_EXTENSION);
-    if (ENOENT == errno || !result) {
-        result = 0;
-    } else {
-        fail_msg("Unable to perform test setup");
-    }
-    return 0;
+    return result;
 }
 
 int librole_writing_test_setup(void **state) {
@@ -155,8 +145,8 @@ int librole_writing_test_teardown(void **state) {
 void test_librole_writing_to_file(void **state) {
     struct librole_graph *rolegraph = (struct librole_graph*)(*state);
 
-    assert_int_equal(librole_writing(__LIBROLE_TEST_DATADIR "/role.test.string.new" LIBROLE_ROLE_EXTENSION, rolegraph, 0, 0), LIBROLE_OK);
-    assert_int_equal(librole_writing(__LIBROLE_TEST_DATADIR "/role.test.int.new" LIBROLE_ROLE_EXTENSION, rolegraph, 1, 0), LIBROLE_OK);
+    assert_int_equal(librole_writing(file_role_test_string_new, rolegraph, 0, 0), LIBROLE_OK);
+    assert_int_equal(librole_writing(file_role_test_int_new, rolegraph, 1, 0), LIBROLE_OK);
 }
 
 void test_librole_writing_to_file_addgroup(void **state) {
@@ -171,7 +161,7 @@ void test_librole_writing_to_file_addgroup(void **state) {
     assert_int_equal(librole_ver_add(test_role, gid), LIBROLE_OK);
 
     assert_int_equal(librole_role_add(rolegraph, *test_role), LIBROLE_OK);
-    assert_int_equal(librole_writing(__LIBROLE_TEST_DATADIR "/role.test.add" LIBROLE_ROLE_EXTENSION, rolegraph, 0, 0), LIBROLE_OK);
+    assert_int_equal(librole_writing(file_role_test_add, rolegraph, 0, 0), LIBROLE_OK);
 
     librole_ver_free(test_role);
 }
@@ -188,7 +178,7 @@ void test_librole_writing_to_file_setgroup(void **state) {
     assert_int_equal(librole_ver_add(test_role, gid), LIBROLE_OK);
 
     assert_int_equal(librole_role_set(rolegraph, *test_role), LIBROLE_OK);
-    assert_int_equal(librole_writing(__LIBROLE_TEST_DATADIR "/role.test.set" LIBROLE_ROLE_EXTENSION, rolegraph, 0, 0), LIBROLE_OK);
+    assert_int_equal(librole_writing(file_role_test_set, rolegraph, 0, 0), LIBROLE_OK);
 
     /*
      * Don't try to free librole_ver using librole_ver_free() because
@@ -210,7 +200,7 @@ void test_librole_writing_to_file_delgroup(void **state) {
     assert_int_equal(librole_ver_add(test_role, gid), LIBROLE_OK);
 
     assert_int_equal(librole_role_del(rolegraph, *test_role), LIBROLE_OK);
-    assert_int_equal(librole_writing(__LIBROLE_TEST_DATADIR "/role.test.del" LIBROLE_ROLE_EXTENSION, rolegraph, 0, 0), LIBROLE_OK);
+    assert_int_equal(librole_writing(file_role_test_del, rolegraph, 0, 0), LIBROLE_OK);
 
     librole_ver_free(test_role);
 }
@@ -227,7 +217,7 @@ void test_librole_writing_to_file_dropgroup(void **state) {
     assert_int_equal(librole_ver_add(test_role, gid), LIBROLE_OK);
 
     assert_int_equal(librole_role_drop(rolegraph, *test_role), LIBROLE_OK);
-    assert_int_equal(librole_writing(__LIBROLE_TEST_DATADIR "/role.test.drop" LIBROLE_ROLE_EXTENSION, rolegraph, 0, 0), LIBROLE_OK);
+    assert_int_equal(librole_writing(file_role_test_drop, rolegraph, 0, 0), LIBROLE_OK);
 
     librole_ver_free(test_role);
 }
