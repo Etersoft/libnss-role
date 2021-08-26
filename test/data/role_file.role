@@ -1,4 +1,2 @@
-domain admins: wheel, audio,dfdfdsfds , "some text"    
-power users: "wheel", audio dfdfdsfds,"diff txt"
 users: video, wheel
 
