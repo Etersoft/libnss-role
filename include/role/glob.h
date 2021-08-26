@@ -20,5 +20,7 @@
 
 #define LIBROLE_ROLE_EXTENSION ".role"
 
+#define LIBROLE_MAX_SYSTEM_ROLES 256
+
 #endif
 

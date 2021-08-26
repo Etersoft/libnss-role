@@ -38,6 +38,8 @@
 #include "test_config.h"
 #include "test_parser.h"
 #include "role/parser.h"
+#include "role/fileop.h"
+#include "role/fileop_rw.h"
 #include "role/glob.h"
 
 
@@ -145,8 +147,8 @@ int librole_writing_test_teardown(void **state) {
 void test_librole_writing_to_file(void **state) {
     struct librole_graph *rolegraph = (struct librole_graph*)(*state);
 
-    assert_int_equal(librole_writing(file_role_test_string_new, rolegraph, 0, 0), LIBROLE_OK);
-    assert_int_equal(librole_writing(file_role_test_int_new, rolegraph, 1, 0), LIBROLE_OK);
+    assert_int_equal(librole_writing(file_role_test_string_new, rolegraph, 0, 0, NULL), LIBROLE_OK);
+    assert_int_equal(librole_writing(file_role_test_int_new, rolegraph, 1, 0, NULL), LIBROLE_OK);
 }
 
 void test_librole_writing_to_file_addgroup(void **state) {
@@ -161,7 +163,7 @@ void test_librole_writing_to_file_addgroup(void **state) {
     assert_int_equal(librole_ver_add(test_role, gid), LIBROLE_OK);
 
     assert_int_equal(librole_role_add(rolegraph, *test_role), LIBROLE_OK);
-    assert_int_equal(librole_writing(file_role_test_add, rolegraph, 0, 0), LIBROLE_OK);
+    assert_int_equal(librole_writing(file_role_test_add, rolegraph, 0, 0, NULL), LIBROLE_OK);
 
     librole_ver_free(test_role);
 }
@@ -178,7 +180,7 @@ void test_librole_writing_to_file_setgroup(void **state) {
     assert_int_equal(librole_ver_add(test_role, gid), LIBROLE_OK);
 
     assert_int_equal(librole_role_set(rolegraph, *test_role), LIBROLE_OK);
-    assert_int_equal(librole_writing(file_role_test_set, rolegraph, 0, 0), LIBROLE_OK);
+    assert_int_equal(librole_writing(file_role_test_set, rolegraph, 0, 0, NULL), LIBROLE_OK);
 
     /*
      * Don't try to free librole_ver using librole_ver_free() because
@@ -200,7 +202,7 @@ void test_librole_writing_to_file_delgroup(void **state) {
     assert_int_equal(librole_ver_add(test_role, gid), LIBROLE_OK);
 
     assert_int_equal(librole_role_del(rolegraph, *test_role), LIBROLE_OK);
-    assert_int_equal(librole_writing(file_role_test_del, rolegraph, 0, 0), LIBROLE_OK);
+    assert_int_equal(librole_writing(file_role_test_del, rolegraph, 0, 0, NULL), LIBROLE_OK);
 
     librole_ver_free(test_role);
 }
@@ -217,7 +219,7 @@ void test_librole_writing_to_file_dropgroup(void **state) {
     assert_int_equal(librole_ver_add(test_role, gid), LIBROLE_OK);
 
     assert_int_equal(librole_role_drop(rolegraph, *test_role), LIBROLE_OK);
-    assert_int_equal(librole_writing(file_role_test_drop, rolegraph, 0, 0), LIBROLE_OK);
+    assert_int_equal(librole_writing(file_role_test_drop, rolegraph, 0, 0, NULL), LIBROLE_OK);
 
     librole_ver_free(test_role);
 }
