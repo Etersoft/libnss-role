@@ -57,7 +57,7 @@ static int unlink_test_file(const char *filename) {
         result = 0;
         goto unlink_test_file_end;
     }
-    fail_msg("Unable to unlink %s", file_role_test_string_new);
+    result = 1;
 
 unlink_test_file_end:
     return result;
@@ -109,26 +109,70 @@ int librole_writing_test_group_setup(void **state) {
     int result = 1;
 
     result = unlink_test_file(file_role_test_string_new);
+    if (result) {
+        fail_msg("Unable to unlink %s", file_role_test_string_new);
+    }
+
     result = unlink_test_file(file_role_test_int_new);
+    if (result) {
+        fail_msg("Unable to unlink %s", file_role_test_int_new);
+    }
+
     result = unlink_test_file(file_role_test_add);
+    if (result) {
+        fail_msg("Unable to unlink %s", file_role_test_add);
+    }
+
     result = unlink_test_file(file_role_test_set);
+    if (result) {
+        fail_msg("Unable to unlink %s", file_role_test_set);
+    }
+
     result = unlink_test_file(file_role_test_del);
+    if (result) {
+        fail_msg("Unable to unlink %s", file_role_test_del);
+    }
+
     result = unlink_test_file(file_role_test_drop);
+    if (result) {
+        fail_msg("Unable to unlink %s", file_role_test_drop);
+    }
 
     return result;
 }
 
 int librole_writing_test_setup(void **state) {
     struct librole_graph *rolegraph = malloc(sizeof(struct librole_graph));
+    int result = 0;
 
-    assert_int_equal(librole_graph_init(rolegraph), LIBROLE_OK);
-    assert_int_equal(
-        librole_reading(__LIBROLE_TEST_DATADIR "/role_file" LIBROLE_ROLE_EXTENSION, rolegraph),
-        LIBROLE_OK);
+    if (!rolegraph) {
+        goto librole_writing_test_setup_fail;
+    }
 
+    result = librole_graph_init(rolegraph);
+    if (LIBROLE_OK != result) {
+        goto librole_writing_test_setup_fail;
+    }
+
+    result = librole_reading(__LIBROLE_TEST_DATADIR "/role_file" LIBROLE_ROLE_EXTENSION, rolegraph);
+    if (LIBROLE_OK != result) {
+        goto librole_writing_test_setup_fail;
+    }
+
+    goto librole_writing_test_setup_success;
+
+librole_writing_test_setup_fail:
+    if (rolegraph) {
+        free(rolegraph);
+        rolegraph = NULL;
+    }
+    result = 1;
+    fail_msg("Failed to setup librole_writing test");
+
+librole_writing_test_setup_success:
     (*state) = rolegraph;
 
-    return 0;
+    return result;
 }
 
 int librole_writing_test_teardown(void **state) {
@@ -154,6 +198,10 @@ void test_librole_writing_to_file_addgroup(void **state) {
     struct librole_ver *test_role = malloc(sizeof(struct librole_ver));
     gid_t gid = 0;
 
+    if (!test_role) {
+        fail_msg("Unable to allocate memory for 'struct librole_ver testrole'");
+    }
+
     assert_int_equal(librole_ver_init(test_role), LIBROLE_OK);
 
     assert_int_equal(librole_get_gid("users", &test_role->gid), LIBROLE_OK);
@@ -170,6 +218,10 @@ void test_librole_writing_to_file_setgroup(void **state) {
     struct librole_graph *rolegraph = (struct librole_graph*)(*state);
     struct librole_ver *test_role = malloc(sizeof(struct librole_ver));
     gid_t gid = 0;
+
+    if (!test_role) {
+        fail_msg("Unable to allocate memory for 'struct librole_ver testrole'");
+    }
 
     assert_int_equal(librole_ver_init(test_role), LIBROLE_OK);
 
@@ -193,6 +245,10 @@ void test_librole_writing_to_file_delgroup(void **state) {
     struct librole_ver *test_role = malloc(sizeof(struct librole_ver));
     gid_t gid = 0;
 
+    if (!test_role) {
+        fail_msg("Unable to allocate memory for 'struct librole_ver test_role'");
+    }
+
     assert_int_equal(librole_ver_init(test_role), LIBROLE_OK);
 
     assert_int_equal(librole_get_gid("users", &test_role->gid), LIBROLE_OK);
@@ -209,6 +265,10 @@ void test_librole_writing_to_file_dropgroup(void **state) {
     struct librole_graph *rolegraph = (struct librole_graph*)(*state);
     struct librole_ver *test_role = malloc(sizeof(struct librole_ver));
     gid_t gid = 0;
+
+    if (!test_role) {
+        fail_msg("Unable to allocate memory for 'struct librole_ver test_role'");
+    }
 
     assert_int_equal(librole_ver_init(test_role), LIBROLE_OK);
 
