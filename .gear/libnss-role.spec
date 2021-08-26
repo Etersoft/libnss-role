@@ -55,10 +55,10 @@ NSS API library for roles and privilegies.
 	-DMANDIR=%_man8dir \
 	-DCMAKE_INSTALL_PREFIX:PATH=%_prefix
 %cmake_build
-
-%check
 %cmake_build -t test
 
+%check
+%cmake_build test
 %_cmake__builddir/checkver %version
 
 %install

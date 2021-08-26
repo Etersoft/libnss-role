@@ -8,7 +8,7 @@ set(TEST_SOURCES
 
 add_mocked_test(main
 	SOURCES ${TEST_SOURCES}
-	COMPILE_OPTIONS -g3 -Wl,--wrap=librole_config_file
+	COMPILE_OPTIONS -g3 -Wl,--wrap=librole_config_file -Wl,--rpath=${CMAKE_BINARY_DIR}
 	LINK_LIBRARIES role pam pam_misc)
 
 target_include_directories(test_main PRIVATE
