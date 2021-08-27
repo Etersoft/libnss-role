@@ -53,6 +53,7 @@ This module implements such permission management model.
 
 * **CMake 3.10+** for building
 * **cmocka** for unit testing
+* **nss_wrapper** for unit testing
 
 The build process is as simple as:
 
