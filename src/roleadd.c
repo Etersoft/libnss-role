@@ -28,6 +28,9 @@
 #include "role/parser.h"
 #include "role/version.h"
 #include "role/fileop.h"
+#include "role/paths.h"
+#include "role/fileop_rw.h"
+
 
 struct option rolelst_opt[] = {
     {"help", no_argument, 0, 'h'},
@@ -63,7 +66,7 @@ static int parse_options(int argc, char **argv, int *set_flag, int *skip_flag, i
     *skip_flag = 0;
     *roled_flag = 0;
     *system_role_flag = 0;
-    while((c = getopt_long(argc, argv, "hmsvf:S", rolelst_opt, &opt_ind)) != -1) {
+    while((c = getopt_long(argc, argv, "hsmvSf:", rolelst_opt, &opt_ind)) != -1) {
         switch(c) {
             case 'h':
                 print_help();
@@ -122,7 +125,7 @@ int main(int argc, char **argv) {
         if (result != LIBROLE_OK)
             goto exit;
 
-        librole_read_file_from_dir(LIBROLE_CONFIG_DIR, filename, &G);
+        librole_read_file_from_dir(librole_config_dir(), filename, &G);
     } else if (system_role_flag) {
         int filename_sz = strlen(argv[optind]) + strlen(LIBROLE_ROLE_EXTENSION) + 1;
 
@@ -137,9 +140,9 @@ int main(int argc, char **argv) {
         if (result != LIBROLE_OK)
             goto exit;
 
-        librole_read_file_from_dir(LIBROLE_CONFIG_DIR, filename, &G);
+        librole_read_file_from_dir(librole_config_dir(), filename, &G);
     } else {
-        result = librole_reading(LIBROLE_CONFIG, &G);
+        result = librole_reading(librole_config_file(), &G);
         if (result != LIBROLE_OK)
             goto exit;
     }

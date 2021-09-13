@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2008-2020 Etersoft
- * Copyright (c) 2020 BaseALT
+ * Copyright (c) 2021 BaseALT Ltd. <org@basealt.ru>
+ * Copyright (c) 2021 Igor Chudov <nir@nir.org.ru>
  *
  * NSS library for roles and privileges.
  *
@@ -19,85 +19,64 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  * USA.
  */
+
+#define UNIT_TESTING 1
+
 /* cmocka requirements */
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
 #include <cmocka.h>
 
-/* Test requirements */
-#include <stdlib.h>
-#include <stdio.h>
-#include <getopt.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
 
-#include "role/parser.h"
+#include "test_config.h"
+#include "test_parser.h"
+#include "test_paths.h"
 
-static void test_drop_quotes(void **state) {
-    char *orig_ptr = NULL;
-    /* Create mutable memory area for test string */
-    char *immutable_line[] = { "\"role_name\"" };
-    size_t line_length = strlen(*immutable_line);
-    char *mutable_line = calloc(line_length + 1, sizeof(char));
-    (void) state;
-
-    assert_non_null(mutable_line);
-    /* drop_quotes increments the pointer making it impossible to free
-     * the memory so it is needed to store the original pointer to
-     * be able to free the memory block allocated */
-    orig_ptr = mutable_line;
-    strncpy(mutable_line, *immutable_line, line_length);
-    strcpy(mutable_line, *immutable_line);
-
-    assert_string_equal(mutable_line, "\"role_name\"");
-    drop_quotes(&mutable_line);
-    assert_string_equal(mutable_line, "role_name");
-
-    free(orig_ptr);
-    mutable_line = NULL;
-    orig_ptr = NULL;
-}
-
-static void test_parse_line(void **state) {
-    struct librole_graph G;
-    char *immutable_line[] = { "users:\"tftp\",named" };
-    size_t line_length = strlen(*immutable_line);
-    char *mutable_line = calloc(line_length + 1, sizeof(char));
-
-    assert_int_equal(librole_graph_init(&G), LIBROLE_OK);
-    assert_non_null(mutable_line);
-    strncpy(mutable_line, *immutable_line, line_length);
-
-    parse_line(mutable_line, &G);
-
-    free(mutable_line);
-    mutable_line = NULL;
-}
-
-static void test_main(void **state) {
-    struct librole_graph G;
-    (void) state;
-
-    assert_int_equal(librole_graph_init(&G), LIBROLE_OK);
-    assert_int_equal(librole_reading("test/role.source", &G), LIBROLE_OK);
-    assert_int_equal(librole_writing("/dev/stdout", &G, 0, 0), LIBROLE_OK);
-    assert_int_equal(librole_writing("/dev/stdout", &G, 1, 0), LIBROLE_OK);
-    assert_int_equal(librole_writing("test/role.test.new", &G, 0, 0), LIBROLE_OK);
-    assert_int_equal(librole_writing("test/role.test.add", &G, 0, 0), LIBROLE_OK);
-    assert_int_equal(librole_writing("test/role.test.del", &G, 0, 0), LIBROLE_OK);
-
-    librole_graph_free(&G);
-}
 
 int main(int argc, char **argv) {
-    const struct CMUnitTest tests[] = {
+    int result = 0;
+
+    const struct CMUnitTest parser_tests[] = {
           cmocka_unit_test(test_drop_quotes)
         , cmocka_unit_test(test_parse_line)
-        /*cmocka_unit_test(test_main)*/
     };
 
-    return cmocka_run_group_tests(tests, NULL, NULL);
+    const struct CMUnitTest librole_writing_tests[] = {
+          cmocka_unit_test_setup_teardown(
+              test_librole_writing_to_file
+            , librole_writing_test_setup
+            , librole_writing_test_teardown)
+        , cmocka_unit_test_setup_teardown(
+              test_librole_writing_to_file_addgroup
+            , librole_writing_test_setup
+            , librole_writing_test_teardown)
+        , cmocka_unit_test_setup_teardown(
+              test_librole_writing_to_file_setgroup
+            , librole_writing_test_setup
+            , librole_writing_test_teardown)
+        , cmocka_unit_test_setup_teardown(
+              test_librole_writing_to_file_delgroup
+            , librole_writing_test_setup
+            , librole_writing_test_teardown)
+        , cmocka_unit_test_setup_teardown(
+              test_librole_writing_to_file_dropgroup
+            , librole_writing_test_setup
+            , librole_writing_test_teardown)
+    };
+
+    const struct CMUnitTest paths_tests[] = {
+        cmocka_unit_test(test_librole_config_vars)
+    };
+
+    result = cmocka_run_group_tests_name("parser_tests", parser_tests, NULL, NULL);
+    result += cmocka_run_group_tests_name(
+          "librole_writing_tests"
+        , librole_writing_tests
+        , librole_writing_test_group_setup
+        , NULL);
+    result += cmocka_run_group_tests_name("paths_tests", paths_tests, NULL, NULL);
+
+    return result;
 }
 

@@ -18,11 +18,9 @@
 #define LIBROLE_INCORRECT_VALUE     148
 #define LIBROLE_OK			0
 
-#define LIBROLE_CONFIG "/etc/role"
-
-#define LIBROLE_CONFIG_DIR "/etc/role.d"
-
 #define LIBROLE_ROLE_EXTENSION ".role"
+
+#define LIBROLE_MAX_SYSTEM_ROLES 256
 
 #endif
 

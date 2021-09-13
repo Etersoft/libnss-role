@@ -30,6 +30,7 @@ BuildRequires: libcmocka
 BuildRequires: libcmocka-devel
 BuildRequires: libpam0
 BuildRequires: libpam0-devel
+BuildRequires: nss_wrapper
 
 Requires: libpam0
 
@@ -57,7 +58,7 @@ NSS API library for roles and privilegies.
 %cmake_build
 
 %check
-%cmake_build -t test
+%cmake_build -t all_tests
 
 %_cmake__builddir/checkver %version
 
