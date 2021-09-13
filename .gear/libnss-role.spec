@@ -6,8 +6,8 @@
 %global _cmake_skip_rpath %nil
 
 Name: libnss-role
-Version: 0.5.3
-Release: alt1
+Version: 0.5.4
+Release: alt0.dev1
 
 Summary: NSS API library and admin tools for roles and privilegies
 
