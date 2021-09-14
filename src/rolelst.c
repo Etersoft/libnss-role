@@ -47,9 +47,13 @@ struct rolelst_settings {
     int numeric_flag;
     int verbose_mode;
     int system_role_mode;
+    int roles_list_mode;
     const char* roled_filename;
     const char* system_role;
 };
+
+static char** roles_list = NULL;
+int roles_list_count = 0;
 
 static int parse_options(int argc, char **argv, struct rolelst_settings *settings)
 {
@@ -57,7 +61,7 @@ static int parse_options(int argc, char **argv, struct rolelst_settings *setting
     while((c = getopt_long(argc, argv, "hnvVS::f:", rolelst_opt, &opt_ind)) != -1) {
         switch(c) {
             case 'h':
-                fprintf(stdout, "Usage: rolelst [-hnv]\n");
+                fprintf(stdout, "Usage: rolelst [-hnvVSf] [role_name ...]\n");
                 fprintf(stdout,
                     "\t-h [ --help   ]\t\tproduce help message\n");
                 fprintf(stdout,
@@ -102,6 +106,12 @@ static int parse_options(int argc, char **argv, struct rolelst_settings *setting
                 return 0;
         }
     }
+
+    if (!settings->system_role_mode && argc > optind && argv[optind] != NULL) {
+        roles_list = argv + optind;
+        roles_list_count = argc - optind;
+        settings->roles_list_mode = 1;
+    }
     return 1;
 }
 
@@ -118,6 +128,22 @@ int system_roles_filter(const char *rolename) {
         if (system_role == NULL)
             break;
         if (strcmp(system_role, rolename) == 0)
+            return 1;
+    }
+
+    return 0;
+}
+
+int roles_list_filter(const char *rolename) {
+    int i = 0;
+    char *role;
+
+    while (i < roles_list_count) {
+        role = roles_list[i++];
+
+        if (role == NULL)
+            break;
+        if (strcmp(role, rolename) == 0)
             return 1;
     }
 
@@ -162,6 +188,10 @@ int main(int argc, char **argv) {
             goto exit;
     }
 
+    if (settings.roles_list_mode) {
+        roles_filter = roles_list_filter;
+    }
+
     if ((settings.verbose_mode || settings.roled_filename) && !settings.system_role_mode) {
         if (settings.verbose_mode && settings.roled_filename) {
             printf("# Settings read from /etc/role.d/%s:\n", settings.roled_filename);
@@ -170,7 +200,7 @@ int main(int argc, char **argv) {
         }
 
         fflush(stdout);
-        result = librole_writing("/dev/stdout", &G, settings.numeric_flag, 0, NULL);
+        result = librole_writing("/dev/stdout", &G, settings.numeric_flag, 0, roles_filter);
         if (LIBROLE_OK != result || settings.roled_filename) {
             goto exit;
         }
