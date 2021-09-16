@@ -7,7 +7,7 @@
 
 Name: libnss-role
 Version: 0.5.4
-Release: alt1
+Release: alt2
 
 Summary: NSS API library and admin tools for roles and privilegies
 
@@ -59,7 +59,7 @@ NSS API library for roles and privilegies.
 %cmake_build -t all_tests
 
 %check
-%cmake_build all_tests
+%cmake_build -- all_tests
 %_cmake__builddir/checkver %version
 
 %install
@@ -99,6 +99,10 @@ update_chrooted all
 %_includedir/role/
 
 %changelog
+* Thu Sep 16 2021 Evgeny Sinelnikov <sin@altlinux.org> 0.5.4-alt2
+- Refusing to parse further with cmake_build macros for tests due
+  compatibility with Sisyphus
+
 * Tue Sep 14 2021 Evgeny Sinelnikov <sin@altlinux.org> 0.5.4-alt1
 - Muliple fixes and testing support
 - Add list of roles as additional arguments in rolelst
