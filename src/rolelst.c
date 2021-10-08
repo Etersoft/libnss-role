@@ -84,9 +84,17 @@ static int parse_options(int argc, char **argv, struct rolelst_settings *setting
                 settings->verbose_mode = 1;
                 break;
             case 'f':
+                if (settings->system_role_mode) {
+                    fprintf(stderr, "rolelst: show role in additional file option excludes show system role option\n");
+                    return 0;
+                }
                 settings->roled_filename = optarg;
                 break;
             case 'S':
+                if (settings->roled_filename) {
+                    fprintf(stderr, "rolelst: show system role option excludes show role in additional file option\n");
+                    return 0;
+                }
                 settings->system_role_mode = 1;
                 if (optarg == NULL && argv[optind] != NULL && argv[optind][0] != '-') {
                     settings->system_role = argv[optind];
