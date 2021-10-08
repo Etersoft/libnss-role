@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(libnss-role
 	LANGUAGES C
-	VERSION 0.5.4
+	VERSION 0.5.5
 	DESCRIPTION "NSS library to work with roles")
 set(C_STANDARD 90)
 set(CMAKE_C_STANDARD 90)
