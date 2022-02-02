@@ -6,7 +6,7 @@
 %global _cmake_skip_rpath %nil
 
 Name: libnss-role
-Version: 0.5.5
+Version: 0.5.6
 Release: alt1
 
 Summary: NSS API library and admin tools for roles and privilegies
@@ -91,6 +91,9 @@ update_chrooted all
 %_includedir/role/
 
 %changelog
+* Wed Feb 02 2022 Evgeny Sinelnikov <sin@altlinux.org> 0.5.6-alt1
+- Add libnss-role control facility
+
 * Fri Oct 08 2021 Evgeny Sinelnikov <sin@altlinux.org> 0.5.5-alt1
 - Add mutual exclusion for show system role (-S or --system) and
   show role in additional file option (-f or --file) options.
