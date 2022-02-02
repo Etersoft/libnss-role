@@ -20,9 +20,6 @@ Packager: Vitaly Lipatov <lav@altlinux.ru>
 # https://github.com/altlinux/libnss-role.git
 Source: %name-%version.tar
 
-Requires(pre): chrooted >= 0.3.5-alt1 chrooted-resolv sed
-Requires(postun): chrooted >= 0.3.5-alt1 sed
-
 BuildRequires: glibc-devel
 BuildRequires: cmake
 BuildRequires: ctest
@@ -32,7 +29,7 @@ BuildRequires: libpam0
 BuildRequires: libpam0-devel
 BuildRequires: nss_wrapper
 
-Requires: libpam0
+Requires: libpam0 chrooted >= 0.3.5-alt1 chrooted-resolv control
 
 %description
 NSS API library and admin tools for roles and privilegies.
@@ -66,21 +63,15 @@ NSS API library for roles and privilegies.
 %cmakeinstall_std
 mkdir -p %buildroot%_sysconfdir/role.d
 
+# control support
+install -pD -m755 %name.control %buildroot%_controldir/%name
+
 %post
-if [ "$1" = "1" ]; then
-    grep -q '^group:[[:blank:]]*\(.\+[[:blank:]]\+\)*role\($\|[[:blank:]]\)' \
-        %_sysconfdir/nsswitch.conf || \
-    sed -i.rpmorig -e 's/^\(group:.\+\)$/\1 role/g' \
-        %_sysconfdir/nsswitch.conf
-fi
+control libnss-role enabled
 update_chrooted all
 
-%postun
-if [ "$1" = "0" ]; then
-    sed -i -e 's/^group:role/group:/g' \
-           -e 's/^\(group:\)\(.\+[[:blank:]]*\)*[[:blank:]]\+role\($\|[[:blank:]].*\)$/\1\2\3/g' \
-        %_sysconfdir/nsswitch.conf
-fi
+%preun
+control libnss-role disabled
 update_chrooted all
 
 %files
@@ -93,6 +84,7 @@ update_chrooted all
 %_bindir/rolelst
 %_libdir/*.so.*
 %_man8dir/*
+%config %_controldir/%name
 
 %files devel
 %_libdir/*.so
