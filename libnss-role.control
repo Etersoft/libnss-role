@@ -24,9 +24,7 @@ case "$REQUEST" in
 		str="$(grep -E '^\s*group:.*' $CONFIG)"
 		if [ -z "$str" ];then
 			echo 'unknown'
-		elif echo "$str" | grep -E -q '(:role\s*$|:role\s+\S+|\srole\s+\S+)'; then
-			echo 'unknown'
-		elif echo "$str" | grep -E -q '^\s*group:.*\srole\s*$'; then
+		elif echo "$str" | grep -E -q '^\s*group(:.*\s|:)role(\s+.*|\s*)$'; then
 			echo 'enabled'
 		else
 			echo 'disabled'
