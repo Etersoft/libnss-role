@@ -34,16 +34,22 @@
 int librole_graph_add(struct librole_graph *G, struct librole_ver v)
 {
     if (G->size == G->capacity) {
-        G->capacity <<= 1;
-        G->gr = (struct librole_ver *) realloc(G->gr, sizeof(struct librole_ver) * G->capacity);
-        if (!G->gr)
-            return LIBROLE_MEMORY_ERROR;
+        int capacity = G->capacity ? G->capacity << 1 : 10;
+        struct librole_ver *gr;
+        int *used;
 
-        G->used = (int *) realloc(G->used, sizeof(int) * G->capacity);
-        if (!G->used) {
-            free(G->gr);
+        /* Keep G valid on failure: it is freed by the caller */
+        gr = (struct librole_ver *) realloc(G->gr, sizeof(struct librole_ver) * capacity);
+        if (!gr)
             return LIBROLE_MEMORY_ERROR;
-        }
+        G->gr = gr;
+
+        used = (int *) realloc(G->used, sizeof(int) * capacity);
+        if (!used)
+            return LIBROLE_MEMORY_ERROR;
+        memset(used + G->capacity, 0, sizeof(int) * (capacity - G->capacity));
+        G->used = used;
+        G->capacity = capacity;
     }
     G->gr[G->size++] = v;
     return LIBROLE_OK;
@@ -63,10 +69,14 @@ int librole_ver_add(struct librole_ver *v, gid_t g)
     /* This code will be executed on LIBROLE_NO_SUCH_GROUP from
      * librole_ver_find_gid or on any other result */
     if (v->size == v->capacity) {
-        v->capacity <<= 1;
-        v->list = (gid_t *) realloc(v->list, sizeof(gid_t) * v->capacity);
-        if (!v->list)
+        /* capacity is 0 after librole_ver_free() (librole_role_drop()) */
+        int capacity = v->capacity ? v->capacity << 1 : 10;
+        gid_t *list = (gid_t *) realloc(v->list, sizeof(gid_t) * capacity);
+
+        if (!list)
             return LIBROLE_MEMORY_ERROR;
+        v->list = list;
+        v->capacity = capacity;
     }
     v->list[v->size++] = g;
 
@@ -78,6 +88,7 @@ int librole_graph_init(struct librole_graph *G)
 {
     G->capacity = 10;
     G->size = 0;
+    G->used = NULL;
     G->gr = (struct librole_ver *) malloc(sizeof(struct librole_ver) * G->capacity);
     if (!G->gr)
         return LIBROLE_MEMORY_ERROR;
@@ -85,6 +96,8 @@ int librole_graph_init(struct librole_graph *G)
     G->used = (int *) malloc(sizeof(int) * G->capacity);
     if (!G->used) {
         free(G->gr);
+        G->gr = NULL;
+        G->size = 0;
         return LIBROLE_MEMORY_ERROR;
     }
     memset(G->used, 0, sizeof(int) * G->capacity);
@@ -132,10 +145,10 @@ int librole_ver_find_gid(struct librole_ver* v, gid_t g, int *idx)
 
 void librole_ver_free(struct librole_ver *v)
 {
-    if (v && v->list) {
-        free(v->list);
-        v->list = NULL;
-    }
+    if (!v)
+        return;
+    free(v->list);
+    v->list = NULL;
     v->size = 0;
     v->capacity = 0;
 }
