@@ -9,7 +9,8 @@ set(TEST_SOURCES
 	test_main.c
 	test_parser.c
 	test_paths.c
-	test_unavail.c)
+	test_unavail.c
+	test_memory.c)
 
 add_mocked_test(main
 	SOURCES ${TEST_SOURCES}
