@@ -36,6 +36,7 @@
 #include "test_memory.h"
 #include "test_fileop_rw.h"
 #include "test_roles.h"
+#include "test_files.h"
 
 
 int main(void) {
@@ -108,6 +109,15 @@ int main(void) {
             , roles_test_setup, roles_test_teardown)
     };
 
+    const struct CMUnitTest files_tests[] = {
+          cmocka_unit_test_setup_teardown(test_reading_missing_file
+            , files_test_setup, files_test_teardown)
+        , cmocka_unit_test_setup_teardown(test_nss_initgroups_missing_file
+            , files_test_setup, files_test_teardown)
+        , cmocka_unit_test_setup_teardown(test_find_role_file
+            , files_test_setup, files_test_teardown)
+    };
+
     const struct CMUnitTest paths_tests[] = {
         cmocka_unit_test(test_librole_config_vars)
     };
@@ -122,6 +132,7 @@ int main(void) {
     result += cmocka_run_group_tests_name("memory_tests", memory_tests, NULL, NULL);
     result += cmocka_run_group_tests_name("fileop_rw_tests", fileop_rw_tests, NULL, NULL);
     result += cmocka_run_group_tests_name("roles_tests", roles_tests, NULL, NULL);
+    result += cmocka_run_group_tests_name("files_tests", files_tests, NULL, NULL);
     result += cmocka_run_group_tests_name("paths_tests", paths_tests, NULL, NULL);
 
     return result;
