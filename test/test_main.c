@@ -73,6 +73,7 @@ int main(int argc, char **argv) {
         , cmocka_unit_test(test_reading_unavail)
         , cmocka_unit_test(test_reading_last_line_without_eol)
         , cmocka_unit_test(test_nss_initgroups_unavail)
+        , cmocka_unit_test(test_reading_directory_unavail)
     };
 
     const struct CMUnitTest paths_tests[] = {

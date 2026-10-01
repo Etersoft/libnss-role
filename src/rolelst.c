@@ -160,7 +160,7 @@ int roles_list_filter(const char *rolename) {
 
 int main(int argc, char **argv) {
     struct rolelst_settings settings;
-    struct librole_graph G;
+    struct librole_graph G = {0};
     int result = LIBROLE_OK;
     int source_unavail = 0;
     memset(&settings, 0, sizeof(settings));
@@ -181,6 +181,8 @@ int main(int argc, char **argv) {
         result = librole_read_file_from_dir(librole_config_dir(), settings.roled_filename, &G);
         if (result == LIBROLE_SOURCE_UNAVAIL)
             source_unavail = 1;
+        else if (result != LIBROLE_OK)
+            goto exit;
     } else {
         if (settings.system_role_mode) {
             if (settings.system_role) {
@@ -221,13 +223,11 @@ int main(int argc, char **argv) {
     }
 
 
-    /* Don't check return code in order to retain previous utility
-     * behavior in common mode */
     result = librole_get_directory_files(librole_config_dir(), &G);
-    /* Check return code in system roles mode */
-    if (LIBROLE_OK != result && settings.system_role_mode) {
+    if (result == LIBROLE_SOURCE_UNAVAIL)
+        source_unavail = 1;
+    else if (result != LIBROLE_OK)
         goto exit;
-    }
 
     if (0 != settings.verbose_mode) {
         if (settings.system_role_mode) {
