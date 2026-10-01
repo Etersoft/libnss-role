@@ -42,6 +42,9 @@ enum nss_status _nss_role_initgroups_dyn(char *user, gid_t main_group,
     int i, result;
     librole_group_collector col = {0}, ans = {0};
 
+    /* Groups of roles depend on groups of the user only */
+    (void) user;
+
     pthread_mutex_lock(&mutex);
 
     result = librole_graph_init(&G);

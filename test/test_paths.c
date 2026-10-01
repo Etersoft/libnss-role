@@ -31,7 +31,7 @@
 
 static const char *testdir = __LIBROLE_TEST_DATADIR;
 
-const char *librole_config_dir() {
+const char *librole_config_dir(void) {
 	return mock_ptr_type(const char *);
 }
 

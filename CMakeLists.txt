@@ -9,7 +9,10 @@ set(C_STANDARD_REQUIRED ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
-add_compile_options(-pedantic -g3)
+add_compile_options(-Wall -Wextra -pedantic -g3)
+# POSIX and X/Open functions (getgrnam_r, scandir, strdup, snprintf...)
+# are not declared in strict C90 mode without feature test macros
+add_definitions(-D_DEFAULT_SOURCE -D_XOPEN_SOURCE=700)
 
 option(ENABLE_TESTS "Enable unit tests for libnss-role" ON)
 option(NSS_LIBDIR "Destination directory for libnss_role" "/lib64")

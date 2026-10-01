@@ -132,14 +132,13 @@ int main(int argc, char **argv) {
         if (result == LIBROLE_SOURCE_UNAVAIL)
             goto exit;
     } else if (system_role_flag) {
-        int filename_sz = strlen(argv[optind]) + strlen(LIBROLE_ROLE_EXTENSION) + 1;
+        size_t filename_sz = strlen(argv[optind]) + strlen(LIBROLE_ROLE_EXTENSION) + 1;
 
         filename = malloc(filename_sz);
         if (filename == NULL)
             goto exit;
 
-        strncpy(filename, argv[optind], filename_sz);
-        strncat(filename, LIBROLE_ROLE_EXTENSION, strlen(LIBROLE_ROLE_EXTENSION));
+        snprintf(filename, filename_sz, "%s" LIBROLE_ROLE_EXTENSION, argv[optind]);
 
         result = librole_validate_filename_from_dir(filename);
         if (result != LIBROLE_OK)
