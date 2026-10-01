@@ -152,6 +152,11 @@ int librole_write_dir(const char* filename, const char* pam_role, struct librole
         goto librole_write_dir_done;
     }
     fullpath = calloc(fullpathlen, sizeof(char));
+    if (!fullpath)
+    {
+        result = LIBROLE_MEMORY_ERROR;
+        goto librole_write_dir_done;
+    }
 
     /* Build full path to the file being read for roles */
     strcpy(fullpath, librole_config_dir());
