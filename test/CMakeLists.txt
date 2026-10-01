@@ -8,12 +8,13 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data DESTINATION ${CMAKE_CURRENT_BINARY_DI
 set(TEST_SOURCES
 	test_main.c
 	test_parser.c
-	test_paths.c)
+	test_paths.c
+	test_unavail.c)
 
 add_mocked_test(main
 	SOURCES ${TEST_SOURCES}
 	COMPILE_OPTIONS -g3 -Wl,--wrap=librole_config_file
-	LINK_LIBRARIES role pam pam_misc)
+	LINK_LIBRARIES role nss_role pam pam_misc ${CMAKE_DL_LIBS})
 
 target_include_directories(test_main PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/../include
