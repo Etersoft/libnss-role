@@ -167,8 +167,12 @@ int librole_get_group_name(gid_t gid, char *ans, size_t ans_size)
         return LIBROLE_NO_SUCH_GROUP;
     }
     if (ans) {
-        strncpy(ans, grp.gr_name, ans_size);
-        ans[ans_size] = '\0';
+        /* Don't return a truncated name: it is a name of another group */
+        if (strlen(grp.gr_name) >= ans_size) {
+            free(buffer);
+            return LIBROLE_OUT_OF_RANGE;
+        }
+        strcpy(ans, grp.gr_name);
     }
 
     free(buffer);
@@ -281,8 +285,11 @@ int librole_get_user_name(uid_t uid, char *user_name, size_t user_name_size)
     }
 
     if (user_name) {
-        strncpy(user_name, pwd_ptr->pw_name, user_name_size);
-        user_name[user_name_size - 1 ] = '\0';
+        if (strlen(pwd_ptr->pw_name) >= user_name_size) {
+            free(buffer);
+            return LIBROLE_OUT_OF_RANGE;
+        }
+        strcpy(user_name, pwd_ptr->pw_name);
     }
 
     free(buffer);
