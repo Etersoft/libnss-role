@@ -50,6 +50,18 @@ static const char *file_role_test_del = __LIBROLE_TEST_DATADIR "/role.test.del" 
 static const char *file_role_test_drop = __LIBROLE_TEST_DATADIR "/role.test.drop" LIBROLE_ROLE_EXTENSION;
 
 
+static void assert_file_content(const char *filename, const char *content) {
+    char buf[256];
+    size_t len;
+    FILE *f = fopen(filename, "r");
+
+    assert_non_null(f);
+    len = fread(buf, 1, sizeof(buf) - 1, f);
+    fclose(f);
+    buf[len] = '\0';
+    assert_string_equal(buf, content);
+}
+
 static int unlink_test_file(const char *filename) {
     int result = 1;
 
@@ -105,6 +117,7 @@ void test_parse_line(void **state) {
 
     free(mutable_line);
     mutable_line = NULL;
+    librole_graph_free(&G);
 }
 
 int librole_writing_test_group_setup(void **state) {
@@ -184,6 +197,7 @@ int librole_writing_test_teardown(void **state) {
     rolegraph = (struct librole_graph*)(*state);
 
     librole_graph_free(rolegraph);
+    free(rolegraph);
     rolegraph = NULL;
 
     return 0;
@@ -193,7 +207,9 @@ void test_librole_writing_to_file(void **state) {
     struct librole_graph *rolegraph = (struct librole_graph*)(*state);
 
     assert_int_equal(librole_writing(file_role_test_string_new, rolegraph, 0, 0, NULL), LIBROLE_OK);
+    assert_file_content(file_role_test_string_new, "users:video,wheel\n");
     assert_int_equal(librole_writing(file_role_test_int_new, rolegraph, 1, 0, NULL), LIBROLE_OK);
+    assert_file_content(file_role_test_int_new, "100:482,5\n");
 }
 
 void test_librole_writing_to_file_addgroup(void **state) {
@@ -213,8 +229,10 @@ void test_librole_writing_to_file_addgroup(void **state) {
 
     assert_int_equal(librole_role_add(rolegraph, *test_role), LIBROLE_OK);
     assert_int_equal(librole_writing(file_role_test_add, rolegraph, 0, 0, NULL), LIBROLE_OK);
+    assert_file_content(file_role_test_add, "users:video,wheel,audio\n");
 
     librole_ver_free(test_role);
+    free(test_role);
 }
 
 void test_librole_writing_to_file_setgroup(void **state) {
@@ -234,6 +252,7 @@ void test_librole_writing_to_file_setgroup(void **state) {
 
     assert_int_equal(librole_role_set(rolegraph, *test_role), LIBROLE_OK);
     assert_int_equal(librole_writing(file_role_test_set, rolegraph, 0, 0, NULL), LIBROLE_OK);
+    assert_file_content(file_role_test_set, "users:audio\n");
 
     /*
      * Don't try to free librole_ver using librole_ver_free() because
@@ -241,6 +260,7 @@ void test_librole_writing_to_file_setgroup(void **state) {
      *
      * librole_ver_free(test_role);
      */
+    free(test_role);
 }
 
 void test_librole_writing_to_file_delgroup(void **state) {
@@ -260,8 +280,10 @@ void test_librole_writing_to_file_delgroup(void **state) {
 
     assert_int_equal(librole_role_del(rolegraph, *test_role), LIBROLE_OK);
     assert_int_equal(librole_writing(file_role_test_del, rolegraph, 0, 0, NULL), LIBROLE_OK);
+    assert_file_content(file_role_test_del, "users:wheel\n");
 
     librole_ver_free(test_role);
+    free(test_role);
 }
 
 void test_librole_writing_to_file_dropgroup(void **state) {
@@ -281,6 +303,8 @@ void test_librole_writing_to_file_dropgroup(void **state) {
 
     assert_int_equal(librole_role_drop(rolegraph, *test_role), LIBROLE_OK);
     assert_int_equal(librole_writing(file_role_test_drop, rolegraph, 0, 0, NULL), LIBROLE_OK);
+    assert_file_content(file_role_test_drop, "");
 
     librole_ver_free(test_role);
+    free(test_role);
 }
