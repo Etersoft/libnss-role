@@ -15,9 +15,10 @@ add_compile_options(-Wall -Wextra -pedantic -g3)
 add_definitions(-D_DEFAULT_SOURCE -D_XOPEN_SOURCE=700)
 
 option(ENABLE_TESTS "Enable unit tests for libnss-role" ON)
-option(NSS_LIBDIR "Destination directory for libnss_role" "/lib64")
-option(ROLE_LIBDIR "Destination directory for librole" "/usr/lib64")
-option(MANDIR "Manpage install directory" "/usr/share/man/man8")
+include(GNUInstallDirs)
+set(NSS_LIBDIR "${CMAKE_INSTALL_FULL_LIBDIR}" CACHE PATH "Destination directory for libnss_role")
+set(ROLE_LIBDIR "${CMAKE_INSTALL_FULL_LIBDIR}" CACHE PATH "Destination directory for librole")
+set(MANDIR "${CMAKE_INSTALL_FULL_MANDIR}/man8" CACHE PATH "Manpage install directory")
 
 if(ENABLE_TESTS)
 	find_package(CMocka CONFIG REQUIRED)
