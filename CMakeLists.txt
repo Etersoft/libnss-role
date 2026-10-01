@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(libnss-role
 	LANGUAGES C
-	VERSION 0.5.6
+	VERSION 0.6.0
 	DESCRIPTION "NSS library to work with roles")
 set(C_STANDARD 90)
 set(CMAKE_C_STANDARD 90)
@@ -50,7 +50,7 @@ set(HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/include/role/paths.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/role/parser.h)
 
-set(LIBROLE_VERSION 1.0.0)
+set(LIBROLE_VERSION 1.1.0)
 set(LIBROLE_SOVERSION 1)
 set(LIBNSSROLE_VERSION 2.0.0)
 set(LIBNSSROLE_SOVERSION 2)
