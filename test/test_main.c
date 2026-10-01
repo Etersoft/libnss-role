@@ -33,6 +33,7 @@
 #include "test_parser.h"
 #include "test_paths.h"
 #include "test_unavail.h"
+#include "test_memory.h"
 
 
 int main(int argc, char **argv) {
@@ -76,6 +77,13 @@ int main(int argc, char **argv) {
         , cmocka_unit_test(test_reading_directory_unavail)
     };
 
+    const struct CMUnitTest memory_tests[] = {
+          cmocka_unit_test(test_get_group_name_buffer)
+        , cmocka_unit_test(test_role_drop_then_add)
+        , cmocka_unit_test(test_graph_grow)
+        , cmocka_unit_test(test_validate_filename)
+    };
+
     const struct CMUnitTest paths_tests[] = {
         cmocka_unit_test(test_librole_config_vars)
     };
@@ -87,6 +95,7 @@ int main(int argc, char **argv) {
         , librole_writing_test_group_setup
         , NULL);
     result += cmocka_run_group_tests_name("unavail_tests", unavail_tests, NULL, NULL);
+    result += cmocka_run_group_tests_name("memory_tests", memory_tests, NULL, NULL);
     result += cmocka_run_group_tests_name("paths_tests", paths_tests, NULL, NULL);
 
     return result;

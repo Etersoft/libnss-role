@@ -37,7 +37,8 @@ struct option rolelst_opt[] = {
     {"skip-missing-groups", no_argument, 0, 'm'},
     {"version", no_argument, 0, 'v'},
     {"system", no_argument, 0, 'S'},
-    {"file", required_argument, 0, 'f'}
+    {"file", required_argument, 0, 'f'},
+    {0, 0, 0, 0}
 };
 
 static void print_help(void)
