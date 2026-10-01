@@ -62,7 +62,7 @@ add_library(role SHARED
 	${CMAKE_CURRENT_SOURCE_DIR}/src/graph.c
 	${NSS_SOURCES})
 
-target_link_libraries(role pam pam_misc)
+target_link_libraries(role PRIVATE pam pam_misc)
 
 set_target_properties(role PROPERTIES
 	VERSION ${LIBROLE_VERSION}
@@ -81,17 +81,17 @@ set_target_properties(nss_role PROPERTIES
 add_executable(roleadd
 	${CMAKE_CURRENT_SOURCE_DIR}/src/roleadd.c)
 
-target_link_libraries(roleadd role pam pam_misc)
+target_link_libraries(roleadd role)
 
 add_executable(roledel
 	${CMAKE_CURRENT_SOURCE_DIR}/src/roledel.c)
 
-target_link_libraries(roledel role pam pam_misc)
+target_link_libraries(roledel role)
 
 add_executable(rolelst
 	${CMAKE_CURRENT_SOURCE_DIR}/src/rolelst.c)
 
-target_link_libraries(rolelst role pam pam_misc)
+target_link_libraries(rolelst role)
 
 add_executable(checkver ${CMAKE_CURRENT_SOURCE_DIR}/src/checkver.c)
 
