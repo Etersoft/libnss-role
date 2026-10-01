@@ -190,6 +190,7 @@ int librole_get_directory_files(const char * const directory,
     struct librole_graph *role_graph)
 {
     int retcode = LIBROLE_OK;
+    int result;
     struct dirent **files;
     int file_count = 0;
     int i = 0;
@@ -205,9 +206,9 @@ int librole_get_directory_files(const char * const directory,
 
     /* Get all regular files in directory */
     file_count = scandir(directory, &files, librole_is_role_file, alphasort);
-    if (0 != errno)
+    if (file_count < 0)
     {
-        retcode = errno;
+        retcode = errno == ENOENT ? LIBROLE_OK : LIBROLE_IO_ERROR;
         goto librole_get_directory_files_end;
     }
 
@@ -216,8 +217,13 @@ int librole_get_directory_files(const char * const directory,
         /* Validate reading filename and skip if name is not valid */
         if (librole_validate_filename_from_dir(files[i]->d_name) == LIBROLE_OK) {
             /* Don't do anything on errors and try to continue reading */
-            retcode = librole_read_file_from_dir(
+            result = librole_read_file_from_dir(
                 directory, files[i]->d_name, role_graph);
+            /* Later successful files must not hide an incomplete graph.
+             * Prefer a hard error over an unavailable group source. */
+            if (result != LIBROLE_OK &&
+                (retcode == LIBROLE_OK || retcode == LIBROLE_SOURCE_UNAVAIL))
+                retcode = result;
         }
         free(files[i]);
     }

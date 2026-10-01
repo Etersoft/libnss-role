@@ -27,4 +27,6 @@ void test_reading_unavail(void **state);
 void test_reading_last_line_without_eol(void **state);
 void test_nss_initgroups_unavail(void **state);
 
+void test_reading_directory_unavail(void **state);
+
 #endif

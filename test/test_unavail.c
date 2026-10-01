@@ -33,6 +33,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include "role/fileop.h"
 
 #include "test_config.h"
 #include "test_unavail.h"
@@ -289,4 +291,24 @@ void test_nss_initgroups_unavail(void **state)
 
     free(groups);
     unlink(role_file_unavail);
+}
+
+void test_reading_directory_unavail(void **state)
+{
+    struct librole_graph G;
+    const char *dir = __LIBROLE_TEST_DATADIR "/role.test.unavail.d";
+    const char *first = __LIBROLE_TEST_DATADIR "/role.test.unavail.d/a.role";
+    const char *last = __LIBROLE_TEST_DATADIR "/role.test.unavail.d/z.role";
+
+    (void) state;
+    assert_int_equal(mkdir(dir, 0700), 0);
+    write_file(first, "users:dom_unavail,video\n");
+    write_file(last, "audio:tftp\n");
+    assert_int_equal(librole_graph_init(&G), LIBROLE_OK);
+    assert_int_equal(librole_get_directory_files(dir, &G), LIBROLE_SOURCE_UNAVAIL);
+    assert_int_equal(G.size, 2);
+    librole_graph_free(&G);
+    unlink(first);
+    unlink(last);
+    rmdir(dir);
 }

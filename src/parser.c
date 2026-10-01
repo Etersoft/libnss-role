@@ -341,6 +341,10 @@ int librole_reading(const char *s, struct librole_graph *G)
     
     while(1) {
         c = fgetc(f);
+        if (c == EOF && ferror(f)) {
+            result = LIBROLE_IO_ERROR;
+            goto libnss_role_reading_out;
+        }
         if (c == EOF || c == '\n') {
             if (c == EOF && !id)
                 break;
