@@ -11,7 +11,8 @@ set(TEST_SOURCES
 	test_paths.c
 	test_unavail.c
 	test_memory.c
-	test_fileop_rw.c)
+	test_fileop_rw.c
+	test_roles.c)
 
 add_mocked_test(main
 	SOURCES ${TEST_SOURCES}
