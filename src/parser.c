@@ -297,7 +297,9 @@ int parse_line(char *line, struct librole_graph *G)
     return result;
 
 libnss_role_parse_line_error:
-    free(role->list);
+    /* Lists of existing roles are owned by G and freed by librole_graph_free() */
+    if (!role_exists)
+        free(role->list);
     return result;
 }
 
