@@ -32,6 +32,7 @@
 #include "test_config.h"
 #include "test_parser.h"
 #include "test_paths.h"
+#include "test_unavail.h"
 
 
 int main(int argc, char **argv) {
@@ -65,6 +66,16 @@ int main(int argc, char **argv) {
             , librole_writing_test_teardown)
     };
 
+    const struct CMUnitTest unavail_tests[] = {
+          cmocka_unit_test(test_parse_line_existing_role_error)
+        , cmocka_unit_test(test_parse_line_unavail_member)
+        , cmocka_unit_test(test_parse_line_unavail_role)
+        , cmocka_unit_test(test_reading_unavail)
+        , cmocka_unit_test(test_reading_last_line_without_eol)
+        , cmocka_unit_test(test_nss_initgroups_unavail)
+        , cmocka_unit_test(test_reading_directory_unavail)
+    };
+
     const struct CMUnitTest paths_tests[] = {
         cmocka_unit_test(test_librole_config_vars)
     };
@@ -75,6 +86,7 @@ int main(int argc, char **argv) {
         , librole_writing_tests
         , librole_writing_test_group_setup
         , NULL);
+    result += cmocka_run_group_tests_name("unavail_tests", unavail_tests, NULL, NULL);
     result += cmocka_run_group_tests_name("paths_tests", paths_tests, NULL, NULL);
 
     return result;

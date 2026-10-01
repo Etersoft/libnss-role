@@ -238,6 +238,7 @@ int parse_line(char *line, struct librole_graph *G)
     struct librole_ver * role = &default_role;
     int comment = 0;
     int role_exists = 0;
+    int source_unavail = 0;
     int gid_index = 0;
     gid_t gr;
 
@@ -280,6 +281,10 @@ int parse_line(char *line, struct librole_graph *G)
         result = librole_get_gid(last, &gr);
         if (result == LIBROLE_NO_SUCH_GROUP)
             continue;
+        if (result == LIBROLE_SOURCE_UNAVAIL) {
+            source_unavail = 1;
+            continue;
+        }
         if (result != LIBROLE_OK)
             goto libnss_role_parse_line_error;
 
@@ -294,10 +299,14 @@ int parse_line(char *line, struct librole_graph *G)
             goto libnss_role_parse_line_error;
         }
     }
+    if (source_unavail)
+        result = LIBROLE_SOURCE_UNAVAIL;
     return result;
 
 libnss_role_parse_line_error:
-    free(role->list);
+    /* Lists of existing roles are owned by G and freed by librole_graph_free() */
+    if (!role_exists)
+        free(role->list);
     return result;
 }
 
@@ -317,6 +326,7 @@ int librole_reading(const char *s, struct librole_graph *G)
     unsigned long len = LIBROLE_START_LINESIZE;
     char *str = NULL;
     unsigned long id = 0;
+    int source_unavail = 0;
     int c;
 
     str = malloc(len * sizeof(char));
@@ -331,16 +341,27 @@ int librole_reading(const char *s, struct librole_graph *G)
     
     while(1) {
         c = fgetc(f);
-        if (c == EOF)
-            break;
-        if (c == '\n') {
+        if (c == EOF && ferror(f)) {
+            result = LIBROLE_IO_ERROR;
+            goto libnss_role_reading_out;
+        }
+        if (c == EOF || c == '\n') {
+            if (c == EOF && !id)
+                break;
             str[id] = '\0';
             result = parse_line(str, G);
-            if (result != LIBROLE_OK &&
+            /* Lines with unknown groups are skipped. Lines with groups from
+             * an unavailable database are skipped too, but the caller is
+             * told about it: the graph is incomplete. */
+            if (result == LIBROLE_SOURCE_UNAVAIL)
+                source_unavail = 1;
+            else if (result != LIBROLE_OK &&
                     result != LIBROLE_NO_SUCH_GROUP)
                 goto libnss_role_reading_out;
             id = 0;
             result = LIBROLE_OK;
+            if (c == EOF)
+                break;
             continue;
         }
         str[id++] = c;
@@ -350,13 +371,10 @@ int librole_reading(const char *s, struct librole_graph *G)
                 goto libnss_role_reading_out;
         }
     }
-    if (id) {
-        str[id] = '\0';
-        result = parse_line(str, G);
-        if (result != LIBROLE_OK)
-            goto libnss_role_reading_out;
-    }
-    
+
+    if (source_unavail)
+        result = LIBROLE_SOURCE_UNAVAIL;
+
 libnss_role_reading_out:
     fclose(f);
 libnss_role_reading_out_free:

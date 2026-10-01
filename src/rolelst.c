@@ -160,8 +160,9 @@ int roles_list_filter(const char *rolename) {
 
 int main(int argc, char **argv) {
     struct rolelst_settings settings;
-    struct librole_graph G;
+    struct librole_graph G = {0};
     int result = LIBROLE_OK;
+    int source_unavail = 0;
     memset(&settings, 0, sizeof(settings));
     memset(system_roles, 0, sizeof(system_roles));
 
@@ -177,7 +178,11 @@ int main(int argc, char **argv) {
         if (result != LIBROLE_OK)
             goto exit;
 
-        librole_read_file_from_dir(librole_config_dir(), settings.roled_filename, &G);
+        result = librole_read_file_from_dir(librole_config_dir(), settings.roled_filename, &G);
+        if (result == LIBROLE_SOURCE_UNAVAIL)
+            source_unavail = 1;
+        else if (result != LIBROLE_OK)
+            goto exit;
     } else {
         if (settings.system_role_mode) {
             if (settings.system_role) {
@@ -192,7 +197,10 @@ int main(int argc, char **argv) {
         }
 
         result = librole_reading(librole_config_file(), &G);
-        if (result != LIBROLE_OK)
+        /* Show what can be resolved, but report incomplete output */
+        if (result == LIBROLE_SOURCE_UNAVAIL)
+            source_unavail = 1;
+        else if (result != LIBROLE_OK)
             goto exit;
     }
 
@@ -215,13 +223,11 @@ int main(int argc, char **argv) {
     }
 
 
-    /* Don't check return code in order to retain previous utility
-     * behavior in common mode */
     result = librole_get_directory_files(librole_config_dir(), &G);
-    /* Check return code in system roles mode */
-    if (LIBROLE_OK != result && settings.system_role_mode) {
+    if (result == LIBROLE_SOURCE_UNAVAIL)
+        source_unavail = 1;
+    else if (result != LIBROLE_OK)
         goto exit;
-    }
 
     if (0 != settings.verbose_mode) {
         if (settings.system_role_mode) {
@@ -241,6 +247,8 @@ int main(int argc, char **argv) {
     }
 
 exit:
+    if (result == LIBROLE_OK && source_unavail)
+        result = LIBROLE_SOURCE_UNAVAIL;
     librole_print_error(result);
     librole_graph_free(&G);
     return result;

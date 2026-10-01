@@ -125,7 +125,11 @@ int main(int argc, char **argv) {
         if (result != LIBROLE_OK)
             goto exit;
 
-        librole_read_file_from_dir(librole_config_dir(), filename, &G);
+        /* A missing file is fine (a new one will be written), but don't
+         * rewrite the file if some groups in it can't be resolved now */
+        result = librole_read_file_from_dir(librole_config_dir(), filename, &G);
+        if (result == LIBROLE_SOURCE_UNAVAIL)
+            goto exit;
     } else if (system_role_flag) {
         int filename_sz = strlen(argv[optind]) + strlen(LIBROLE_ROLE_EXTENSION) + 1;
 
@@ -140,7 +144,11 @@ int main(int argc, char **argv) {
         if (result != LIBROLE_OK)
             goto exit;
 
-        librole_read_file_from_dir(librole_config_dir(), filename, &G);
+        /* A missing file is fine (a new one will be written), but don't
+         * rewrite the file if some groups in it can't be resolved now */
+        result = librole_read_file_from_dir(librole_config_dir(), filename, &G);
+        if (result == LIBROLE_SOURCE_UNAVAIL)
+            goto exit;
     } else {
         result = librole_reading(librole_config_file(), &G);
         if (result != LIBROLE_OK)
