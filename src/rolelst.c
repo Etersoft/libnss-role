@@ -40,7 +40,8 @@ struct option rolelst_opt[] = {
     {"version", no_argument, 0, 'v'},
     {"verbose", no_argument, 0, 'V'},
     {"system", optional_argument, 0, 'S'},
-    {"file", required_argument, 0, 'f'}
+    {"file", required_argument, 0, 'f'},
+    {0, 0, 0, 0}
 };
 
 struct rolelst_settings {
