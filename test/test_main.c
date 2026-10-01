@@ -34,6 +34,7 @@
 #include "test_paths.h"
 #include "test_unavail.h"
 #include "test_memory.h"
+#include "test_fileop_rw.h"
 
 
 int main(void) {
@@ -84,6 +85,17 @@ int main(void) {
         , cmocka_unit_test(test_validate_filename)
     };
 
+    const struct CMUnitTest fileop_rw_tests[] = {
+          cmocka_unit_test_setup_teardown(test_lock_existing_file
+            , fileop_rw_test_setup, fileop_rw_test_teardown)
+        , cmocka_unit_test_setup_teardown(test_lock_stale
+            , fileop_rw_test_setup, fileop_rw_test_teardown)
+        , cmocka_unit_test_setup_teardown(test_write_file_error
+            , fileop_rw_test_setup, fileop_rw_test_teardown)
+        , cmocka_unit_test_setup_teardown(test_write_file_replace
+            , fileop_rw_test_setup, fileop_rw_test_teardown)
+    };
+
     const struct CMUnitTest paths_tests[] = {
         cmocka_unit_test(test_librole_config_vars)
     };
@@ -96,6 +108,7 @@ int main(void) {
         , NULL);
     result += cmocka_run_group_tests_name("unavail_tests", unavail_tests, NULL, NULL);
     result += cmocka_run_group_tests_name("memory_tests", memory_tests, NULL, NULL);
+    result += cmocka_run_group_tests_name("fileop_rw_tests", fileop_rw_tests, NULL, NULL);
     result += cmocka_run_group_tests_name("paths_tests", paths_tests, NULL, NULL);
 
     return result;
