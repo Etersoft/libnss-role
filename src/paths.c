@@ -24,11 +24,11 @@
 static const char *role_config_file = "/etc/role";
 static const char *role_config_dir = "/etc/role.d";
 
-const char *librole_config_file() {
+const char *librole_config_file(void) {
 	return role_config_file;
 }
 
-const char *librole_config_dir() {
+const char *librole_config_dir(void) {
 	return role_config_dir;
 }
 

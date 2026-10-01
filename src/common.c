@@ -60,10 +60,10 @@ static int errno_to_result(int err)
 static void *get_buffer(int const_name, size_t *actual_size)
 {
     void *buf;
-    size_t bufsize = sysconf(const_name);
-    if (bufsize == -1) {
-        bufsize = 16384;
-    }
+    long maxsize = sysconf(const_name);
+    /* -1 if there is no hard limit */
+    size_t bufsize = maxsize > 0 ? (size_t) maxsize : 16384;
+
     buf = malloc(bufsize);
     if (buf)
         *actual_size = bufsize;

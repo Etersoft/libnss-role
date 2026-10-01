@@ -49,7 +49,7 @@ struct rolelst_settings {
     int system_role_mode;
     int roles_list_mode;
     const char* roled_filename;
-    const char* system_role;
+    char* system_role;
 };
 
 static char** roles_list = NULL;
