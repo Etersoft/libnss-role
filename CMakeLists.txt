@@ -113,6 +113,10 @@ install(FILES ${HEADERS}
 	DESTINATION include/role)
 install(FILES ${MANPAGES}
 	DESTINATION ${MANDIR})
+# role(5) goes to man5 next to MANDIR (man8)
+get_filename_component(MANBASEDIR ${MANDIR} DIRECTORY)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/doc/role.5
+	DESTINATION ${MANBASEDIR}/man5)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/dist/role
 	DESTINATION /etc)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/dist/role.pamd
