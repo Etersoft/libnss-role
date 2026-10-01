@@ -334,6 +334,9 @@ void librole_print_error(int result)
         case LIBROLE_SOURCE_UNAVAIL:
             errtext = "Group database is unavailable";
             break;
+        case LIBROLE_LOCKED:
+            errtext = "File is locked by another process";
+            break;
         case LIBROLE_OK:
             errtext = "No error";
             break;

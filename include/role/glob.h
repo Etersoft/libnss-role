@@ -4,6 +4,7 @@
 #define LIBROLE_START_LINESIZE		200 /* start buffer size for /etc/role line */
 #define LIBROLE_MAX_NAME		    100 /* max user/group name length */
 
+#define LIBROLE_LOCKED			161 /* file is locked by another process */
 #define LIBROLE_SOURCE_UNAVAIL		160 /* group database is unavailable */
 #define LIBROLE_INVALID_ROLE_FILENAME	159
 #define LIBROLE_ERROR_OPENING_DIRECTORY	158

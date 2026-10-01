@@ -31,6 +31,10 @@
 #include <string.h>
 /* For PATH_MAX */
 #include <linux/limits.h>
+/* For stat, chmod */
+#include <sys/stat.h>
+/* For open */
+#include <fcntl.h>
 
 #include "role/glob.h"
 #include "role/fileop_rw.h"
@@ -94,36 +98,98 @@ int librole_writing(const char *file, struct librole_graph *G, int numeric_flag,
             if (result != LIBROLE_OK)
                 goto libnss_role_writing_exit;
         }
-        if (fputc('\n', f) < 0)
+        if (fputc('\n', f) < 0) {
+            result = LIBROLE_IO_ERROR;
             goto libnss_role_writing_exit;
+        }
     }
 
     result = LIBROLE_OK;
 
 libnss_role_writing_exit:
-    fclose(f);
+    /* Buffered data is written here: report ENOSPC and so on */
+    if (fclose(f) != 0 && result == LIBROLE_OK)
+        result = LIBROLE_IO_ERROR;
+    return result;
+}
+
+static int sync_file(const char *file)
+{
+    int result = LIBROLE_OK;
+    int fd = open(file, O_RDONLY);
+
+    if (fd == -1)
+        return LIBROLE_IO_ERROR;
+    if (fsync(fd) != 0)
+        result = LIBROLE_IO_ERROR;
+    close(fd);
+    return result;
+}
+
+/*
+ * Write G to file under lock. The file is replaced atomically: on any
+ * error it is left untouched.
+ */
+int librole_write_file(const char *file, struct librole_graph *G, int empty_flag)
+{
+    int result;
+    char tmp[PATH_MAX];
+    struct stat sb;
+    int len;
+
+    len = snprintf(tmp, sizeof tmp, "%s.new", file);
+    if (len < 1 || (size_t) len >= sizeof tmp)
+        return LIBROLE_ERROR_PATH_TOO_LONG;
+
+    result = librole_lock(file);
+    if (result != LIBROLE_OK)
+        return result;
+
+    /* Leftover of an interrupted write, we hold the lock */
+    unlink(tmp);
+    result = librole_writing(tmp, G, 0, empty_flag, NULL);
+    if (result != LIBROLE_OK)
+        goto librole_write_file_fail;
+
+    /* Keep permissions and owner of the file being replaced */
+    if (stat(file, &sb) == 0) {
+        if (chmod(tmp, sb.st_mode & 07777) != 0 ||
+            (chown(tmp, sb.st_uid, sb.st_gid) != 0 && errno != EPERM)) {
+            result = LIBROLE_IO_ERROR;
+            goto librole_write_file_fail;
+        }
+    }
+
+    result = sync_file(tmp);
+    if (result != LIBROLE_OK)
+        goto librole_write_file_fail;
+
+    if (rename(tmp, file) != 0) {
+        result = LIBROLE_IO_ERROR;
+        goto librole_write_file_fail;
+    }
+
+    librole_unlock(file);
+    return LIBROLE_OK;
+
+librole_write_file_fail:
+    unlink(tmp);
+    librole_unlock(file);
     return result;
 }
 
 int librole_write(const char* pam_role, struct librole_graph *G, int empty_flag)
 {
     int result;
-    int pam_status;
-    pam_handle_t *pamh;
+    int pam_status = PAM_SUCCESS;
+    pam_handle_t *pamh = NULL;
 
     result = librole_pam_check(pamh, pam_role, &pam_status);
     if (result != LIBROLE_OK) {
         goto exit;
     }
 
-    result = librole_lock(librole_config_file());
-    if (result != LIBROLE_OK) {
-        goto exit;
-    }
-
-    result = librole_writing(librole_config_file(), G, 0, empty_flag, NULL);
-
-    librole_unlock(librole_config_file());
+    result = librole_write_file(librole_config_file(), G, empty_flag);
 
 /* TODO: can we release immediately? */
 exit:
@@ -134,7 +200,7 @@ exit:
 int librole_write_dir(const char* filename, const char* pam_role, struct librole_graph *G, int empty_flag)
 {
     int result = 0;
-    int pam_status;
+    int pam_status = PAM_SUCCESS;
     size_t dirlen = strlen(librole_config_dir());
     size_t namelen = strlen(filename);
     size_t fullpathlen = dirlen + namelen + 1 + 1;
@@ -163,14 +229,7 @@ int librole_write_dir(const char* filename, const char* pam_role, struct librole
     strcat(fullpath, "/");
     strcat(fullpath, filename);
 
-    result = librole_lock(fullpath);
-    if (result != LIBROLE_OK) {
-        goto librole_write_dir_done;
-    }
-
-    result = librole_writing(fullpath, G, 0, empty_flag, NULL);
-
-    librole_unlock(fullpath);
+    result = librole_write_file(fullpath, G, empty_flag);
 
 /* TODO: can we release immediately? */
 librole_write_dir_done:
