@@ -35,6 +35,7 @@
 #include "test_unavail.h"
 #include "test_memory.h"
 #include "test_fileop_rw.h"
+#include "test_roles.h"
 
 
 int main(void) {
@@ -96,6 +97,17 @@ int main(void) {
             , fileop_rw_test_setup, fileop_rw_test_teardown)
     };
 
+    const struct CMUnitTest roles_tests[] = {
+          cmocka_unit_test(test_parse_line_formats)
+        , cmocka_unit_test(test_dfs_nested_and_cycle)
+        , cmocka_unit_test_setup_teardown(test_reading_role_dir
+            , roles_test_setup, roles_test_teardown)
+        , cmocka_unit_test_setup_teardown(test_nss_initgroups
+            , roles_test_setup, roles_test_teardown)
+        , cmocka_unit_test_setup_teardown(test_nss_initgroups_existing_groups
+            , roles_test_setup, roles_test_teardown)
+    };
+
     const struct CMUnitTest paths_tests[] = {
         cmocka_unit_test(test_librole_config_vars)
     };
@@ -109,6 +121,7 @@ int main(void) {
     result += cmocka_run_group_tests_name("unavail_tests", unavail_tests, NULL, NULL);
     result += cmocka_run_group_tests_name("memory_tests", memory_tests, NULL, NULL);
     result += cmocka_run_group_tests_name("fileop_rw_tests", fileop_rw_tests, NULL, NULL);
+    result += cmocka_run_group_tests_name("roles_tests", roles_tests, NULL, NULL);
     result += cmocka_run_group_tests_name("paths_tests", paths_tests, NULL, NULL);
 
     return result;

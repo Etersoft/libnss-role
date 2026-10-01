@@ -11,7 +11,8 @@ set(TEST_SOURCES
 	test_paths.c
 	test_unavail.c
 	test_memory.c
-	test_fileop_rw.c)
+	test_fileop_rw.c
+	test_roles.c)
 
 add_mocked_test(main
 	SOURCES ${TEST_SOURCES}
@@ -22,6 +23,31 @@ target_include_directories(test_main PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/../include
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 	${CMAKE_CURRENT_BINARY_DIR}/include)
+
+set(TEST_ENVIRONMENT
+	LD_PRELOAD=libnss_wrapper.so
+	NSS_WRAPPER_PASSWD=${WRAPPER_PASSWD}
+	NSS_WRAPPER_GROUP=${WRAPPER_GROUP}
+	NSS_WRAPPER_HOSTS=${WRAPPER_HOSTS})
+
+# Run with ctest too
+set_tests_properties(test_main PROPERTIES
+	ENVIRONMENT "${TEST_ENVIRONMENT}")
+
+option(ENABLE_TESTS_VALGRIND "Also run unit tests under valgrind with ctest" OFF)
+if(ENABLE_TESTS_VALGRIND)
+	find_program(VALGRIND valgrind)
+	if(NOT VALGRIND)
+		message(FATAL_ERROR "valgrind is required for ENABLE_TESTS_VALGRIND")
+	endif()
+	add_test(NAME test_main_valgrind
+		COMMAND ${VALGRIND} --error-exitcode=1
+			--leak-check=full --errors-for-leak-kinds=definite
+			$<TARGET_FILE:test_main>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+	set_tests_properties(test_main_valgrind PROPERTIES
+		ENVIRONMENT "${TEST_ENVIRONMENT}")
+endif()
 
 add_custom_target(all_tests ALL
 	DEPENDS test_main)
