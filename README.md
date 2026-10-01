@@ -30,6 +30,14 @@ Now you can add all users to `users` group instead of adding them to all these g
 Furthermore, you can create a group named `admins` and add it to groups `users` and `wheel`. As a result, administrators
 will get all "user" groups and a `wheel` group in addition.
 
+In other words, `libnss-role` allows to achieve the following:
+
+* user `vasya` is a member of the group `users`;
+* we want all users-members of the group `users` to become members of the group `cdrom` automatically, but don't want to manually add each member of `users` to `cdrom`;
+* `libnss-role` does so that when `glibc` is asked to provide groups that the user belongs to, the answer is "modified" as described above.
+
+In GNU/Linux distributions, practically all programs and libraries are linked with system `libc.so.6` (glibc) and this means that if they use standard methods to get information about users, `libnss-role` will work. If a binary is statically linked with any libc or does not use the system glibc in other ways, `libnss-role` will not work for this binary.
+
 This module has its own administration utilities. These utilities divide all groups into two categories: **roles** and **privileges**.
 
 ### Privilege
