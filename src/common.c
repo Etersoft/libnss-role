@@ -39,8 +39,11 @@
 static int errno_to_result(int err)
 {
     switch (err) {
+        /* getgrnam_r() and friends return the errno of an NSS module
+         * which reported NSS_STATUS_UNAVAIL, e.g. ENOENT from winbind
+         * when winbindd is not running yet. */
         case ENOENT:
-            return ENOENT;
+            return LIBROLE_SOURCE_UNAVAIL;
         case ERANGE:
             return LIBROLE_OUT_OF_RANGE;
         case EMFILE:
@@ -320,6 +323,9 @@ void librole_print_error(int result)
             break;
         case LIBROLE_INCORRECT_VALUE:
             errtext = "Incorrect value";
+            break;
+        case LIBROLE_SOURCE_UNAVAIL:
+            errtext = "Group database is unavailable";
             break;
         case LIBROLE_OK:
             errtext = "No error";

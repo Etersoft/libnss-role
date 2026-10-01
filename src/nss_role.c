@@ -52,7 +52,9 @@ enum nss_status _nss_role_initgroups_dyn(char *user, gid_t main_group,
     }
 
     result = librole_reading(librole_config_file(), &G);
-    if (result != LIBROLE_OK) {
+    /* Use roles which could be resolved if some group database
+     * (e.g. winbind during early boot) is unavailable */
+    if (result != LIBROLE_OK && result != LIBROLE_SOURCE_UNAVAIL) {
         if (result == LIBROLE_MEMORY_ERROR) {
             *errnop = ENOMEM;
             ret =  NSS_STATUS_NOTFOUND;
