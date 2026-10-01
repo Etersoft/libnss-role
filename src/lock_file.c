@@ -114,7 +114,7 @@ static int do_lock(const char *tmp, const char *lock)
     if (kill(pid, 0) == 0 || errno == EPERM) {
         unlink(tmp);
         errno = EEXIST;
-        return LIBROLE_UNKNOWN_ERROR;
+        return LIBROLE_LOCKED;
     }
     /* Stale lock */
     if (unlink(lock) != 0) {

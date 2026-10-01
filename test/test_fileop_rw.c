@@ -104,7 +104,7 @@ void test_lock_existing_file(void **state)
     assert_int_equal(librole_lock(role_file), LIBROLE_OK);
     assert_true(file_exists(role_file_lock));
     /* Locked by a live process (this one) */
-    assert_int_not_equal(librole_lock(role_file), LIBROLE_OK);
+    assert_int_equal(librole_lock(role_file), LIBROLE_LOCKED);
     assert_int_equal(librole_unlock(role_file), LIBROLE_OK);
     assert_false(file_exists(role_file_lock));
     assert_file_content(role_file, ROLE_CONTENT);
