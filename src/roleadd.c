@@ -44,7 +44,7 @@ struct option rolelst_opt[] = {
 
 static void print_help(void)
 {
-    fprintf(stdout, "Usage: roleadd [-hsmv] ROLE [*PRIVS]\n");
+    fprintf(stdout, "Usage: roleadd [-hsmv] [-f FILE.role | -S] ROLE [PRIVS ...]\n");
     fprintf(stdout,
         "\t-h [ --help ]\t\tproduce help message\n");
     fprintf(stdout,

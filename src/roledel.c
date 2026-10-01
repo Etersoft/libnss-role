@@ -43,7 +43,7 @@ struct option rolelst_opt[] = {
 
 static void print_help(void)
 {
-    fprintf(stdout, "Usage: roledel [-hrmv] ROLE [*PRIVS]\n");
+    fprintf(stdout, "Usage: roledel [-hrmv] [-f FILE.role | -S] ROLE [PRIVS ...]\n");
     fprintf(stdout,
         "\t-h [ --help ]\t\tproduce help message\n");
     fprintf(stdout,
