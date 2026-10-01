@@ -108,8 +108,8 @@ libnss_role_writing_exit:
 int librole_write(const char* pam_role, struct librole_graph *G, int empty_flag)
 {
     int result;
-    int pam_status;
-    pam_handle_t *pamh;
+    int pam_status = PAM_SUCCESS;
+    pam_handle_t *pamh = NULL;
 
     result = librole_pam_check(pamh, pam_role, &pam_status);
     if (result != LIBROLE_OK) {
@@ -134,7 +134,7 @@ exit:
 int librole_write_dir(const char* filename, const char* pam_role, struct librole_graph *G, int empty_flag)
 {
     int result = 0;
-    int pam_status;
+    int pam_status = PAM_SUCCESS;
     size_t dirlen = strlen(librole_config_dir());
     size_t namelen = strlen(filename);
     size_t fullpathlen = dirlen + namelen + 1 + 1;
