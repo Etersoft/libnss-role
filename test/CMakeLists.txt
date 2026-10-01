@@ -13,7 +13,7 @@ set(TEST_SOURCES
 
 add_mocked_test(main
 	SOURCES ${TEST_SOURCES}
-	COMPILE_OPTIONS -g3 -Wl,--wrap=librole_config_file
+	COMPILE_OPTIONS -g3
 	LINK_LIBRARIES role nss_role pam pam_misc ${CMAKE_DL_LIBS})
 
 target_include_directories(test_main PRIVATE

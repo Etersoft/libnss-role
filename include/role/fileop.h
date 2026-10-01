@@ -1,6 +1,8 @@
 #if !defined(LIBROLE_FILEOP_H)
 #define LIBROLE_FILEOP_H 1
 
+#include <role/parser.h>
+
 /*
  * \brief Validate single role file name from roles directory.
  *
