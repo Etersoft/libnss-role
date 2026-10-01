@@ -62,13 +62,13 @@ static int parse_options(int argc, char **argv, struct rolelst_settings *setting
     while((c = getopt_long(argc, argv, "hnvVS::f:", rolelst_opt, &opt_ind)) != -1) {
         switch(c) {
             case 'h':
-                fprintf(stdout, "Usage: rolelst [-hnvVSf] [role_name ...]\n");
+                fprintf(stdout, "Usage: rolelst [-hnvV] [-f FILE.role | -S [ROLE]] [ROLE ...]\n");
                 fprintf(stdout,
                     "\t-h [ --help   ]\t\tproduce help message\n");
                 fprintf(stdout,
                     "\t-n [ --numeric]\t\tprint gid instead of group names\n");
                 fprintf(stdout,
-                    "\t-v [ --version]\t\tprint roledel version being used\n");
+                    "\t-v [ --version]\t\tprint rolelst version being used\n");
                 fprintf(stdout,
                     "\t-V [ --verbose]\t\tprint extra information about role sources\n");
                 fprintf(stdout,
