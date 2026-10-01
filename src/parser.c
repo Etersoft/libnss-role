@@ -348,7 +348,9 @@ int librole_reading(const char *s, struct librole_graph *G)
 
     f = fopen(s, "r");
     if (!f) {
-        result = LIBROLE_IO_ERROR;
+        /* Missing file is an empty configuration */
+        if (errno != ENOENT)
+            result = LIBROLE_IO_ERROR;
         goto libnss_role_reading_out_free;
     }
     

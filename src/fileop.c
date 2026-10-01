@@ -282,3 +282,43 @@ int librole_get_system_roles(const char * const directory,
 librole_get_directory_files_end:
     return retcode;
 }
+
+int librole_find_role_file(const char * const directory, gid_t gid, char **filename)
+{
+    int retcode = LIBROLE_NO_SUCH_GROUP;
+    struct dirent **files;
+    int file_count;
+    int i;
+
+    if (!directory || !filename)
+        return LIBROLE_INCORRECT_VALUE;
+
+    *filename = NULL;
+    file_count = scandir(directory, &files, librole_is_role_file, alphasort);
+    if (file_count < 0)
+        return LIBROLE_NO_SUCH_GROUP;
+
+    for (i = 0; i < file_count; ++i)
+    {
+        struct librole_graph G;
+
+        if (retcode == LIBROLE_NO_SUCH_GROUP) {
+            retcode = librole_graph_init(&G);
+            if (retcode == LIBROLE_OK) {
+                /* Unresolvable entries don't matter: we look for gid */
+                librole_read_file_from_dir(directory, files[i]->d_name, &G);
+                retcode = librole_find_gid(&G, gid, NULL);
+                if (retcode == LIBROLE_OK) {
+                    *filename = strdup(files[i]->d_name);
+                    if (!*filename)
+                        retcode = LIBROLE_MEMORY_ERROR;
+                }
+            }
+            librole_graph_free(&G);
+        }
+        free(files[i]);
+    }
+    free(files);
+
+    return retcode;
+}

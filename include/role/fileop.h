@@ -53,5 +53,19 @@ int librole_get_directory_files(const char * const directory, struct librole_gra
  */
 int librole_get_system_roles(const char * const directory, char *system_roles[]);
 
+/**
+ * \brief Find a file in roles directory which describes the role.
+ *
+ * \param[in] directory Roles directory.
+ * \param[in] gid Role to find.
+ * \param[out] filename Name of the first file (in alphabetical order)
+ *  containing the role, to be freed by the caller.
+ * \return
+ *  - LIBROLE_OK: The role is found.
+ *  - LIBROLE_NO_SUCH_GROUP: No file contains the role.
+ *  - Other error codes.
+ */
+int librole_find_role_file(const char * const directory, gid_t gid, char **filename);
+
 #endif
 

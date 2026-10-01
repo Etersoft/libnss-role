@@ -163,6 +163,19 @@ int main(int argc, char **argv) {
     else
         result = librole_role_del(&G, del_role);
 
+    /* The role may be in another file in /etc/role.d */
+    if (result == LIBROLE_NO_SUCH_GROUP) {
+        char *role_file = NULL;
+
+        if (librole_find_role_file(librole_config_dir(), del_role.gid, &role_file) == LIBROLE_OK) {
+            fprintf(stderr, "Role %s is defined in %s/%s, use: roledel -f %s ...\n",
+                    argv[optind], librole_config_dir(), role_file, role_file);
+            free(role_file);
+        } else {
+            fprintf(stderr, "Role %s is not defined\n", argv[optind]);
+        }
+    }
+
     if (result == LIBROLE_OK) {
         if (roled_flag) {
             result = librole_write_dir(filename, "roledel", &G, 0);
