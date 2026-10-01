@@ -82,7 +82,7 @@ int librole_realloc_buffer(void **buffer, size_t *size)
 #endif
     newbuffer = realloc(*buffer, newsize * sizeof(char));
     if (!newbuffer) {
-        free(buffer);
+        free(*buffer);
         *buffer = NULL;
         *size = 0;
         return LIBROLE_MEMORY_ERROR;
