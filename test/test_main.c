@@ -35,7 +35,7 @@
 #include "test_unavail.h"
 
 
-int main(int argc, char **argv) {
+int main(void) {
     int result = 0;
 
     const struct CMUnitTest parser_tests[] = {

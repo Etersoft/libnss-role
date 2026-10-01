@@ -95,6 +95,7 @@ void test_parse_line(void **state) {
     char *immutable_line[] = { "users:\"tftp\",named" };
     size_t line_length = strlen(*immutable_line);
     char *mutable_line = calloc(line_length + 1, sizeof(char));
+    (void) state;
 
     assert_int_equal(librole_graph_init(&G), LIBROLE_OK);
     assert_non_null(mutable_line);
@@ -108,6 +109,7 @@ void test_parse_line(void **state) {
 
 int librole_writing_test_group_setup(void **state) {
     int result = 1;
+    (void) state;
 
     result = unlink_test_file(file_role_test_string_new);
     if (result) {
